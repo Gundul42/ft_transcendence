@@ -18,18 +18,6 @@ function main() {
 	let sessionId = document.cookie.slice(document.cookie.indexOf(cookie_sessionId) + cookie_sessionId.length, document.cookie.indexOf(";", document.cookie.indexOf(cookie_sessionId)));
 	if (currentQuery.get("code") != null && currentQuery.get("code").length > 0 && currentQuery.get("state") != null && currentQuery.get("state").length > 0) {
 		console.log("Sending token request to backend");
-		//const req = new XMLHttpRequest();
-		// const data = new FormData();
-
-		// data.append("grant_type", "authorization_code");
-		// data.append("client_id", oauth2_inst.client_id);
-		// data.append("client_secret", "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");
-		// data.append("code", currentQuery.get("code"));
-		// data.append("redirect_uri", oauth2_inst.redirect_uri);
-
-		// req.open("POST", "https://api.intra.42.fr/oauth/token");
-		// req.setRequestHeader("Access-Control-Allow-Origin", "https://localhost");
-		// req.send(data);
 	}
 	else {
 		console.log("Sending link request to backend");
