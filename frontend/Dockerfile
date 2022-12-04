@@ -5,14 +5,13 @@ RUN apt-get update\
 	&& apt-get install -y curl\
 	git\
 	&& curl -fsSL https://deb.nodesource.com/setup_19.x | bash - \
-	&& apt-get install -y nodejs\
-	&& npm i -g @nestjs/cli
+	&& apt-get install -y nodejs
 
-RUN useradd -m app_frontend\
-	&& nest new -p npm /home/app_frontend/frontend\
-	&& chown -R app_frontend:app_frontend /home/app_frontend
+RUN apt-get install -y nginx\
+	&& rm -f /etc/nginx/sites-enabled/*\
+	&& useradd -u 1000 app_frontend\
+	&& usermod -aG app_frontend www-data\
+	&& chown -R app_frontend:app_frontend /var/www\
+	&& npm install -g client-oauth2
 
-USER app_frontend
-WORKDIR /home/app_frontend/frontend
-
-CMD ["npm", "run", "start:dev"]
+CMD ["nginx", "-g", "daemon off;"]

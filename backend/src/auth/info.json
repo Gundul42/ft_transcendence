@@ -1,0 +1,11 @@
+{
+	"ftAPI" : {
+		"url" : "https://api.intra.42.fr",
+		"auth" : "/oauth/authorize",
+		"token" : "/oauth/token"
+	} ,
+	"client_id" : "",
+	"secret" : "",
+	"redirect_uri" : "https://localhost",
+	"scope" : "public"
+}

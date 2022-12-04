@@ -5,10 +5,10 @@ RUN apt-get update\
 	&& apt-get install -y curl\
 	git\
 	&& curl -fsSL https://deb.nodesource.com/setup_19.x | bash - \
-	&& apt-get install -y nodejs\
-	&& npm i -g @nestjs/cli
+	&& apt-get install -y nodejs
 
-RUN useradd -m app_backend\
+RUN npm i -g @nestjs/cli\
+	&& useradd -m app_backend\
 	&& nest new -p npm /home/app_backend/backend\
 	&& chown -R app_backend:app_backend /home/app_backend
 

@@ -1,18 +1,21 @@
 version: '3.3'
 
 services:
-  nginx:
-    restart: always
-    depends_on:
-      - frontend
-    image: "nginx:latest"
-    ports:
-      - "443:443"
-    networks:
-      - app
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+  #nginx:
+  #  restart: always
+  #  depends_on:
+  #    - backend
+  #  build: "./nginx"
+  #  image: "nginx:latest"
+  #  ports:
+  #    - "443:443"
+  #    - "80:80"
+  #  networks:
+  #    - app
+  #  volumes:
+  #    - ./nginx/conf.d:/etc/nginx/conf.d:ro
+  #    - ./nginx/ssl:/etc/nginx/ssl:ro
+  #    - ./frontend/content:/var/www/html/content:ro
 
   frontend:
     restart: always
@@ -21,11 +24,15 @@ services:
     build: "./frontend"
     image: "frontend:latest"
     ports:
-      - "127.0.0.1:8080:3000"
+      - "443:443"
+      - "80:80"
     networks:
       - app
     volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./frontend/src:/home/app_frontend/frontend/src:ro
+      - ./frontend/content:/var/www/html/content:ro
 
   backend:
     restart: always
@@ -39,6 +46,7 @@ services:
       - app
     volumes:
       - ./backend/src:/home/app_backend/backend/src:ro
+      - ./backend/resources/tsconfig.json:/home/app_backend/backend/tsconfig.json:ro
 
   pgsql:
     restart: always
