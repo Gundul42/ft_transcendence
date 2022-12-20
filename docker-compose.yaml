@@ -1,28 +1,11 @@
 version: '3.3'
 
 services:
-  #nginx:
-  #  restart: always
-  #  depends_on:
-  #    - backend
-  #  build: "./nginx"
-  #  image: "nginx:latest"
-  #  ports:
-  #    - "443:443"
-  #    - "80:80"
-  #  networks:
-  #    - app
-  #  volumes:
-  #    - ./nginx/conf.d:/etc/nginx/conf.d:ro
-  #    - ./nginx/ssl:/etc/nginx/ssl:ro
-  #    - ./frontend/content:/var/www/html/content:ro
-
-  frontend:
+  nginx:
     restart: always
     depends_on:
       - backend
-    build: "./frontend"
-    image: "frontend:latest"
+    image: "nginx:latest"
     ports:
       - "443:443"
       - "80:80"
@@ -31,8 +14,24 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./frontend/src:/home/app_frontend/frontend/src:ro
       - ./frontend/content:/var/www/html/content:ro
+
+  frontend:
+    restart: always
+    depends_on:
+      - backend
+    build: "./frontend"
+    image: "frontend:latest"
+    ports:
+      - "3000:3000"
+    networks:
+      - app
+    volumes:
+    #  - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    #  - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./frontend/src:/var/www/html/frontend/src
+    #  - ./frontend/src:/home/app_frontend/frontend/src:ro
+    #  - ./frontend/content:/var/www/html/content:ro
 
   backend:
     restart: always
@@ -47,10 +46,12 @@ services:
     volumes:
       - ./backend/src:/home/app_backend/backend/src:ro
       - ./backend/resources/tsconfig.json:/home/app_backend/backend/tsconfig.json:ro
+      - ./.env://home/app_backend/backend/.env:ro
 
   pgsql:
     restart: always
     image: postgres:latest
+    build: ./postgres
     ports:
       - "127.0.0.1:5432:5432"
     networks:

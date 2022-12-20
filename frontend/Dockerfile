@@ -1,17 +1,17 @@
 FROM ubuntu:latest
 
-RUN apt-get update\
-	&& apt-get upgrade -y\
-	&& apt-get install -y curl\
+RUN apt update\
+	&& apt upgrade -y\
+	&& apt install -y curl\
 	git\
-	&& curl -fsSL https://deb.nodesource.com/setup_19.x | bash - \
+	&& curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 	&& apt-get install -y nodejs
 
-RUN apt-get install -y nginx\
+RUN apt install -y nginx\
 	&& rm -f /etc/nginx/sites-enabled/*\
-	&& useradd -u 1000 app_frontend\
-	&& usermod -aG app_frontend www-data\
-	&& chown -R app_frontend:app_frontend /var/www\
-	&& npm install -g client-oauth2
+	&& mkdir -p /var/www/html\
+	&& echo "yes" | npx create-react-app /var/www/html/frontend --template typescript
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD [ "npm", "--prefix", "/var/www/html/frontend", "start" ]
+
+#CMD ["nginx", "-g", "daemon off;"]
