@@ -1,4 +1,4 @@
-const backendAPI = "https://localhost/api/";
+const backendAPI = "https://localhost:3000/api/";
 
 class oauth2 {
 	constructor(client_id, redirect_uri, scope, state, response_type) {

@@ -12,6 +12,8 @@ RUN apt install -y nginx\
 	&& mkdir -p /var/www/html\
 	&& echo "yes" | npx create-react-app /var/www/html/frontend --template typescript
 
+RUN export PORT=4242
+
 CMD [ "npm", "--prefix", "/var/www/html/frontend", "start" ]
 
 #CMD ["nginx", "-g", "daemon off;"]

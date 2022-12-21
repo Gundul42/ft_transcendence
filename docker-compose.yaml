@@ -23,7 +23,7 @@ services:
     build: "./frontend"
     image: "frontend:latest"
     ports:
-      - "3000:3000"
+      - "4242:4242"
     networks:
       - app
     volumes:
