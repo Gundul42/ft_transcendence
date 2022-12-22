@@ -38,8 +38,8 @@ function App() {
         method: "GET"
       });
       const otherdata = await (await data.blob()).text();
-      setResult(otherdata.slice(otherdata.indexOf("<a"), otherdata.lastIndexOf("</a>") + 4). replaceAll(/\\\"/g, "\""));
-    };
+      setResult(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
+  };
 
     api();
   }, []);
@@ -49,7 +49,7 @@ function App() {
       <header className="App-header">
         <h1>This is my app</h1>
         <p>hello</p>
-        {result}
+        <a href={result}>click to validate</a>
       </header>
     </div>
   );
