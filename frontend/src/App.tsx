@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-type htmlObject = {
-  html: string;
-}
-
 // async function api<T>(url: string): Promise<T> {
 //   return (await fetch(url)
 //     .then(response => {

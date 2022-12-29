@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Res, Req, UseFilters, Param, Headers } from '@nestjs/common';
+import { Controller, Get, UseGuards, Res, Req, UseFilters, Query, Headers } from '@nestjs/common';
 import { Request, Response } from "express";
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
@@ -31,9 +31,10 @@ export class AuthController {
     return ({html: `<a href="${this.authService.getLink(state)}">Authenticate through your intra page</a>`});
   }
 
-  @Get("confirm/:code")
+  @Get("confirm")
   @UseGuards(ConfirmGuard)
-  confirm(@Req() req: Request, @Param('code') code: string): string {
+  async confirm(@Req() req: Request, @Query('code') code: string): Promise<string> {
+    console.log("starting confirmation process");
     let sessionId: string = "";
     let state: string = "";
     let session: Promise<Session> = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], "127.0.0.1");
@@ -47,7 +48,14 @@ export class AuthController {
       }
     )
     let res: Promise<AxiosResponse<any>> = this.authService.requestToken(code, state);
-    console.log(res);
+    res.then(
+      function(value) {
+        console.log(value);
+      },
+      function(error) {
+        console.log(error);
+      }
+    )
     return ("<p>Identity confirmed</p>");
   }
 }

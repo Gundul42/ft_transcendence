@@ -46,12 +46,13 @@ export class AuthService {
   }
 
   requestToken(authCode: string, clientState: string) : Promise<AxiosResponse<any>> {
+    console.log("code is "+authCode);
     return this.httpService.axiosRef.post(oauth_info.ftAPI.url + oauth_info.ftAPI.token, {
       grant_type : "authorization_code",
       client_id : oauth_info.client_id,
       client_secret : oauth_info.secret,
       code : authCode,
-      redirect_uri : "https://localhost/api",
+      redirect_uri : oauth_info.redirect_uri,
       state : clientState
     },
     {
@@ -86,16 +87,13 @@ export class AuthService {
   }
 
   confirmSignup(req: Request) : boolean {
-    let ret: boolean = false;
+    const url_request: URL = new URL("https://localhost" + req.url);
     const session = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], '127.0.0.1');
     session.then(
       function(value) {
-        if (value.state != req.params.state) {
+        if (value.state != url_request.searchParams.get('state')?.replace(/\\$/g, '')) {
           console.log("Third party request");
           throw UnauthorizedException;
-        }
-        else {
-          ret = true;
         }
       },
       function(error) {
@@ -103,6 +101,6 @@ export class AuthService {
         throw UnauthorizedException;
       }
     )
-    return ret;
+    return true;
   }
 }
