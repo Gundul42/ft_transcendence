@@ -9,7 +9,7 @@ import { Session } from '../session/session.entity';
 import { AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 
-@Controller("api")
+@Controller("intra")
 export class AuthController {
   constructor(private readonly authService: AuthService, private sessionService: SessionService) {}
 
@@ -34,6 +34,7 @@ export class AuthController {
   @Get("confirm/:code")
   @UseGuards(ConfirmGuard)
   confirm(@Req() req: Request, @Param('code') code: string): string {
+    console.log("hey");
     let sessionId: string = "";
     let state: string = "";
     let session: Promise<Session> = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], "127.0.0.1");

@@ -14,6 +14,6 @@ RUN apt install -y nginx\
 
 RUN export PORT=4242
 
-CMD [ "npm", "--prefix", "/var/www/html/frontend", "start" ]
+CMD [ "npm", "--prefix", "/var/www/html/frontend", "--port", "4242", "start" ]
 
 #CMD ["nginx", "-g", "daemon off;"]
