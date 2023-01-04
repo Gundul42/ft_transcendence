@@ -10,6 +10,15 @@ async function bootstrap() {
   //   origin: "http://localhost:3000",
   //   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   // });
+  // BAD SECURITY
+  const options = {
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    credentials: true,
+    allowedHeaders: 'Content-Type, Accept',
+  };
+  app.enableCors(options);
   await app.listen(8000);
 }
 bootstrap();

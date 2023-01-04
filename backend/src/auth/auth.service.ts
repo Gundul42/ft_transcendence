@@ -105,4 +105,9 @@ export class AuthService {
     )
     return ret;
   }
+
+  getHello(): string {
+    console.log("In backend");
+    return 'Hello World!';
+  }
 }

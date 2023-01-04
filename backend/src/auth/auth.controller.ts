@@ -51,4 +51,16 @@ export class AuthController {
     console.log(res);
     return ("<p>Identity confirmed</p>");
   }
+
+  @Get("hello")
+  @UseFilters(AuthFilter)
+  hello(): string {
+    console.log("went into hello");
+    // const str = 'This string is coming from API';
+    // if (document != null)
+    //   document.getElementById('resultDiv').innerHTML = str;
+    // return ({html: `<a href="aaaaa">testtt</a>`});
+    return (this.authService.getHello());
+    return ('Heyyyyyyy');
+  }
 }

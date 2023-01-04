@@ -7,7 +7,7 @@ export class AuthFilter implements ExceptionFilter {
 		const context = host.switchToHttp();
 		const response = context.getResponse<Response>();
 		const status = exception.getStatus();
-
-		response.status(status).redirect('/api/signup');
+		console.log("here?");
+		response.status(status).redirect('/api/intra/signup');
 	}
 }

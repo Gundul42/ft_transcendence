@@ -27,12 +27,19 @@ import { testMsg, Example } from './context/auth0-context';
 // }
 async function ababa()
 {
-  const data = await fetch("http://localhost/api/hello", {
-        method: "GET"
-      })
-      .catch();
-  const otherdata = await (await data.blob()).text();
-  console.log(otherdata);
+  try
+  {
+    const data = await fetch("http://localhost/api/intra/hello", {
+      method: "GET",
+    })
+    const otherdata = await data.text();
+    console.log(otherdata);
+  }
+  catch (error)
+  {
+    if (error instanceof Error)
+      console.log(error.message);
+  }
 }
 
 
