@@ -28,7 +28,7 @@ export class AuthController {
     this.sessionService.add(sessionId, 0, '127.0.0.1', new Date(Date.now()), state);
     res.cookie('ft_transcendence_sessionId', sessionId);
     console.log("arriving here");
-    return ({html: `<a href="${this.authService.getLink(state)}">Authenticate through your intra page</a>`});
+    return ({html: `"${this.authService.getLink(state)}"`});
   }
 
   @Get("confirm/:code")
@@ -56,11 +56,6 @@ export class AuthController {
   @UseFilters(AuthFilter)
   hello(): string {
     console.log("went into hello");
-    // const str = 'This string is coming from API';
-    // if (document != null)
-    //   document.getElementById('resultDiv').innerHTML = str;
-    // return ({html: `<a href="aaaaa">testtt</a>`});
     return (this.authService.getHello());
-    return ('Heyyyyyyy');
   }
 }

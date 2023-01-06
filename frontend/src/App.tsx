@@ -29,9 +29,11 @@ async function ababa()
 {
   try
   {
-    const data = await fetch("http://localhost/api/intra/hello", {
+    const data = await fetch("http://localhost/api/intra/signup", {
       method: "GET",
+      headers: new Headers({'Accept': 'signup'}),
     })
+    console.log(data);
     const otherdata = await data.text();
     console.log(otherdata);
   }
@@ -52,11 +54,14 @@ function App() {
   const [result, setResult] = useState<string>();
   useEffect(() => {
     const api = async () => {
-      const data = await fetch("ft_transcendence.io/api/intra/signup", {
-        method: "GET"
-      });
+      const data = await fetch("http://localhost/api/intra/signup", {
+        method: "GET",
+        headers: new Headers({'Accept': 'signup'}),
+      })
       const otherdata = await (await data.blob()).text();
-      setResult(otherdata.slice(otherdata.indexOf("<a"), otherdata.lastIndexOf("</a>") + 4).replaceAll(/\\"/g, "\""));
+      const aaa = otherdata.slice(otherdata.indexOf("https"), otherdata.lastIndexOf("\"") + 4).replaceAll(/\\"/g, "\"");
+      console.log(aaa);
+      setResult(aaa);
     };
 
     api();
@@ -77,7 +82,9 @@ function App() {
         <button onClick={Example}> Hook Call </button>
         <button onClick={testMsg}> Func Call </button>
         <p>hello world</p>
-        {result}
+        <a href={result}>
+          <button> Authenticate through your intra page </button>
+        </a>
       </header>
     </div>
   );
