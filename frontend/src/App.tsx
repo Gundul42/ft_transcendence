@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import { testMsg, Example } from './context/auth0-context';
 
 // async function api<T>(url: string): Promise<T> {
 //   return (await fetch(url)
