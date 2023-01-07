@@ -15,18 +15,6 @@ export class AuthService {
     private sessionService: SessionService,
     private readonly httpService: HttpService ) {}
 
-  // getIp(header: string | string[] | null) : string {
-  //   if (typeof header === "null") {
-  //     return "";
-  //   }
-  //   else if (typeof header === "string")  {
-  //     return header;
-  //   }
-  //   else {
-  //     console.log(header);
-  //   }
-  // }
-
   alphanum(n : number) : string {
     let res = "";
     for (let i = 0; i < n; i++) {
@@ -46,9 +34,8 @@ export class AuthService {
   }
 
   requestToken(authCode: string, clientState: string) : Promise<AxiosResponse<any>> {
-    console.log("code is "+authCode);
     return this.httpService.axiosRef.post(oauth_info.ftAPI.url + oauth_info.ftAPI.token, {
-      grant_type : "authorization_code",
+      grant_type : 'authorization_code',
       client_id : oauth_info.client_id,
       client_secret : oauth_info.secret,
       code : authCode,
@@ -62,22 +49,32 @@ export class AuthService {
     });
   }
 
+  requestData(access_token: string) : Promise<AxiosResponse<any>> {
+    return this.httpService.axiosRef.get(oauth_info.ftAPI.url + oauth_info.ftAPI.user_data, {
+      headers : {
+        'Authorization': 'Bearer ' + access_token
+      }
+    })
+  }
+
   // Guards
 
-  validateSession(req: Request) : boolean {
-    let ret: boolean = false;
-    const session: Promise<Session> = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], '127.0.0.1');
-    session.then(
+  async validateSession(req: Request, ip: string) : Promise<boolean> {
+    let ret: boolean = await this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
+    .then(
       function(value) {
-        if (value == null || value.userid == 0) {
+        console.log(value);
+        if (value == null || value.userid == null) {
           console.log("Session does not exist");
+          return false;
         }
         else {
-          ret = true;
+          return true;
         }
       },
       function(error) {
         console.log(error);
+        return false;
       }
     )
     if (!ret) {
@@ -86,9 +83,9 @@ export class AuthService {
     return ret;
   }
 
-  confirmSignup(req: Request) : boolean {
+  confirmSignup(req: Request, ip: string) : boolean {
     const url_request: URL = new URL("https://localhost" + req.url);
-    const session = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], '127.0.0.1');
+    const session = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip);
     session.then(
       function(value) {
         if (value.state != url_request.searchParams.get('state')?.replace(/\\$/g, '')) {
