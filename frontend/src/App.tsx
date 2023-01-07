@@ -25,13 +25,13 @@ async function ababa()
 {
   try
   {
-    const data = await fetch("http://localhost/api/intra/signup", {
+    const data = await fetch("https://localhost/api/intra/auth", {
       method: "GET",
-      headers: new Headers({'Accept': 'signup'}),
+      headers: new Headers({'Accept': 'auth'}),
     })
     console.log(data);
     const otherdata = await data.text();
-    console.log(otherdata);
+    console.log(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
   }
   catch (error)
   {
@@ -50,9 +50,9 @@ function App() {
   const [result, setResult] = useState<string>();
   useEffect(() => {
     const api = async () => {
-      const data = await fetch("http://localhost/api/intra/signup", {
+      const data = await fetch("https://localhost/api/intra/auth", {
         method: "GET",
-        headers: new Headers({'Accept': 'signup'}),
+        headers: new Headers({'Content-Type': 'auth'}),
       })
       const otherdata = await (await data.blob()).text();
       setResult(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
@@ -65,10 +65,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-      <a href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-2f605ce7cd168c6196829150ee8107490c666c503568d8afdfa27a7408086637&redirect_uri=http%3A%2F%2Flocalhost%2Fapi%2Fconfirm%2F&response_type=code" rel="noreferrer" target="_blank">
-        <button> Link Button </button>
-      </a>
-      <a href="https://localhost/api/hello" rel="noreferrer" target="_blank">
+      <a href="https://localhost/api/intra/hello" rel="noreferrer" target="_blank">
         <button> Test Button </button>
       </a>
         <h1>This is transcendence</h1>
@@ -76,9 +73,6 @@ function App() {
         <button onClick={Example}> Hook Call </button>
         <button onClick={testMsg}> Func Call </button>
         <p>hello world</p>
-        <a href={result}>
-          <button> Authenticate through your intra page </button>
-        </a>
         <a href={result}>Click to validate</a>
       </header>
     </div>

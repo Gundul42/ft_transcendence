@@ -85,6 +85,7 @@ export class AuthService {
 
   confirmSignup(req: Request, ip: string) : boolean {
     const url_request: URL = new URL("https://localhost" + req.url);
+    console.log("In confirm signup" + url_request);
     const session = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip);
     session.then(
       function(value) {

@@ -29,12 +29,13 @@ export class AuthController {
     console.log("client ip is " + ip);
     this.sessionService.add(sessionId, null, ip, new Date(Date.now()), state);
     res.cookie('ft_transcendence_sessionId', sessionId);
-    return ({html: `<a href="${this.authService.getLink(state)}">Authenticate through your intra page</a>`});
+    return ({html: `"${this.authService.getLink(state)}"`});
   }
 
   @Get("confirm")
   @UseGuards(ConfirmGuard)
   async confirm(@Req() req: Request, @Res() res: Response, @Query('code') code: string, @Ip() ip: string): Promise<void> {
+    console.log("In confirm");
     this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
     .then(
       (session) => {
@@ -91,13 +92,6 @@ export class AuthController {
         console.log(error);
       }
     )
-    return ("<p>Identity confirmed</p>");
-  }
-
-  @Get("hello")
-  @UseFilters(AuthFilter)
-  hello(): string {
-    console.log("went into hello");
-    return (this.authService.getHello());
+    // return ("<p>Identity confirmed</p>");
   }
 }

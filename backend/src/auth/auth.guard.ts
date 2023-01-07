@@ -5,8 +5,8 @@ import { AuthService } from './auth.service';
 @Injectable()
 export class AuthGuard implements CanActivate {
 	constructor(private authService: AuthService) {}
-
 	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+		console.log("Auth Guard");
 		const req = context.switchToHttp().getRequest();
 
 		return this.authService.validateSession(req, req.ip);
