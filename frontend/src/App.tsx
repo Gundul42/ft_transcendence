@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { testMsg, Example } from './context/auth0-context';
-
-// type htmlObject = {
-//   html: string;
-// }
 
 // async function api<T>(url: string): Promise<T> {
 //   return (await fetch(url)
@@ -59,10 +54,8 @@ function App() {
         headers: new Headers({'Accept': 'signup'}),
       })
       const otherdata = await (await data.blob()).text();
-      const aaa = otherdata.slice(otherdata.indexOf("https"), otherdata.lastIndexOf("\"") + 4).replaceAll(/\\"/g, "\"");
-      console.log(aaa);
-      setResult(aaa);
-    };
+      setResult(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
+  };
 
     api();
   }, []);
@@ -85,6 +78,7 @@ function App() {
         <a href={result}>
           <button> Authenticate through your intra page </button>
         </a>
+        <a href={result}>Click to validate</a>
       </header>
     </div>
   );
