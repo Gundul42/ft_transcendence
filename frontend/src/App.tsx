@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+// import { useState } from 'react';
 import './App.css';
 import { testMsg, Example } from './context/auth0-context';
 
@@ -21,47 +22,111 @@ import { testMsg, Example } from './context/auth0-context';
 //   )
 //   return (res);
 // }
-async function ababa()
+function AuthMsg()
 {
-  try
+  const [msg, setMsg] = useState<string>();
+  var val;
+  useEffect(() => {
+    console.log("inside hook");
+    (async () => {
+      const data = await fetch("https://localhost/api/intra/auth", {
+        method: "GET",
+        headers: new Headers({'Content-Type': 'text/html'}),
+      })
+      const otherdata = await (await data.blob()).text();
+      setMsg(otherdata);
+    })();
+    }, [val]);
+  if (!msg)
   {
-    const data = await fetch("https://localhost/api/intra/auth", {
-      method: "GET",
-      headers: new Headers({'Accept': 'auth'}),
-    })
-    console.log(data);
-    const otherdata = await data.text();
-    console.log(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
+    val = false;
+    console.log("here");
+    return (
+      <div>
+        <p>Error occured</p>
+      </div>
+    );
   }
-  catch (error)
+  val = true;
+  if (msg?.startsWith("Congrats"))
   {
-    if (error instanceof Error)
-      console.log(error.message);
+    return (
+      <div>
+        <p>{msg}</p>
+      </div>
+    );
+  }
+  else
+  {
+    const linkadr = msg.slice(msg.indexOf("https://"), msg.lastIndexOf("\">"));
+    return (
+      <div>
+        <a href={linkadr}>Auth here</a>
+      </div>
+    );
   }
 }
-
-
-// const auth = async () => {
-//   const res: htmlObject = await api("https://localhost/api/auth");
-//   return res;
+// function Fett()
+// {
+//   const api = async () => {
+//     const data = await fetch("https://localhost/api/intra/auth", {
+//       method: "GET",
+//       headers: new Headers({'Content-Type': 'text/html'}),
+//     })
+//     const otherdata = await (await data.blob()).text();
+//     return (otherdata);
+//     // if (otherdata.startsWith("Congrats"))
+//     // {
+//     //   return (
+//     //     <div>
+//     //     <p>{otherdata}</p>
+//     //     </div>
+//     //   )
+//     // }
+//     // else
+//     // {
+//     //   const linkadr = otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">"));
+//     //   return (
+//     //     <div>
+//     //     <a href={linkadr}>
+//     //       Click to validate
+//     //     </a>
+//     //     </div>
+//     //   )
+//     // }
+//   }
+//   try
+//   {
+//     api();
+//     // const [result, setResult] = useState<string>();
+//         // setResult(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
+//   }
+//   catch (error)
+//   {
+//     if (error instanceof Error)
+//         console.log(error.message);
+//   }
+//   return (
+//     <div>
+//           <p>Error occured</p>
+//     </div>
+//   )
 // }
 
 function App() {
-  const [result, setResult] = useState<string>();
-  useEffect(() => {
-    const api = async () => {
-      const data = await fetch("https://localhost/api/intra/auth", {
-        method: "GET",
-        headers: new Headers({'Content-Type': 'auth'}),
-      })
-      const otherdata = await (await data.blob()).text();
-      setResult(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
-  };
+  // const [result, setResult] = useState<string>();
+  // useEffect(() => {
+  //   const api = async () => {
+  //     const data = await fetch("https://localhost/api/intra/auth", {
+  //       method: "GET",
+  //       headers: new Headers({'Content-Type': 'text/html'}),
+  //     })
+  //     const otherdata = await (await data.blob()).text();
+  //     setResult(otherdata.slice(otherdata.indexOf("https://"), otherdata.lastIndexOf("\">")));
+  // };
 
-    api();
-  }, []);
-
-  console.log(result)
+  //   api();
+  // }, []);
   return (
     <div className="App">
       <header className="App-header">
@@ -69,11 +134,11 @@ function App() {
         <button> Test Button </button>
       </a>
         <h1>This is transcendence</h1>
-        <button onClick={ababa}> Auth Test </button>
-        <button onClick={Example}> Hook Call </button>
+        <Example></Example>
         <button onClick={testMsg}> Func Call </button>
         <p>hello world</p>
-        <a href={result}>Click to validate</a>
+        <AuthMsg></AuthMsg>
+        {/* <a href={result}>Click to validate</a> */}
       </header>
     </div>
   );

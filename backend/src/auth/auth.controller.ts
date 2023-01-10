@@ -19,7 +19,14 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @UseFilters(AuthFilter)
   login(@Req() req: Request): string {
+    console.log("Congrats you are in");
     return ("<p>Congrats you are in</p>");
+  }
+
+  @Get("hello")
+  hello(): string {
+    console.log("went into hello");
+    return (this.authService.getHello());
   }
 
   @Get("signup")
@@ -27,6 +34,7 @@ export class AuthController {
     const state: string = this.authService.alphanum(20);
     const sessionId: string = this.authService.alphanum(20);
     console.log("client ip is " + ip);
+    console.log("State is: " + state);
     this.sessionService.add(sessionId, null, ip, new Date(Date.now()), state);
     res.cookie('ft_transcendence_sessionId', sessionId);
     return ({html: `"${this.authService.getLink(state)}"`});
@@ -57,7 +65,8 @@ export class AuthController {
                         scope: token.data.scope,
                         created_at: token.data.created_at
                       });
-                      res.redirect('/api/auth');
+                      console.log("Welcome back " + record_user);
+                      res.redirect('/api/intra/auth');
                     }
                     else {
                       console.log("Creating new user");
@@ -67,7 +76,8 @@ export class AuthController {
                           await Session.update({sessionid: session.sessionid}, {
                             user: new_user
                           });
-                          res.redirect('/api/auth');
+                          console.log("User created?");
+                          res.redirect('/api/intra/auth');
                         },
                         (error) => {console.log(error)}
                       )

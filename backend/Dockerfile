@@ -25,4 +25,4 @@ WORKDIR /home/app_backend/backend
 
 RUN npm install
 
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:debug"]

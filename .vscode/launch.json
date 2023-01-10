@@ -1,25 +1,17 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-		{
-			"type": "node",
-			"request": "launch",
-			"name": "Debug Nest Framework",
-			"args": [
-				"${workspaceFolder}/backend/src/main.ts"
-			],
-			"runtimeArgs": [
-				"--nolazy",
-				"-r",
-				"ts-node/register",
-				"-r",
-				"tsconfig-paths/register"
-			],
-			"sourceMaps": true,
-			"envFile": "${workspaceFolder}/.env",
-			"cwd": "${workspaceRoot}",
-			"console": "integratedTerminal",
-			"protocol": "inspector"
-		}
+	  {
+		"name": "Debug: api",
+		"type": "node",
+		"request": "attach",
+		"restart": true,
+		"port": 8000,
+		"address": "0.0.0.0",
+		"localRoot": "${workspaceFolder}/backend",
+		"remoteRoot": "/home/app_backend/backend",
+		"protocol": "inspector",
+		"skipFiles": ["<node_internals>/**"]
+	  }
 	]
   }

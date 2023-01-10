@@ -13,7 +13,7 @@ async function bootstrap() {
   // BAD SECURITY
   const options = {
     origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     preflightContinue: false,
     credentials: true,
     allowedHeaders: 'Content-Type, Accept',

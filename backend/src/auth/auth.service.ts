@@ -30,6 +30,7 @@ export class AuthService {
     ft_uri.append("scope", oauth_info.scope);
     ft_uri.append("response_type", "code");
     ft_uri.append("state", state);
+    console.log(ft_uri);
     return (oauth_info.ftAPI.url + oauth_info.ftAPI.auth + "?" + ft_uri.toString());
   }
 
@@ -85,20 +86,31 @@ export class AuthService {
 
   confirmSignup(req: Request, ip: string) : boolean {
     const url_request: URL = new URL("https://localhost" + req.url);
-    console.log("In confirm signup" + url_request);
+    console.log("In confirm signup: " + url_request);
+    console.log(this.sessionService);
     const session = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip);
     session.then(
       function(value) {
-        if (value.state != url_request.searchParams.get('state')?.replace(/\\$/g, '')) {
+        console.log(session);
+        console.log(value);
+        console.log(url_request.searchParams);
+        if ((value?.state + '\\""') != url_request.searchParams?.get('state')) {
+          console.log("First val" + value?.state + '\\""');
+          console.log("Second val" + url_request.searchParams?.get('state'));
           console.log("Third party request");
           throw UnauthorizedException;
         }
+        else
+          console.log("succes in confirm signup");
       },
       function(error) {
+        console.log("finding Id failed");
         console.log(error);
         throw UnauthorizedException;
       }
     )
+    if (!session)
+      console.log("Session not established ??");
     return true;
   }
 

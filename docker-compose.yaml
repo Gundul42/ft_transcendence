@@ -7,6 +7,8 @@ services:
     depends_on:
       - backend
     image: "nginx:latest"
+    links:
+      - backend
     ports:
       - 443:443
       - 80:80
@@ -24,9 +26,9 @@ services:
       - backend
     build: "./frontend"
     image: "frontend:latest"
-    ports:
-      - 4242:4242
-      - 3000:3000
+    # ports:
+    #   - 4242:4242
+    #   - 3000:3000
     networks:
       - app
     volumes:
@@ -43,8 +45,9 @@ services:
       - pgsql
     build: "./backend"
     image: "backend:latest"
-    ports:
-      - 8000:8000
+    # ports:
+    #   - 8000:8000
+    #   - 9400:9400
     networks:
       - app
     volumes:
