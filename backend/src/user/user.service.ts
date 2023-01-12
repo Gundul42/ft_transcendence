@@ -14,8 +14,11 @@ export class AppUserService {
     return this.userRepository.find();
   }
 
-  findOne(id: string): Promise<AppUser> {
-    return this.userRepository.findOneBy({
+  async findOne(id: string): Promise<AppUser> {
+    if (id === null || id === undefined) {
+      throw new Error("Null | Undefined values cannot be used to create a database query");
+    }
+    return await this.userRepository.findOneBy({
       userid: id
       },
     );

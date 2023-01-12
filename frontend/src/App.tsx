@@ -36,6 +36,7 @@ function Dispatch() {
       .then(
         async (value) => {
           if (value.ok) {
+            console.log(value);
             setResult({
               status: Status.Success,
               error: null,

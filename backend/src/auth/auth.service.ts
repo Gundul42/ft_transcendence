@@ -76,6 +76,10 @@ export class AuthService {
         return false;
       }
     )
+    .catch((e) => {
+      console.log(e);
+      throw new UnauthorizedException();
+    })
     if (!ret) {
       throw new UnauthorizedException();
     }

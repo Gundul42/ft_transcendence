@@ -15,8 +15,11 @@ export class SessionService {
     return this.sessionRepository.find();
   }
 
-  findOne(id: string, ip: string): Promise<Session> {
-    return this.sessionRepository.findOneBy({
+  async findOne(id: string, ip: string): Promise<Session> {
+    if (id === null || id === undefined || ip === null || ip === undefined) {
+      throw new Error("Null | Undefined values cannot be used to create a database query");
+    }
+    return await this.sessionRepository.findOneBy({
       sessionid: id, 
       ip_address: ip,
       },
@@ -36,6 +39,15 @@ export class SessionService {
     to_delete.forEach(async (s, i) => { await this.remove(s.sessionid)});
   }
 
+  async purgeIP(ip: string): Promise<void> {
+    let to_delete: Session[] = await this.sessionRepository.find({
+      where: {
+        ip_address: ip,
+      },
+    });
+    to_delete.forEach(async (s, i) => { await this.remove(s.sessionid)});
+  }
+
   async add(sessionid: string, user: AppUser | null, ip_address: string | null, created_on: Date, state: string) : Promise<void> {
     const session = new Session;
     session.sessionid = sessionid;
@@ -47,6 +59,9 @@ export class SessionService {
   }
 
   async joinUser(sessionid: string) : Promise<any> {
+    if (sessionid === null || sessionid === undefined) {
+      throw new Error("Null | Undefined values cannot be used to create a database query");
+    }
     return await this.sessionRepository
       .createQueryBuilder('session')
       .innerJoinAndSelect('session.user', 'user')

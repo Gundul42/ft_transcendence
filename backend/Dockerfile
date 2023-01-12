@@ -8,11 +8,6 @@ RUN apt update\
 	&& apt-get install -y nodejs
 
 RUN npm i -g @nestjs/cli\
-	#&& npm i -g cookie-parser\
-	#&& npm i -D -g @types/cookie-parser\
-	#&& npm i -g --save @nestjs/typeorm typeorm pg\
-	#&& npm i -g --save @nestjs/config\
-	#&& npm i -g --save @nestjs/axios\
 	&& useradd -m app_backend\
 	&& nest new -p npm /home/app_backend/backend\
 	&& chown -R app_backend:app_backend /home/app_backend

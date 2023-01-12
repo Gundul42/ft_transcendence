@@ -19,16 +19,21 @@ export class AuthController {
   @Get("auth")
   @UseGuards(AuthGuard)
   @UseFilters(AuthFilter)
-  async login(@Req() req: Request): Promise<Object> {
+  async login(@Req() req: Request, @Res() res, @RealIP() ip: string): Promise<void> {
     this.sessionService.removeEmpty();
     try {
       var session: any = await this.sessionService.joinUser(req.cookies['ft_transcendence_sessionId']);
+      if (session === null) {
+        throw new Error("Session not found")
+      }
       console.log(session) //See what data is available and select it
     } catch (error) {
       console.log(error);
-      return {};
+      this.sessionService.purgeIP(ip);
+      res.clearCookie('ft_transcendence_sessionId');
+      res.end();
     }
-    return ({
+    res.send({
       'type' : 'content',
       'data' : {
         'full_name' : session.user.full_name,
@@ -41,7 +46,7 @@ export class AuthController {
     const state: string = this.authService.alphanum(20);
     const sessionId: string = this.authService.alphanum(20);
     await this.sessionService.add(sessionId, null, ip, new Date(Date.now()), state);
-    res.cookie('ft_transcendence_sessionId', sessionId);
+    res.cookie('ft_transcendence_sessionId', sessionId, { sameSite: 'none', secure: true});
     return (
       { 'type' : 'link',
         'data' : {
@@ -86,6 +91,9 @@ export class AuthController {
         refresh_token: token.data.refresh_token,
         scope: token.data.scope,
         created_at: token.data.created_at
+      });
+      await Session.update({sessionid: session.sessionid}, {
+        user: record_user,
       });
       res.redirect('/');
     } else {
