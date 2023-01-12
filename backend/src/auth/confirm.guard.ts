@@ -8,8 +8,8 @@ export class ConfirmGuard implements CanActivate {
 	constructor(private authService: AuthService) {}
 
 	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-		const req = context.switchToHttp().getRequest<Request>();
+		const req = context.switchToHttp().getRequest();
 
-		return this.authService.confirmSignup(req, req.ip);
+		return this.authService.confirmSignup(req, req.headers["x-forwarded-for"]);
 	}
 }

@@ -1,12 +1,12 @@
 psql -U $POSTGRES_USER -d $POSTGRES_DB -c \
-"CREATE TABLE IF NOT EXISTS sessions (
+"CREATE TABLE IF NOT EXISTS session (
 	sessionid VARCHAR(20) PRIMARY KEY,
 	ip_address VARCHAR(15),
 	userid serial,
 	created_on TIMESTAMP NOT NULL,
 	state VARCHAR(20)
 	);
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS app_user (
 	userid INT PRIMARY KEY,
 	email VARCHAR(50),
 	full_name VARCHAR(100),

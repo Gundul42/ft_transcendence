@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, Logger, Ip } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 
@@ -9,6 +9,6 @@ export class AuthGuard implements CanActivate {
 	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
 		const req = context.switchToHttp().getRequest();
 
-		return this.authService.validateSession(req, req.ip);
+		return this.authService.validateSession(req, req.headers["x-forwarded-for"]);
 	}
 }

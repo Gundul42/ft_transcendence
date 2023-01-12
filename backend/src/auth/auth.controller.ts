@@ -1,5 +1,6 @@
-import { Controller, Get, UseGuards, Res, Req, UseFilters, Query, Headers, Ip } from '@nestjs/common';
-import { Request, Response } from "express";
+import { Controller, Get, UseGuards, Res, Req, UseFilters, Query, Headers } from '@nestjs/common';
+import { RealIP } from 'nestjs-real-ip';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
 import { AuthFilter } from './auth.filter';
@@ -18,78 +19,87 @@ export class AuthController {
   @Get("auth")
   @UseGuards(AuthGuard)
   @UseFilters(AuthFilter)
-  login(@Req() req: Request): string {
-    return ("<p>Congrats you are in</p>");
+  async login(@Req() req: Request): Promise<Object> {
+    this.sessionService.removeEmpty();
+    try {
+      var session: any = await this.sessionService.joinUser(req.cookies['ft_transcendence_sessionId']);
+      console.log(session) //See what data is available and select it
+    } catch (error) {
+      console.log(error);
+      return {};
+    }
+    return ({
+      'type' : 'content',
+      'data' : {
+        'full_name' : session.user.full_name,
+      }
+    });
   }
 
   @Get("signup")
-  signup(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Headers() headers, @Ip() ip: string): Object {
+  async signup(@Req() req: Request, @Res({ passthrough: true }) res: Response, @Headers() headers, @RealIP() ip: string): Promise<any> {
     const state: string = this.authService.alphanum(20);
     const sessionId: string = this.authService.alphanum(20);
-    console.log("client ip is " + ip);
-    this.sessionService.add(sessionId, null, ip, new Date(Date.now()), state);
+    await this.sessionService.add(sessionId, null, ip, new Date(Date.now()), state);
     res.cookie('ft_transcendence_sessionId', sessionId);
-    return ({html: `<a href="${this.authService.getLink(state)}">Authenticate through your intra page</a>`});
+    return (
+      { 'type' : 'link',
+        'data' : {
+          'link' : `${this.authService.getLink(state)}`
+        }
+      });
   }
 
   @Get("confirm")
   @UseGuards(ConfirmGuard)
-  async confirm(@Req() req: Request, @Res() res: Response, @Query('code') code: string, @Ip() ip: string): Promise<void> {
-    this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
-    .then(
-      (session) => {
-        this.authService.requestToken(code, session.state)
-        .then(
-          (token) => {
-            this.authService.requestData(token.data.access_token)
-            .then(
-              (user_data) => {
-                this.userService.findOne(user_data.data.id)
-                .then(
-                  async (record_user) => {
-                    if (record_user != null) {
-                      await AppUser.update({userid: user_data.data.id}, {
-                        access_token: token.data.access_token,
-                        token_type: token.data.token_type,
-                        expires_in: token.data.expires_in,
-                        refresh_token: token.data.refresh_token,
-                        scope: token.data.scope,
-                        created_at: token.data.created_at
-                      });
-                      res.redirect('/api/auth');
-                    }
-                    else {
-                      console.log("Creating new user");
-                      this.userService.add(user_data.data.id, user_data.data.email, user_data.data.usual_full_name, token.data.access_token, token.data.token_type, token.data.expires_in, token.data.refresh_token, token.data.scope, token.data.created_at)
-                      .then (
-                        async (new_user) => {
-                          await Session.update({sessionid: session.sessionid}, {
-                            user: new_user
-                          });
-                          res.redirect('/api/auth');
-                        },
-                        (error) => {console.log(error)}
-                      )
-                    }
-                  },
-                  async (error) => {
-                    console.log(error);
-                  }
-                )
-              },
-              (error) => {
-                console.log(error);
-              }
-            )
-          },
-          (error) => {
-            console.log(error);
-          }
-        )
-      },
-      (error) => {
-        console.log(error);
-      }
-    )
+  async confirm(@Req() req: Request, @Res() res: Response, @Query('code') code: string, @RealIP() ip: string): Promise<void> {
+    try {
+      var session: Session = await this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip);
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+    try {
+      var token: any = await this.authService.requestToken(code, session.state);
+    } catch(error) {
+      console.log(error);
+      return;
+    }
+    try {
+      var user_data: any = await this.authService.requestData(token.data.access_token);
+      //console.log(user_data); //print user data to see what data is available from intra
+    } catch(error) {
+      console.log(error);
+      return;
+    }
+    try {
+      var record_user: AppUser = await this.userService.findOne(user_data.data.id);
+    } catch(error) {
+      console.log(error);
+      return;
+    }
+    if (record_user != null) {
+      await AppUser.update({userid: user_data.data.id}, {
+        access_token: token.data.access_token,
+        token_type: token.data.token_type,
+        expires_in: token.data.expires_in,
+        refresh_token: token.data.refresh_token,
+        scope: token.data.scope,
+        created_at: token.data.created_at
+      });
+      res.redirect('/');
+    } else {
+      console.log("Creating new user");
+      this.userService.add(user_data.data.id, user_data.data.email, user_data.data.usual_full_name, token.data.access_token, token.data.token_type, token.data.expires_in, token.data.refresh_token, token.data.scope, token.data.created_at)
+      .then (
+        async (new_user) => {
+          await Session.update({sessionid: session.sessionid}, {
+            user: new_user
+          });
+          res.redirect('/');
+        },
+        (error) => {console.log(error)}
+      )
+    }
   }
 }

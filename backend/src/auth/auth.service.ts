@@ -63,7 +63,6 @@ export class AuthService {
     let ret: boolean = await this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
     .then(
       function(value) {
-        console.log(value);
         if (value == null || value.userid == null) {
           console.log("Session does not exist");
           return false;
@@ -83,21 +82,29 @@ export class AuthService {
     return ret;
   }
 
-  confirmSignup(req: Request, ip: string) : boolean {
+  async confirmSignup(req: Request, ip: string) : Promise<boolean> {
     const url_request: URL = new URL("https://localhost" + req.url);
-    const session = this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip);
-    session.then(
+    return await this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
+    .then(
       function(value) {
-        if (value.state != url_request.searchParams.get('state')?.replace(/\\$/g, '')) {
-          console.log("Third party request");
-          throw UnauthorizedException;
+        if (url_request.searchParams.get('state') === null) {
+          console.log("URL is missing authentication data");
+          throw new UnauthorizedException();
         }
+        else if (value === null || value.state === null) {
+          console.log("Session was registered incorrectly");
+          throw new UnauthorizedException();
+        }
+        else if (value.state != url_request.searchParams.get('state')?.replace(/\\$/g, '')) {
+          console.log("Third party request");
+          throw new UnauthorizedException();
+        }
+        return true;
       },
       function(error) {
         console.log(error);
-        throw UnauthorizedException;
+        throw new UnauthorizedException();
       }
     )
-    return true;
   }
 }
