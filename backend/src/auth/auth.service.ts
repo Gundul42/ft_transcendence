@@ -56,7 +56,10 @@ export class AuthService {
   // Guards
 
   async validateSession(req: Request) : Promise<boolean> {
-    let ret: boolean = await this.prisma.session.findUnique({
+    if (!req.cookies['ft_transcendence_sessionId']) {
+      throw new UnauthorizedException();
+    }
+    return await this.prisma.session.findUnique({
       where: {
         id: req.cookies['ft_transcendence_sessionId'],
       },
@@ -66,7 +69,7 @@ export class AuthService {
       function(value) {
         if (value == null || value.user == null || value.user.id == null) {
           console.log("Session does not exist");
-          return false;
+          throw new UnauthorizedException();
         }
         else {
           return true;
@@ -74,21 +77,20 @@ export class AuthService {
       },
       function(error) {
         console.log(error);
-        return false;
+        throw new UnauthorizedException();
       }
     )
     .catch((e) => {
       console.log(e);
       throw new UnauthorizedException();
     })
-    if (!ret) {
-      throw new UnauthorizedException();
-    }
-    return ret;
   }
 
   async confirmSignup(req: Request) : Promise<boolean> {
     const url_request: URL = new URL("https://localhost" + req.url);
+    if (!req.cookies['ft_transcendence_sessionId']) {
+      throw new UnauthorizedException();
+    }
     return await this.prisma.session.findUnique({
       where: {
         id: req.cookies['ft_transcendence_sessionId'],
