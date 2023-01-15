@@ -2,17 +2,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from "express";
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
-import { Observable } from 'rxjs';
-import { InjectRepository } from '@nestjs/typeorm';
-import { HttpModule } from '@nestjs/axios';
 import * as oauth_info from './info.json'
-import { SessionService } from '../session/session.service';
-import { Session } from '../session/session.entity';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor (
-    private sessionService: SessionService,
+    private prisma: PrismaService,
     private readonly httpService: HttpService ) {}
 
   alphanum(n : number) : string {
@@ -59,11 +55,16 @@ export class AuthService {
 
   // Guards
 
-  async validateSession(req: Request, ip: string) : Promise<boolean> {
-    let ret: boolean = await this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
+  async validateSession(req: Request) : Promise<boolean> {
+    let ret: boolean = await this.prisma.session.findUnique({
+      where: {
+        id: req.cookies['ft_transcendence_sessionId'],
+      },
+      include: { user: true }
+    })
     .then(
       function(value) {
-        if (value == null || value.userid == null) {
+        if (value == null || value.user == null || value.user.id == null) {
           console.log("Session does not exist");
           return false;
         }
@@ -86,9 +87,13 @@ export class AuthService {
     return ret;
   }
 
-  async confirmSignup(req: Request, ip: string) : Promise<boolean> {
+  async confirmSignup(req: Request) : Promise<boolean> {
     const url_request: URL = new URL("https://localhost" + req.url);
-    return await this.sessionService.findOne(req.cookies['ft_transcendence_sessionId'], ip)
+    return await this.prisma.session.findUnique({
+      where: {
+        id: req.cookies['ft_transcendence_sessionId'],
+      }
+    })
     .then(
       function(value) {
         if (url_request.searchParams.get('state') === null) {

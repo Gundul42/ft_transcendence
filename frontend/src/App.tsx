@@ -10,6 +10,7 @@ function Link({data} : {data: any}) {
 }
 
 enum Status {
+  Starting,
   Loading,
   Success,
   Error,
@@ -24,12 +25,17 @@ interface IApi {
 
 function Dispatch() {
   const [result, setResult] = useState<IApi>({
-    status: Status.Loading,
+    status: Status.Starting,
     error: null,
     data: null,
   });
   useEffect(() => {
     const api = () => {
+      setResult({
+        status: Status.Loading,
+        error: null,
+        data: null,
+      })
       fetch("https://localhost/api/auth", {
         method: "GET"
       })
@@ -61,10 +67,10 @@ function Dispatch() {
         }
       )
     };
-    if (result.data === null) {
+    if (result.status === Status.Starting) {
       api();
     }
-  }, [result.data]);
+  }, [result.data, result.status]);
   console.log(result);
   if (result.data === null) {
     return (<p>*Sad backend noises*</p>);

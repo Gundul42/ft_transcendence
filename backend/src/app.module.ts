@@ -2,14 +2,14 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { Session } from './session/session.entity';
-import { AppUser } from './user/user.entity';
+import { PrismaModule } from './prisma/prisma.module';
 
 
 @Module({
   imports: [
     AuthModule,
-    ConfigModule.forRoot(),
+    PrismaModule,
+    ConfigModule.forRoot(),/*
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -23,7 +23,7 @@ import { AppUser } from './user/user.entity';
         synchronize: false,
       }),
       inject: [ConfigService],
-    }),
+    }),*/
   ], 
 })
 export class AppModule {}

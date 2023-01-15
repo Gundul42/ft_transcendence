@@ -34,7 +34,8 @@
     "pg": "^8.8.0",
 	  "@nestjs/config": "^2.2.0",
 	  "@nestjs/axios": "^1.0.0",
-    "nestjs-real-ip": "^2.2.0"
+    "nestjs-real-ip": "^2.2.0",
+    "prisma": "^4.8.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

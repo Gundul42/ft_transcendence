@@ -40,24 +40,24 @@ services:
     build: "./backend"
     image: "backend:latest"
     ports:
-      - "127.0.0.1:8000:3000"
+      - "8000:3000"
     networks:
       - app
     volumes:
       - ./backend/src:/home/app_backend/backend/src:ro
       - ./backend/resources/tsconfig.json:/home/app_backend/backend/tsconfig.json:ro
-      - ./.env://home/app_backend/backend/.env:ro
+      - ./backend/prisma/schema.prisma:/home/app_backend/backend/prisma/schema.prisma:ro
 
   pgsql:
     restart: always
     image: postgres:latest
-    build: ./postgres
+#    build: ./postgres
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
     networks:
       - app
-    volumes:
-      - v_pgsql:/var/lib/postgresql/data
+    #volumes:
+    #  - v_pgsql:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD
       - POSTGRES_USER
@@ -66,5 +66,5 @@ services:
 networks:
   app:
 
-volumes:
-  v_pgsql:
+#volumes:
+#  v_pgsql:
