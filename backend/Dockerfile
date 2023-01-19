@@ -26,9 +26,9 @@ RUN npm install\
 
 COPY --chown=app_backend:app_backend "./prisma/env" "/home/app_backend/backend/.env"
 COPY --chown=app_backend:app_backend "./prisma/schema.prisma" "/home/app_backend/backend/prisma/"
+COPY --chown=app_backend:app_backend "./resources/init.sh" "/"
 
 RUN npm install @prisma/client\
 	&& npx prisma generate
-#RUN npx prisma migrate dev --name init
 
-CMD [ "/bin/bash", "-c", "npx prisma migrate dev --name init & npm run start:dev"]
+CMD [ "/bin/bash", "/init.sh"]
