@@ -83,9 +83,24 @@
 .Menu-icon {
   background-color: #a6a8ac;
   width: 40%;
-  padding-top: 40%;
+  aspect-ratio: 1/1;
   position: relative;
   border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.Menu-icon:hover {
+  background-color: white;
+  width: 42%;
+}
+
+.Menu-icon>* {
+  max-width: 50%;
+  max-height: 50%;
+  width: auto;
+  height: auto;
 }
 
 .Display-name-prompt {
@@ -114,6 +129,10 @@
 .button:hover {
   background-color: white;
   color: #282c34;
+}
+
+.button, .Menu-icon {
+  cursor: pointer;
 }
 
 .break {

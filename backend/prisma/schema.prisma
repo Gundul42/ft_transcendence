@@ -27,8 +27,8 @@ model Token {
 
 model AppUser {
 	id				Int			@id
-	sessionid		String		@unique
-	session			Session		@relation(fields: [sessionid], references: [id])
+	sessionid		String?		@unique
+	session			Session?	@relation(fields: [sessionid], references: [id])
 	access_token	String		@unique
 	token			Token		@relation(fields: [access_token], references: [access_token])
 	email			String

@@ -170,6 +170,23 @@ export class AuthController {
     };
   }
 
+  /*
+  Assign a dummy value to the sessionId, in such way the cookie and the sessionId will not match
+  */
+  @Get('logout')
+  @UseGuards(AuthGuard)
+  async logOut(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const session: any = await this.prisma.session.update({
+      where: {
+        id: req.cookies['ft_transcendence_sessionId'],
+      },
+      data: {
+        id: this.authService.alphanum(20),
+      }
+    });
+    res.redirect('/');
+  }
+
   @Post("display_name")
   @UseGuards(AuthGuard)
   async setDisplayName(@Req() req: Request, @Res() res: Response): Promise<void> {
