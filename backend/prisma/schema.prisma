@@ -1,6 +1,6 @@
 datasource db {
-	provider = "postgresql"
-	url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -8,23 +8,31 @@ generator client {
 }
 
 model Session {
-	id				String		@id
-	user			AppUser?
-	ip_address		String?
-	created_on		DateTime	@default(now())
-	state			String
+  id         String   @id
+  user       AppUser?
+  ip_address String?
+  created_on DateTime @default(now())
+  state      String
 }
 
 model AppUser {
-	id				Int			@id
-	sessionid		String		@unique
-	session			Session		@relation(fields: [sessionid], references: [id])
-	email			String
-	full_name		String
-	access_token	String
-	token_type		String
-	expires_in		Int
-	refresh_token	String
-	scope			String
-	created_at		Int
+  id            Int     @id
+  sessionid     String  @unique
+  session       Session @relation(fields: [sessionid], references: [id])
+  email         String
+  full_name     String
+  access_token  String
+  token_type    String
+  expires_in    Int
+  refresh_token String
+  scope         String
+  created_at    Int
+  Chat          Chat?   @relation(fields: [chatId], references: [id])
+  chatId        Int?
+}
+
+model Chat {
+  id    Int       @id
+  name	String
+  users AppUser[]
 }
