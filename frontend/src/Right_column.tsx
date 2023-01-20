@@ -2,15 +2,6 @@ import React from 'react';
 import { Status } from './App';
 import './App.css';
 
-function loadUser() {
-	//load user page
-}
-
-
-function loadChat() {
-	//load user page
-}
-
 function logOut(): void {
 	fetch("https://localhost/api/logout", {
 		method: "GET"
@@ -20,7 +11,7 @@ function logOut(): void {
 	);
 }
 
-export function RightColumn({result} : {result: any}) {
+export function RightColumn({result, set_page} : {result: any, set_page: any}) {
 	if (result.status !== Status.Success) {
 		return(
 			<div className="Right-column"></div>
@@ -28,9 +19,9 @@ export function RightColumn({result} : {result: any}) {
 	} else if (result.data.type === "content") {
 		return (
 			<div className="Right-column">
-				<div className="Menu-icon" onClick={loadUser}><img src="https://localhost/content/img/icons/user.png" alt="Profile"></img></div>
+				<div className="Menu-icon" onClick={() => {set_page("user")}}><img src="https://localhost/content/img/icons/user.png" alt="Profile"></img></div>
 				<div className="break"></div>
-				<div className="Menu-icon" onClick={loadChat}><img src="https://localhost/content/img/icons/chat.png" alt="Chat"></img></div>
+				<div className="Menu-icon" onClick={() => {set_page("chat")}}><img src="https://localhost/content/img/icons/chat.png" alt="Chat"></img></div>
 				<div className="break"></div>
 				<div className="Menu-icon" onClick={logOut}><img src="https://localhost/content/img/icons/exit.png" alt="Exit"></img></div>
 			</div>

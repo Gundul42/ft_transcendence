@@ -11,7 +11,6 @@ export class ContentController {
 	@Get('img/:dir/:picture')
 	@UseGuards(AuthGuard)
 	loadPicture(@Res({passthrough: true }) res, @Param('dir') dir, @Param('picture') picture) : StreamableFile {
-		console.log("arriving here");
 		const file = createReadStream(join('/home/app_backend/', dir, picture));
 		res.set({
 			'Content-Type': 'image/' + (picture as string).split('.').pop(),
