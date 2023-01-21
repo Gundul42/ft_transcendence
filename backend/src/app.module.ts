@@ -3,12 +3,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ChatModule } from './chat/chat.module';
+import { ChatGateway } from './chat/chat.gateway';
 
 
 @Module({
   imports: [
     AuthModule,
     PrismaModule,
+    ChatModule,
     ConfigModule.forRoot(),/*
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -25,5 +28,9 @@ import { PrismaModule } from './prisma/prisma.module';
       inject: [ConfigService],
     }),*/
   ], 
+  providers: 
+  [
+    ChatGateway
+  ]
 })
 export class AppModule {}

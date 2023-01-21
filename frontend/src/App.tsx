@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import { io } from 'socket.io-client';
+// import { PromptProps } from 'react-router-dom';
+import Chat from './Chat'
+
+const socket = io("https://localhost/api");
+
+socket.on("hello", arg => {
+  console.log(arg);
+});
+socket.emit("howdy", "partner");
 
 function Home({data} : {data: any}) {
   return(<h1>Welcome {(data.full_name as string).split(' ')[0]}</h1>)
@@ -8,6 +18,7 @@ function Home({data} : {data: any}) {
 function Link({data} : {data: any}) {
   return (<a href={data.link}>Login</a>)
 }
+
 
 enum Status {
   Starting,
@@ -90,6 +101,7 @@ function App() {
       <header className="App-header">
         <h1>Meatball Massacre</h1>
         <Dispatch />
+        <Chat />
       </header>
     </div>
   );

@@ -1,34 +1,22 @@
 import {
+	MessageBody,
+	SubscribeMessage,
 	WebSocketGateway,
 	WebSocketServer,
-	SubscribeMessage,
-	OnGatewayConnection,
-	OnGatewayDisconnect,
+	WsResponse,
   } from '@nestjs/websockets';
+// import { Server } from 'socket.io';
   
-  @WebSocketGateway()
-  export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-	@WebSocketServer() server;
-	users: number = 0;
-  
-	async handleConnection() {
-	  // A client has connected
-	  this.users++;
-  
-	  // Notify connected clients of current users
-	  this.server.emit('users', this.users);
+@WebSocketGateway({namespace: 'api/chat'})
+export class ChatGateway {
+	@WebSocketServer()
+	server;
+
+	@SubscribeMessage("message")
+	handleMsg(@MessageBody() message : string) : void
+	{
+		this.server.emit("message", message);
 	}
-  
-	async handleDisconnect() {
-	  // A client has disconnected
-	  this.users--;
-  
-	  // Notify connected clients of current users
-	  this.server.emit('users', this.users);
-	}
-  
-	@SubscribeMessage('chat')
-	async onChat(client, message) {
-	  client.broadcast.emit('chat', message);
-	}
-  }
+// @WebSocketServer()
+
+}
