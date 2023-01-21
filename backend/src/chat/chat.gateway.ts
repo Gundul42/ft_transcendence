@@ -1,22 +1,79 @@
-import {
-	MessageBody,
-	SubscribeMessage,
-	WebSocketGateway,
-	WebSocketServer,
-	WsResponse,
-  } from '@nestjs/websockets';
-// import { Server } from 'socket.io';
-  
-@WebSocketGateway({namespace: 'api/chat'})
-export class ChatGateway {
-	@WebSocketServer()
-	server;
+import { WebSocketGateway, 
+	WebSocketServer, 
+	MessageBody, 
+	SubscribeMessage, 
+	OnGatewayInit, 
+	OnGatewayConnection, 
+	OnGatewayDisconnect } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+// import {Server, Socket} from "@nestjs/platform-socket.io";
+
+@WebSocketGateway( { namespace: 'chat' })
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+	@WebSocketServer() server: Server;
+
+	afterInit(server: Server)
+	{
+		server.use(async (socket: Socket, next) => {
+		  const query = socket.handshake.query;
+	
+		  if (this.isValid(query)) {
+			next();
+			return;
+		  }
+	
+		  return next(new Error("401"));
+		});
+	}
+
+	handleConnection(client: Socket)
+	{
+		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
+    	client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
+	}
+
+	handleDisconnect(client: Socket)
+	{
+		this.leaveAllRooms(client);
+	}
+
+	async leaveAllRooms(client: Socket)
+	{
+
+	}
+
+	async handleJoinEvent(client: Socket, room: string, callback)
+	{
+		// Validate if client can join room here
+	
+		client.join(room);
+		callback(`joined: ${room}`);
+	}
+	async handleLeaveEvent(client: Socket, room: string, callback)
+	{
+		client.leave(room);
+		callback(`left: ${room}`);
+	}
+
+	isValid(query: any): boolean {
+		// Perform validation logic here
+		return true;
+	}
 
 	@SubscribeMessage("message")
 	handleMsg(@MessageBody() message : string) : void
 	{
+		console.log("in handling");
+		console.log(message);
 		this.server.emit("message", message);
 	}
-// @WebSocketServer()
 
+	@SubscribeMessage("ping")
+	pong()
+	{
+		console.log("pong");
+		this.server.emit("pong");
+	}
+  // Add methods for handling events here
 }
+

@@ -1,8 +1,12 @@
-import { Module } from '@nestjs/common';
-import { ChatGateway } from './chat.gateway';
-import { ChatService } from './chat.service';
+// import { Module } from '@nestjs/common';
+// import { WebSocketModule } from '@nestjs/websockets';
+// import { SocketModule } from 'socket.io';
 
-@Module({
-  providers: [ChatGateway]
-})
-export class ChatModule {}
+// @Module({
+//   imports: [
+//     WebSocketModule.forRoot(SocketModule),
+//   ],
+//   controllers: [],
+//   providers: [],
+// })
+// export class ChatModule { }

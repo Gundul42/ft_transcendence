@@ -36,8 +36,9 @@
 	  "@nestjs/axios": "^1.0.0",
     "nestjs-real-ip": "^2.2.0",
     "prisma": "^4.8.1",
-    "@nestjs/microservices": "^9.2.1",
-    "@nestjs/platform-socket.io": "^9.2.1"
+    "@nestjs/platform-socket.io": "^9.2.1",
+    "@nestjs/websockets": "^9.2.1",
+    "socket.io": "^4.5.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

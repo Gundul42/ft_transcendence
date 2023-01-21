@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ChatModule } from './chat/chat.module';
+// import { ChatModule } from './chat/chat.module';
 import { ChatGateway } from './chat/chat.gateway';
 
 
@@ -13,7 +13,7 @@ import { ChatGateway } from './chat/chat.gateway';
     AuthModule,
     ContentModule,
     PrismaModule,
-    ChatModule,
+    // ChatModule,
     ConfigModule.forRoot(),/*
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

@@ -1,26 +1,5 @@
 import React from 'react';
 import './App.css';
-import { io } from 'socket.io-client';
-// import { PromptProps } from 'react-router-dom';
-import Chat from './Chat'
-
-const socket = io("https://localhost/api");
-
-socket.on("hello", arg => {
-  console.log(arg);
-});
-socket.emit("howdy", "partner");
-
-function Home({data} : {data: any}) {
-  return(<h1>Welcome {(data.full_name as string).split(' ')[0]}</h1>)
-}
-
-function Link({data} : {data: any}) {
-  return (<a href={data.link}>Login</a>)
-}
-
-
-enum Status {
 import { Home } from './Home';
 import { User } from './User';
 import { Chat } from './Chat';
