@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Res, Req, UseFilters, Query, Headers } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Headers } from '@nestjs/common';
 import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -7,10 +7,6 @@ import { AuthFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
-// import { SessionService } from '../session/session.service';
-// import { Session } from '../session/session.entity';
-// import { Service } from '../user/user.service';
-// import {  } from '../user/user.entity';
 
 @Controller("api")
 export class AuthController {
@@ -24,16 +20,17 @@ export class AuthController {
       where: { user: null }
     });
     try {
-      var session = await this.prisma.session.findUnique({
-        where: { id: req.cookies['ft_transcendence_sessionId']},
+      var user = await this.prisma.appUser.findUnique({
+        where: { sessionid: req.cookies['ft_transcendence_sessionId']},
         include: {
-          user: true,
+          session: true,
+          friends: true,
         },
       });
-      if (session === null) {
+      if (user === null) {
         throw new Error("Session not found")
       }
-      console.log(session) //See what data is available and select it
+      console.log(user) //See what data is available and select it
     } catch (error) {
       console.log(error);
       this.prisma.session.deleteMany({
@@ -46,7 +43,14 @@ export class AuthController {
     res.send({
       'type' : 'content',
       'data' : {
-        'full_name' : session.user.full_name,
+        full_name: user.full_name,
+        display_name: user.display_name,
+        twoFA: user.twoFA,
+        status: user.status,
+        wins: user.wins,
+        losses: user.losses,
+        ladder_levels: user.ladder_levels,
+        friends: user.friends,
       }
     });
   }
@@ -100,8 +104,12 @@ export class AuthController {
       return;
     }
     try {
-      var record_user: AppUser = await this.prisma.appUser.findUnique({
-        where: { id: user_data.data.id}
+      var record_user = await this.prisma.appUser.findUnique({
+        where: { id: user_data.data.id},
+        include: {
+          token: true,
+          session: true,
+        },
       });
       if (!record_user) {
           record_user = await this.prisma.appUser.create({
@@ -110,26 +118,41 @@ export class AuthController {
             session: { connect: { id: session.id } },
             email: user_data.data.email,
             full_name: user_data.data.usual_full_name,
-            access_token: token.data.access_token,
-            token_type: token.data.token_type,
-            expires_in: token.data.expires_in,
-            refresh_token: token.data.refresh_token,
-            scope: token.data.scope,
-            created_at: token.data.created_at
+            token : { 
+              create: {
+                access_token: token.data.access_token,
+                token_type: token.data.token_type,
+                expires_in: token.data.expires_in,
+                refresh_token: token.data.refresh_token,
+                scope: token.data.scope,
+                created_at: token.data.created_at
+              }
+            }
           },
-          include: { session: true },
+          include: {
+            token: true,
+            session: true
+          },
         })
       } else {
         record_user = await this.prisma.appUser.update({
           where: { id: user_data.data.id},
           data: {
-            access_token: token.data.access_token,
-            token_type: token.data.token_type,
-            expires_in: token.data.expires_in,
-            refresh_token: token.data.refresh_token,
-            scope: token.data.scope,
-            created_at: token.data.created_at
-          }
+            token: {
+              update:{
+                access_token: token.data.access_token,
+                token_type: token.data.token_type,
+                expires_in: token.data.expires_in,
+                refresh_token: token.data.refresh_token,
+                scope: token.data.scope,
+                created_at: token.data.created_at
+              }
+            }
+          },
+          include: {
+            token: true,
+            session: true
+          },
         })
       }
       await this.prisma.session.update({
@@ -146,4 +169,44 @@ export class AuthController {
       return;
     };
   }
+
+  /*
+  Assign a dummy value to the sessionId, in such way the cookie and the sessionId will not match
+  */
+  @Get('logout')
+  @UseGuards(AuthGuard)
+  async logOut(@Req() req: Request, @Res() res: Response): Promise<void> {
+    const session: any = await this.prisma.session.update({
+      where: {
+        id: req.cookies['ft_transcendence_sessionId'],
+      },
+      data: {
+        id: this.authService.alphanum(20),
+      }
+    });
+    res.redirect('/');
+  }
+
+  @Post("display_name")
+  @UseGuards(AuthGuard)
+  async setDisplayName(@Req() req: Request, @Res() res: Response): Promise<void> {
+    if (!req.body.uname) {
+      console.log("You need to select a non empty username");
+    }
+    await this.prisma.session.update({
+      where: {
+        id: req.cookies['ft_transcendence_sessionId'],
+      },
+      data: {
+        user: {
+          update: {
+              display_name: req.body.uname,
+          }
+        }
+      },
+      include : { user: true }
+    });
+    res.redirect('/');
+  }
+
 }

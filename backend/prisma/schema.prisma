@@ -15,24 +15,85 @@ model Session {
   state      String
 }
 
-model AppUser {
-  id            Int     @id
-  sessionid     String  @unique
-  session       Session @relation(fields: [sessionid], references: [id])
-  email         String
-  full_name     String
-  access_token  String
-  token_type    String
-  expires_in    Int
-  refresh_token String
-  scope         String
-  created_at    Int
-  Chat          Chat?   @relation(fields: [chatId], references: [id])
-  chatId        Int?
+model Token {
+	access_token	String		@id
+	user			AppUser?
+	token_type		String
+	expires_in		Int
+	refresh_token	String
+	scope			String
+	created_at		Int
 }
 
-model Chat {
-  id    Int       @id
-  name	String
-  users AppUser[]
+model AppUser {
+	id				Int			@id
+	sessionid		String?		@unique
+	session			Session?	@relation(fields: [sessionid], references: [id])
+	access_token	String		@unique
+	token			Token		@relation(fields: [access_token], references: [access_token])
+	email			String
+	full_name		String
+	display_name	String?
+	avatar			String		@default("/home/app_backend/avatars/default.png")
+	twoFA			Boolean		@default(false)
+	status			Int			@default(0)
+	friends			AppUser[]	@relation("userFriend")
+	symmetricfriend	AppUser[]	@relation("userFriend")
+	blocked			AppUser[]	@relation("block")
+	blockedBy		AppUser[]	@relation("block")
+	wins			Int			@default(0)
+	losses			Int			@default(0)
+	ladder_levels	Int			@default(0)
+	matches_p1		Match[]		@relation("player1")
+	matches_p2		Match[]		@relation("player2")
+	achievements	Achieve[]
+	rooms			Room[]		@relation("participate")
+	adminOf			Room[]		@relation("administrate")
+	penalties		Penalty[]
 }
+
+model Achieve {
+	id				Int			@id @default(autoincrement())
+	type			Int
+	name			String
+	description		String
+	logo			String
+	userid			Int
+	user			AppUser		@relation(fields: [userid], references: [id])
+}
+
+model Match {
+	id				Int			@id @default(autoincrement())
+	started_at		DateTime	@default(now())
+	player1id		Int
+	player2id		Int
+	player1			AppUser		@relation("player1", fields: [player1id], references: [id])
+	player2			AppUser		@relation("player2", fields: [player2id], references: [id])
+	winner			Int
+	ladder			Int
+}
+
+model Room {
+	id				Int			@id @default(autoincrement())
+	participants	AppUser[]	@relation("participate")
+	administrators	AppUser[]	@relation("administrate")
+	penalties		Penalty[]
+	accessibility	Int			@default(0)
+	name			String
+	password		String		@default("")
+}
+
+model Penalty {
+	id				Int			@id @default(autoincrement())
+	type			Int
+	userid			Int
+	user			AppUser		@relation(fields: [userid], references: [id])
+	roomid			Int
+	room			Room		@relation(fields: [roomid], references: [id])
+	created_at		DateTime	@default(now())
+	duration		Int			@default(10)
+}
+
+// Research:
+// 2fa
+// pinging / active users

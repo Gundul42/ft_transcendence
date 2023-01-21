@@ -1,6 +1,6 @@
 import React from 'react';
 import { Socket } from 'socket.io-client';
-// import { Header } from './App';
+import { Header } from './App';
 
 
 // function handleSubmit(value: React.FormEvent<HTMLFormElement>)
