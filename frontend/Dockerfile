@@ -7,7 +7,11 @@ RUN apt update\
 	&& curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 	&& apt-get install -y nodejs
 
+
 RUN mkdir -p /var/www/html\
 	&& echo "yes" | npx create-react-app /var/www/html/frontend --template typescript
+
+WORKDIR /var/www/html/frontend
+RUN npm i styled-components
 
 CMD [ "npm", "--prefix", "/var/www/html/frontend", "start" ]
