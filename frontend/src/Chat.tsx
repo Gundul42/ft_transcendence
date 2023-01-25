@@ -3,15 +3,9 @@ import { Socket } from 'socket.io-client';
 import { Header } from './App';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
+// import Box from '@mui/material/Box'
 
 const socket = io("https://localhost/chat");
-
-// new Server = 
-// function handleSubmit(value: React.FormEvent<HTMLFormElement>)
-// {
-// 	console.log("In handle submit");
-// 	console.log(value);
-// }
 
 type ChatMessage = {
 	name : String
