@@ -45,7 +45,7 @@ function Dispatch({app_state, set_page} : {app_state: any, set_page: any}) {
       case "user":
         return (<User app_state={app_state} set_page={set_page} />);
       case "chat":
-        return (<Chat app_state={app_state} set_page={set_page} />);
+        return (<Chat app_state={app_state} set_page={set_page}/>);
       case "play" :
         return (<Play app_state={app_state} set_page={set_page} />);
       default:

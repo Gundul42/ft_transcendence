@@ -6,6 +6,7 @@ import { WebSocketGateway,
 	OnGatewayConnection, 
 	OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+// import { Server, Socket } from '/usr/local/lib/node_modules/socket.io';  //debugging, my IDE doesn't like the above line
 // import {Server, Socket} from "@nestjs/platform-socket.io";
 
 @WebSocketGateway( { namespace: 'chat' })
@@ -28,6 +29,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleConnection(client: Socket)
 	{
+		console.log("hm?");
 		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
     	client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
 	}
@@ -42,15 +44,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	}
 
+	@SubscribeMessage("join")
 	async handleJoinEvent(client: Socket, room: string, callback)
 	{
 		// Validate if client can join room here
-	
+		console.log("joining room", room);
 		client.join(room);
-		callback(`joined: ${room}`);
+		// callback(`joined: ${room}`);
+		this.server.emit("messageResponse", "Welcome to ", room);
 	}
+
 	async handleLeaveEvent(client: Socket, room: string, callback)
 	{
+		console.log("left the room");
 		client.leave(room);
 		callback(`left: ${room}`);
 	}
@@ -65,13 +71,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		console.log("in handling");
 		console.log(message);
-		this.server.emit("message", message);
+		this.server.emit("messageResponse", message, "hmm");
+		// this.server.emit("messageResponse", 
+		// 	{
+		// 		text: message, 
+		// 		name: "Server", 
+		// 		id: 124234,
+		// 		socketID: 425669384756
+		// 	});
 	}
 
 	@SubscribeMessage("ping")
-	pong()
+	pong(@MessageBody() message : string) : void
 	{
-		console.log("pong");
+		console.log("pong ", message);
 		this.server.emit("pong");
 	}
   // Add methods for handling events here
