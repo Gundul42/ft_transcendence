@@ -26,7 +26,7 @@ export function Home({app_state, set_page} : {app_state: any, set_page: any}) {
 			<LeftColumn result={app_state} />
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">
-				<h1>Welcome {(app_state.data.data.full_name as string).split(' ')[0]}</h1>
+				<h1>Welcome {app_state.data.data.display_name}</h1>
 				<button className="button" onClick={() => {set_page("play")}}>
 					Play
 				</button>

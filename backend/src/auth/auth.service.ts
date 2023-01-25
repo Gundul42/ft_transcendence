@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { Request } from "express";
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import * as oauth_info from './info.json'
+import * as twofactor from 'node-2fa';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -10,14 +11,6 @@ export class AuthService {
   constructor (
     private prisma: PrismaService,
     private readonly httpService: HttpService ) {}
-
-  alphanum(n : number) : string {
-    let res = "";
-    for (let i = 0; i < n; i++) {
-      res += String.fromCharCode(32 + Math.floor(Math.random() * 94));
-    }
-    return (res);
-  }
 
   getLink(state: string): string {
     const ft_uri = new URLSearchParams("");
@@ -92,8 +85,7 @@ export class AuthService {
         if (value == null || value.user == null || value.user.id == null) {
           console.log("Session does not exist");
           throw new UnauthorizedException();
-        }
-        else {
+        } else {
           return true;
         }
       },
@@ -102,10 +94,47 @@ export class AuthService {
         throw new UnauthorizedException();
       }
     )
-    .catch((e) => {
-      console.log(e);
-      throw new UnauthorizedException();
+  }
+
+  async validate2FA(req: Request) : Promise<boolean> {
+    return await this.prisma.session.findUnique({
+      where: {
+        id: req.cookies['ft_transcendence_sessionId'],
+      },
+      include: {
+        user: {
+          include: { twoFA_token: true }
+        }
+      }
     })
+    .then(
+      async (value) => {
+        if (value === null) {
+          throw new UnauthorizedException();
+        }
+        else if (value.twoFA_locked) {
+          if ((req.query.otp !== null) && (twofactor.verifyToken(value.user.twoFA_token.id, (req.query.otp as string)) !== null)) {
+            console.log("2FA successful");
+            await this.prisma.session.update({
+              where: {
+                id: req.cookies['ft_transcendence_sessionId'],
+              },
+              data: {
+                twoFA_locked: false,
+              }
+            });
+          } else {
+            console.log("2 FActor Authentication is active for this account");
+            throw new ForbiddenException();
+          }
+        }
+        return (true);
+      },
+      (err) => {
+        console.log(err);
+        throw new UnauthorizedException();
+      }
+    )
   }
 
   async confirmSignup(req: Request) : Promise<boolean> {

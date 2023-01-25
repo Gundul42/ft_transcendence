@@ -3,6 +3,7 @@ import { Header } from '../App';
 import { RightColumn } from '../Right_column';
 import { PersonalInformation } from './PersonalInformation';
 import { QR } from './QR';
+import { Dashboard } from './Dashboard';
 
 export class User extends React.Component <{ app_state: any, set_page: any}, { avatar: string, display_name: string, twoFA: boolean, qr: any }> {
 	constructor(props: any) {
@@ -102,7 +103,7 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 				<QR qr_link={this.state.qr} closeQR={this.closeQR}/>}
 				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.data.full_name} email={this.props.app_state.data.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} updateDisplayName={this.updateDisplayName} />
 				<Header set_page={this.props.set_page} />
-				<p>This is your personal page</p>
+				<Dashboard app_state={this.props.app_state} />
 				<RightColumn app_state={this.props.app_state} set_page={this.props.set_page} />
 			</div>
 		)

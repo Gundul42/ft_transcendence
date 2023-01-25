@@ -3,10 +3,11 @@ import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
-import { AuthFilter } from './auth.filter';
+import { AuthFilter, TwoFAFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 import * as twofactor from 'node-2fa';
 
 @Controller("api")
@@ -15,7 +16,7 @@ export class AuthController {
 
   @Get("auth")
   @UseGuards(AuthGuard)
-  @UseFilters(AuthFilter)
+  @UseFilters(AuthFilter, TwoFAFilter)
   async login(@Req() req: Request, @Res() res, @RealIP() ip: string): Promise<void> {
     await this.prisma.session.deleteMany({
       where: { user: null }
@@ -26,6 +27,7 @@ export class AuthController {
         include: {
           session: true,
           friends: true,
+          achievements: true
         },
       });
       if (user === null) {
@@ -54,14 +56,16 @@ export class AuthController {
         losses: user.losses,
         ladder_level: user.ladder_level,
         friends: user.friends,
+        achievements: user.achievements,
+        match_history: []
       }
     });
   }
 
   @Get("signup")
   async signup(@Res({ passthrough: true }) res: Response, @RealIP() ip: string): Promise<any> {
-    const state: string = this.authService.alphanum(20);
-    const sessionId: string = this.authService.alphanum(20);
+    const state: string = uuidv4();
+    const sessionId: string = uuidv4();
     await this.prisma.session.create({
       data : {
         id: sessionId,
@@ -163,7 +167,8 @@ export class AuthController {
         data: {
           user: {
             connect: { id: record_user.id }
-          }
+          },
+          twoFA_locked: record_user.twoFA
         }
       });
       res.redirect('/');
@@ -184,7 +189,7 @@ export class AuthController {
         id: req.cookies['ft_transcendence_sessionId'],
       },
       data: {
-        id: this.authService.alphanum(20),
+        id: uuidv4(),
       }
     });
     res.redirect('/');
@@ -229,5 +234,13 @@ export class AuthController {
       await this.authService.record2FA(session.user.id, secret.secret);
       return ({ qr: secret.qr });
     }
+  }
+
+  @Get('pass2FA')
+  pass2FA() : any {
+    return ({
+      type: "twoFA",
+      data: null
+    })
   }
 }
