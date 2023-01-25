@@ -35,7 +35,10 @@
 	  "@nestjs/config": "^2.2.0",
 	  "@nestjs/axios": "^1.0.0",
     "nestjs-real-ip": "^2.2.0",
-    "prisma": "^4.8.1"
+    "prisma": "^4.8.1",
+    "@types/multer": "^1.4.7",
+    "uuid": "^9.0.0",
+    "node-2fa": "^2.0.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

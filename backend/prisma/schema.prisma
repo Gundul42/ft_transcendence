@@ -34,8 +34,9 @@ model AppUser {
 	email			String
 	full_name		String
 	display_name	String?
-	avatar			String		@default("/home/app_backend/avatars/default.png")
+	avatar			String		@default("icons/42wolfsburg.jpeg")
 	twoFA			Boolean		@default(false)
+	twoFA_token		TwoFA?
 	status			Int			@default(0)
 	friends			AppUser[]	@relation("userFriend")
 	symmetricfriend	AppUser[]	@relation("userFriend")
@@ -43,7 +44,8 @@ model AppUser {
 	blockedBy		AppUser[]	@relation("block")
 	wins			Int			@default(0)
 	losses			Int			@default(0)
-	ladder_levels	Int			@default(0)
+	ladder_level	Int			@default(0)
+	queue			Queue?
 	matches_p1		Match[]		@relation("player1")
 	matches_p2		Match[]		@relation("player2")
 	achievements	Achieve[]
@@ -62,14 +64,28 @@ model Achieve {
 	user			AppUser		@relation(fields: [userid], references: [id])
 }
 
+model Queue {
+	id				Int			@id @default(autoincrement())
+	created_at		DateTime	@default(now())
+	userid			Int			@unique
+	user			AppUser?	@relation(fields: [userid], references: [id])
+}
+
+model TwoFA {
+	id				String		@id
+	userid			Int			@unique
+	user			AppUser?	@relation(fields: [userid], references: [id])
+}
+
 model Match {
 	id				Int			@id @default(autoincrement())
 	started_at		DateTime	@default(now())
+	finished_at		DateTime?
 	player1id		Int
 	player2id		Int
 	player1			AppUser		@relation("player1", fields: [player1id], references: [id])
 	player2			AppUser		@relation("player2", fields: [player2id], references: [id])
-	winner			Int
+	winner			Int?
 	ladder			Int
 }
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import './App.css';
-import { Home } from './Home';
-import { User } from './User';
-import { Chat } from './Chat';
-import { Play } from './Play';
+import { Home } from './Home/Home';
+import { User } from './User/User';
+import { Chat } from './Chat/Chat';
+import { Play } from './Play/Play';
 
 export enum Status {
   Starting,
@@ -16,7 +16,7 @@ export enum Status {
 export function Header({set_page} : {set_page: any}) {
   return (
     <header className="App-header">
-      <h1 className="App-title" onClick={() => {set_page("home")}}>Meatball Massacre</h1>
+      <h1 className="App-title" onClick={() => {set_page("home")}}>Mini_Pong</h1>
     </header>
   )
 }
@@ -77,13 +77,16 @@ class App extends React.Component {
   };
 
   goBack(event: Event) {
-    window.history.back();
-    this.setState({
-      status: window.history.state.status,
-      error: window.history.state.error,
-      data: window.history.state.data,
-      page: window.history.state.status,
-    })
+    if (window.history.state !== null) {
+      this.setState({
+        status: window.history.state.status,
+        error: window.history.state.error,
+        data: window.history.state.data,
+        page: window.history.state.page,
+      });
+    } else {
+      window.location.reload();
+    }
   }
 
   componentDidMount() {
@@ -108,7 +111,7 @@ class App extends React.Component {
         })
       }
     });
-    window.addEventListener('popstate', this.goBack);
+    window.addEventListener('popstate', this.goBack.bind(this));
   };
 
   setPage(new_page: "home" |"user" | "chat" | "play") {
@@ -117,7 +120,7 @@ class App extends React.Component {
       error: old_state.error,
       data: old_state.data,
       page: new_page
-    }), () => { window.history.pushState(this.state, ""); console.log(window.history.state)})
+    }), () => { window.history.pushState(this.state, "");})
   }
 
   render() {

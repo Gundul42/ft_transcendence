@@ -7,6 +7,7 @@ import { AuthFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
+import * as twofactor from 'node-2fa';
 
 @Controller("api")
 export class AuthController {
@@ -44,12 +45,14 @@ export class AuthController {
       'type' : 'content',
       'data' : {
         full_name: user.full_name,
+        email: user.email,
         display_name: user.display_name,
         twoFA: user.twoFA,
+        avatar: user.avatar,
         status: user.status,
         wins: user.wins,
         losses: user.losses,
-        ladder_levels: user.ladder_levels,
+        ladder_level: user.ladder_level,
         friends: user.friends,
       }
     });
@@ -190,8 +193,9 @@ export class AuthController {
   @Post("display_name")
   @UseGuards(AuthGuard)
   async setDisplayName(@Req() req: Request, @Res() res: Response): Promise<void> {
-    if (!req.body.uname) {
+    if (!req.body.uname || (req.body.uname as string).length === 0) {
       console.log("You need to select a non empty username");
+      res.end();
     }
     await this.prisma.session.update({
       where: {
@@ -209,4 +213,21 @@ export class AuthController {
     res.redirect('/');
   }
 
+  @Get("twoFA")
+  @UseGuards(AuthGuard)
+  async setTwoFA(@Req() req: Request): Promise<any> {
+    const session = await this.prisma.session.findUnique({
+      where: { id: req.cookies["ft_transcendence_sessionId"] },
+      include: { user: true }
+    })
+    if (session.user.twoFA) {
+      this.authService.deactivate2FA(session.user.id);
+      return ({ qr: null });
+    }
+    else {
+      const secret = twofactor.generateSecret({name: "ft_transcendence", account: session.user.full_name });
+      await this.authService.record2FA(session.user.id, secret.secret);
+      return ({ qr: secret.qr });
+    }
+  }
 }

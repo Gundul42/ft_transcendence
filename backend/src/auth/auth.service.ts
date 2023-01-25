@@ -53,6 +53,28 @@ export class AuthService {
     })
   }
 
+  async deactivate2FA(userid: number) {
+    await this.prisma.appUser.update({
+      where: { id: userid },
+      data: {
+        twoFA: false,
+        twoFA_token: { delete: true }
+      }
+    })
+  }
+
+  async record2FA(userid: number, token: string) {
+    await this.prisma.appUser.update({
+      where: { id: userid },
+      data: {
+        twoFA: true,
+        twoFA_token: {
+          create: { id: token }
+        }
+      }
+    })
+  }
+
   // Guards
 
   async validateSession(req: Request) : Promise<boolean> {
