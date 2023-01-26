@@ -98,6 +98,7 @@ class App extends React.Component {
     })
     .then((value) => value.json())
     .then((parsed_data) => {
+      localStorage.setItem('csrf_token', parsed_data.data.csrf_token);
       if (window.history.state === null) {
         this.setState((previous_state: any) => ({
           status: Status.Success,
