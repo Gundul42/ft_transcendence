@@ -11,12 +11,12 @@ function logOut(): void {
 	);
 }
 
-export function RightColumn({result, set_page} : {result: any, set_page: any}) {
-	if (result.status !== Status.Success) {
+export function RightColumn({app_state, set_page} : {app_state: any, set_page: any}) {
+	if (app_state.status !== Status.Success) {
 		return(
 			<div className="Right-column"></div>
 		)
-	} else if (result.data.type === "content") {
+	} else if (app_state.data.type === "content") {
 		return (
 			<div className="Right-column">
 				<div className="Menu-icon" onClick={() => {set_page("user")}}><img src="https://localhost/content/img/icons/user.png" alt="Profile"></img></div>

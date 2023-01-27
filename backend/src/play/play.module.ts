@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
-import { ContentController } from './content.controller';
-import { ContentService } from './content.service';
+import { PlayController } from './play.controller';
+import { PlayService } from './play.service';
 import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 
 @Module({
   imports: [AuthModule, HttpModule],
-  controllers: [ContentController],
-  providers: [ContentService, AuthService, JwtService],
+  controllers: [PlayController],
+  providers: [PlayService, AuthService, JwtService],
 })
-export class ContentModule {}
+export class PlayModule {}

@@ -6,9 +6,9 @@ import { AuthService } from './auth.service';
 export class AuthGuard implements CanActivate {
 	constructor(private authService: AuthService) {}
 
-	canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const req = context.switchToHttp().getRequest();
 
-		return this.authService.validateSession(req);
+		return (await this.authService.validateSession(req) && await this.authService.validate2FA(req));
 	}
 }

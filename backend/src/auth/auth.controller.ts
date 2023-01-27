@@ -1,12 +1,15 @@
-import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Headers } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Body } from '@nestjs/common';
 import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './auth.guard';
-import { AuthFilter } from './auth.filter';
+import { AuthFilter, TwoFAFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
+import * as twofactor from 'node-2fa';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller("api")
 export class AuthController {
@@ -14,7 +17,7 @@ export class AuthController {
 
   @Get("auth")
   @UseGuards(AuthGuard)
-  @UseFilters(AuthFilter)
+  @UseFilters(AuthFilter, TwoFAFilter)
   async login(@Req() req: Request, @Res() res, @RealIP() ip: string): Promise<void> {
     await this.prisma.session.deleteMany({
       where: { user: null }
@@ -25,6 +28,7 @@ export class AuthController {
         include: {
           session: true,
           friends: true,
+          achievements: true
         },
       });
       if (user === null) {
@@ -40,25 +44,31 @@ export class AuthController {
       res.end();
       return ;
     }
+    const csrf_token: any = await this.authService.generateJwt(user.full_name, user.id);
     res.send({
       'type' : 'content',
       'data' : {
         full_name: user.full_name,
+        email: user.email,
         display_name: user.display_name,
         twoFA: user.twoFA,
+        avatar: user.avatar,
         status: user.status,
         wins: user.wins,
         losses: user.losses,
-        ladder_levels: user.ladder_levels,
+        ladder_level: user.ladder_level,
         friends: user.friends,
+        achievements: user.achievements,
+        match_history: [],
+        csrf_token: csrf_token.access_token
       }
     });
   }
 
   @Get("signup")
   async signup(@Res({ passthrough: true }) res: Response, @RealIP() ip: string): Promise<any> {
-    const state: string = this.authService.alphanum(20);
-    const sessionId: string = this.authService.alphanum(20);
+    const state: string = uuidv4();
+    const sessionId: string = uuidv4();
     await this.prisma.session.create({
       data : {
         id: sessionId,
@@ -160,7 +170,8 @@ export class AuthController {
         data: {
           user: {
             connect: { id: record_user.id }
-          }
+          },
+          twoFA_locked: record_user.twoFA
         }
       });
       res.redirect('/');
@@ -181,16 +192,16 @@ export class AuthController {
         id: req.cookies['ft_transcendence_sessionId'],
       },
       data: {
-        id: this.authService.alphanum(20),
+        id: uuidv4(),
       }
     });
     res.redirect('/');
   }
 
   @Post("display_name")
-  @UseGuards(AuthGuard)
-  async setDisplayName(@Req() req: Request, @Res() res: Response): Promise<void> {
-    if (!req.body.uname) {
+  @UseGuards(AuthGuard, JwtAuthGuard)
+  async setDisplayName(@Req() req: Request, @Body('uname') uname: string): Promise<void> {
+    if (!uname || uname.length === 0) {
       console.log("You need to select a non empty username");
     }
     await this.prisma.session.update({
@@ -206,7 +217,31 @@ export class AuthController {
       },
       include : { user: true }
     });
-    res.redirect('/');
   }
 
+  @Post("twoFA")
+  @UseGuards(AuthGuard, JwtAuthGuard)
+  async setTwoFA(@Req() req: Request): Promise<any> {
+    const session = await this.prisma.session.findUnique({
+      where: { id: req.cookies["ft_transcendence_sessionId"] },
+      include: { user: true }
+    })
+    if (session.user.twoFA) {
+      this.authService.deactivate2FA(session.user.id);
+      return ({ qr: null });
+    }
+    else {
+      const secret = twofactor.generateSecret({name: "ft_transcendence", account: session.user.full_name });
+      await this.authService.record2FA(session.user.id, secret.secret);
+      return ({ qr: secret.qr });
+    }
+  }
+
+  @Get('pass2FA')
+  pass2FA() : any {
+    return ({
+      type: "twoFA",
+      data: null
+    })
+  }
 }

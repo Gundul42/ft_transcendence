@@ -1,6 +1,6 @@
 import React from 'react';
-import { Status } from './App';
-import './App.css';
+import { Status } from '../App';
+import '../App.css';
 
 function Friends({friends_list} : {friends_list: any[]}) {
 	return (
