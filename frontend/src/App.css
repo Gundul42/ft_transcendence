@@ -25,7 +25,7 @@
   cursor: pointer;
 }
 
-.Open-layout, .Chat, .Play {
+.Open-layout, .Play {
   background-color: #282c34;
   width: 100%;
   height: 100%;
@@ -59,6 +59,87 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+}
+
+.Chat {
+  background-color: #8891a3;
+  height: 100%;
+  width: 100%;
+  font-size: calc(4px + 2vmin);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.Chat-Body {
+  background-color: #936b96;
+  height: 100%;
+  width: 70%;
+  font-size: calc(4px + 2vmin);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: normal;
+}
+
+.Message-Text {
+  background-color: #ffffff;
+  border-radius: 10px;
+  color:#282c34;
+  padding-inline: 0.5em;
+  margin: 5px;
+}
+/* 
+.Msg-Container
+{
+  height: 100%;
+  width: 30%;
+  background-color: #ffffff;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: left;
+  align-items: center;
+} */
+
+.Chat-Contacts {
+  height: 100%;
+  width: 30%;
+  background-color: #3d4e71;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: left;
+  align-items: normal;
+  gap: 5px;
+}
+
+.Chat-Box {
+  height: 100%;
+  width: 100%;
+  background-color: #6ed172;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: left;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.Chat-Input {
+  height: 3em;
+  width: 100%;
+  background-color: #282c34;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column-reverse;
+  justify-content: left;
+  align-items: center;
+  gap: 5px;
 }
 
 .Welcome-section {

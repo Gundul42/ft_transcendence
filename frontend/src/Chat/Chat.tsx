@@ -18,56 +18,6 @@ type ChatUser = {
 	socketID : Number
 }
 
-// const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-//		 event.preventDefault();
-
-//		 const form = event.target as HTMLFormElement;
-// 	const message = form.msg.value as String;
-//		 // const ageInput = event.target.elements.age; // accessing via `form.elements`
-// 	// console.log("here");
-//		 // console.log(message); // output: 'foo@bar.com'
-// 	if (!message)
-// 		return ;
-// 	if (message[0] === '/')
-// 	{
-// 		const elements = message.substring(1, message.length).split(" ");
-// 		console.log(elements);
-// 		socket.emit(elements[0], {message: elements.slice(1)});
-// 	}
-// 	else
-// 	{
-// 		console.log("Message: ", message);
-// 		socket.emit("message", message);
-// 	}
-// 	// socket.emit("message", message);
-// 	// socket.emit<"join">(message);
-// 	// alert("!!!");
-//		 // console.log(ageInput.value); // output: '18'
-// };
-
-// function sendPing()
-// {
-// 	console.log("pinging");
-// 	socket.emit("ping", "test");
-// }
-
-// export function Chat({app_state, set_page} : {app_state: any, set_page: any}) {
-// 	return (
-// 		<div className="Chat">
-// 			{/* <Header set_page={set_page} /> */}
-// 			<ChatBody></ChatBody>
-// 			<form onSubmit={handleSubmit}>
-// 				<label>
-// 					Message:
-// 				<input type="text" name="msg" id="msg" placeholder="Start your chat here"/>
-// 				</label>
-// 				<input type="submit" value="Submit" />
-// 			</form>
-// 			<button onClick={ sendPing }>Send ping</button>
-// 		</div>
-// 	)
-// }
-
 const ChatBar = ({socket} : {socket: Socket}) => {
 	const [users, setUsers] = useState<ChatUser[]>()
 
@@ -76,37 +26,34 @@ const ChatBar = ({socket} : {socket: Socket}) => {
 	}, [socket, users])
 
 return (
-	<div className='Left-column'>
-			<h2>Open Chat</h2>
-			<div>
-					<h4	className='chat_header'>ACTIVE USERS</h4>
-					<div className='chat_users'>
-							{users?.map(user => <p key={user.socketID.toString()}>{user.uname}</p>)}
-					</div>
+	<div className='Chat-Contacts'>
+		<h2>Rooms and friends</h2>
+		<div>
+			<div	className='Text-field'>ACTIVE USERS</div>
+			<div className='chat_users'>
+					{users?.map(user => <p key={user.socketID.toString()}>{user.uname}</p>)}
 			</div>
+		</div>
 	</div>
 );
 }
+
 
 const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : ChatMessage[], lastMsg : React.RefObject<HTMLDivElement>}) => { 
 	
 	return (
 		<>
-		<header className='chat_mainHeader'>
-			<p>Welcome to the Chatroom</p>
-			</header>
-	
-			<div className='message_container'>
+			<div className='Chat-Box'>
 			{messages.map(message => (
 				message.name === (app_state.data.data.display_name as string).split(' ')[0] ? (
-				<div className="message_chats" key={message.id.toString()}>
+				<div className="Message-Chats" key={message.id.toString()}>
 				<p className='sender_name'>You</p>
-				<div className='message_sender'>
+				<div className='Message-Text'>
 					<p>{message.text}</p>
 				</div>
 			</div>
 				): (
-				<div className="message_chats" key={message.id.toString()}>
+				<div className="Message-Chats" key={message.id.toString()}>
 				<p>{message.name}</p>
 				<div className='message_recipient'>
 					<p>{message.text}</p>
@@ -159,7 +106,7 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 				setMessage("");
 		}
 	return (
-		<div className='chat_footer'>
+		<div className='Chat-Input'>
 				<form className='form' onSubmit={handleSendMessage}>
 					<input 
 						type="text" 
@@ -173,6 +120,13 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 		 </div>
 	)
 }
+// Input pretty, will implement
+{/* <div class="search input-group">
+                <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                <span class="input-group-text border-0" id="search-addon">
+                    <i class="bi bi-search"></i>
+                </span>
+            </div>` */}
 
 //(app_state.data.data.full_name as string).split(' ')[0]
 //Updating last message https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
@@ -189,13 +143,13 @@ export const Chat = ({app_state, set_page} : {app_state: any, set_page: any}) =>
 	}, [messages]);
 	
 	return (
-		<div className="Chat">
-		<Header set_page={set_page} />
+	<div className="Chat">
 		<ChatBar socket={socket}/>
-		<div className='chat_main'>
+		<div className='Chat-Body'>
+			<Header set_page={set_page} />
 			<ChatBody app_state={app_state} messages={messages} lastMsg={lastMessageRef}/>
 			<ChatFooter app_state={app_state} />	
 		</div>
-		</div>
+	</div>
 	)
 	};
