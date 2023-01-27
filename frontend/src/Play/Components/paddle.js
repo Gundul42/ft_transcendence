@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Paddle({ y }) {
+function Paddle({ y, side }) {
     const screenHeight = 1080;
     const paddleHeight = screenHeight * 0.01;
     const paddleWidth = paddleHeight * 0.1;

@@ -16,4 +16,4 @@ function Ball({ x, y, r }) {
   );
 }
 
-export default Circle;
+export default Ball;
