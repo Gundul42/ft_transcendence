@@ -2,7 +2,7 @@ import React from 'react';
 
 function Paddle({ y, side }) {
     const screenHeight = 1080;
-    const paddleHeight = screenHeight * 0.01;
+    const paddleHeight = screenHeight * 0.1;
     const paddleWidth = paddleHeight * 0.1;
     const halfPaddleHeight = paddleHeight / 2;
     return (
@@ -13,7 +13,7 @@ function Paddle({ y, side }) {
                 top: `${y - halfPaddleHeight}px`,
                 width: `${paddleWidth}px`,
                 height: `${paddleHeight}px`,
-                backgroundColor: 'black',
+                backgroundColor: 'yellow',
             }}
         />
     )
