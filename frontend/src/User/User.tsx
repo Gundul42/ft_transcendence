@@ -14,7 +14,6 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 			twoFA: props.app_state.data.data.twoFA,
 			qr: null
 		}
-		this.updateDisplayName = this.updateDisplayName.bind(this);
 		this.uploadAvatar = this.uploadAvatar.bind(this);
 		this.setTwoFA = this.setTwoFA.bind(this);
 		this.closeQR = this.closeQR.bind(this);
@@ -38,7 +37,11 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 					}
 					let form_data: FormData = new FormData();
 					form_data.append("avatar", newAvatar, newAvatar.name);
-					fetch('https://localhost/content/upload', {method: "POST", body: form_data})
+					fetch('https://localhost/content/upload', {
+						method: "POST",
+						body: form_data,
+						headers: { 'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+					})
 					.then(
 						async (res) => {
 							const res_json: any = await res.json(); 
@@ -57,19 +60,13 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 		}
 	}
 
-	updateDisplayName(event: any) {
-		if (event.target !== null) {
-			this.setState((prev_state) => ({
-				avatar: prev_state.avatar,
-				display_name: event.target.value,
-				twoFA: prev_state.twoFA,
-				qr: null
-			}))
-		}
-	}
-
 	setTwoFA() {
-		fetch("https://localhost/api/twoFA")
+		let form_data: FormData = new FormData();
+		fetch("https://localhost/api/twoFA", {
+			method: "POST",
+			body: form_data,
+			headers: { 'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+		})
 		.then(
 			async (res: Response) => {
 				const data: any = await res.json();
@@ -101,7 +98,7 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 			<div className="User">
 				{ this.state.qr !== null &&
 				<QR qr_link={this.state.qr} closeQR={this.closeQR}/>}
-				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.data.full_name} email={this.props.app_state.data.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} updateDisplayName={this.updateDisplayName} />
+				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.data.full_name} email={this.props.app_state.data.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} />
 				<Header set_page={this.props.set_page} />
 				<Dashboard app_state={this.props.app_state} />
 				<RightColumn app_state={this.props.app_state} set_page={this.props.set_page} />

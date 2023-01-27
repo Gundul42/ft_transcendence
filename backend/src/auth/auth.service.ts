@@ -5,12 +5,15 @@ import { AxiosResponse } from 'axios';
 import * as oauth_info from './info.json'
 import * as twofactor from 'node-2fa';
 import { PrismaService } from '../prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor (
     private prisma: PrismaService,
-    private readonly httpService: HttpService ) {}
+    private readonly httpService: HttpService,
+    private jwtService: JwtService
+  ) {}
 
   getLink(state: string): string {
     const ft_uri = new URLSearchParams("");
@@ -66,6 +69,15 @@ export class AuthService {
         }
       }
     })
+  }
+
+  async generateJwt(user_name: string, user_id: number): Promise<any> {
+    return ({
+      access_token: this.jwtService.sign({
+        username: user_name,
+        sub: user_id
+      })
+    });
   }
 
   // Guards

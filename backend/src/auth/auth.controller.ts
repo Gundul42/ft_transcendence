@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Headers } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Body } from '@nestjs/common';
 import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -9,6 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import * as twofactor from 'node-2fa';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller("api")
 export class AuthController {
@@ -43,6 +44,7 @@ export class AuthController {
       res.end();
       return ;
     }
+    const csrf_token: any = await this.authService.generateJwt(user.full_name, user.id);
     res.send({
       'type' : 'content',
       'data' : {
@@ -57,7 +59,8 @@ export class AuthController {
         ladder_level: user.ladder_level,
         friends: user.friends,
         achievements: user.achievements,
-        match_history: []
+        match_history: [],
+        csrf_token: csrf_token.access_token
       }
     });
   }
@@ -196,11 +199,10 @@ export class AuthController {
   }
 
   @Post("display_name")
-  @UseGuards(AuthGuard)
-  async setDisplayName(@Req() req: Request, @Res() res: Response): Promise<void> {
-    if (!req.body.uname || (req.body.uname as string).length === 0) {
+  @UseGuards(AuthGuard, JwtAuthGuard)
+  async setDisplayName(@Req() req: Request, @Body('uname') uname: string): Promise<void> {
+    if (!uname || uname.length === 0) {
       console.log("You need to select a non empty username");
-      res.end();
     }
     await this.prisma.session.update({
       where: {
@@ -215,11 +217,10 @@ export class AuthController {
       },
       include : { user: true }
     });
-    res.redirect('/');
   }
 
-  @Get("twoFA")
-  @UseGuards(AuthGuard)
+  @Post("twoFA")
+  @UseGuards(AuthGuard, JwtAuthGuard)
   async setTwoFA(@Req() req: Request): Promise<any> {
     const session = await this.prisma.session.findUnique({
       where: { id: req.cookies["ft_transcendence_sessionId"] },
