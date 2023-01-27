@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { Header } from '../App';
-import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 // import Box from '@mui/material/Box'
 
@@ -77,7 +76,7 @@ const ChatBar = ({socket} : {socket: Socket}) => {
 	}, [socket, users])
 
 return (
-	<div className='chat_sidebar'>
+	<div className='Left-column'>
 			<h2>Open Chat</h2>
 			<div>
 					<h4	className='chat_header'>ACTIVE USERS</h4>
@@ -90,24 +89,16 @@ return (
 }
 
 const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : ChatMessage[], lastMsg : React.RefObject<HTMLDivElement>}) => { 
-	const navigate = useNavigate()
-	
-	
-	const handleLeaveChat = () => {
-		navigate("/")
-		window.location.reload()
-	}
 	
 	return (
 		<>
 		<header className='chat_mainHeader'>
 			<p>Welcome to the Chatroom</p>
-			<button className='leaveChatBtn' onClick={handleLeaveChat}>LEAVE CHAT</button>
 			</header>
 	
 			<div className='message_container'>
 			{messages.map(message => (
-				message.name === (app_state.data.data.full_name as string).split(' ')[0] ? (
+				message.name === (app_state.data.data.display_name as string).split(' ')[0] ? (
 				<div className="message_chats" key={message.id.toString()}>
 				<p className='sender_name'>You</p>
 				<div className='message_sender'>
@@ -139,7 +130,7 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 
 		const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
 				e.preventDefault()
-				if(message.trim() && (app_state.data.data.full_name as string).split(' ')[0]) {
+				if(message.trim() && (app_state.data.data.display_name as string).split(' ')[0]) {
 		console.log(message);
 		if (message[0] === '/')
 		{
@@ -148,7 +139,7 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 			socket.emit(elements[0], 
 				{
 					text: elements.slice(1), 
-					name: (app_state.data.data.full_name as string).split(' ')[0], 
+					name: (app_state.data.data.display_name as string).split(' ')[0], 
 					id: `${socket.id}${Math.random()}`,
 					socketID: socket.id
 				});
@@ -158,7 +149,7 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 			socket.emit("message", 
 				{
 				text: message, 
-				name: (app_state.data.data.full_name as string).split(' ')[0], 
+				name: (app_state.data.data.display_name as string).split(' ')[0], 
 				id: `${socket.id}${Math.random()}`,
 				socketID: socket.id
 				});
