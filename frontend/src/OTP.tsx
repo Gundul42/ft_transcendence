@@ -1,4 +1,5 @@
 import React from 'react';
+import endpoint from './endpoint.json'
 
 export class OTP extends React.Component<{set_data: any}, {otp: string | null }> {
 	constructor(props: any) {
@@ -11,9 +12,9 @@ export class OTP extends React.Component<{set_data: any}, {otp: string | null }>
 		this.sendOTP = this.sendOTP.bind(this);
 	}
 
-	changeOTP(event: any) {
+	changeOTP(event: React.FormEvent<HTMLInputElement>) {
 		if (event.target !== null) {
-			this.setState({ otp: event.target.value });
+			this.setState({ otp: (event.target as HTMLInputElement).value });
 		}
 	}
 
@@ -21,7 +22,7 @@ export class OTP extends React.Component<{set_data: any}, {otp: string | null }>
 		if (this.state.otp === null || this.state.otp === "" || (this.state.otp as string).length !== 6) {
 			return ;
 		}
-		fetch("https://localhost/api/auth?otp=" + this.state.otp)
+		fetch(endpoint.auth.login + "?otp=" + this.state.otp)
 		.then(
 			(data) => {
 				this.props.set_data(data);

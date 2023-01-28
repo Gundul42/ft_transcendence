@@ -9,7 +9,7 @@ export class AuthFilter implements ExceptionFilter {
 		const response = context.getResponse<Response>();
 		const status = exception.getStatus();
 
-		response.status(status).redirect('/api/signup');
+		response.status(status).redirect('/api/auth/signup');
 	}
 }
 
@@ -21,6 +21,6 @@ export class TwoFAFilter implements ExceptionFilter {
 		const response = context.getResponse<Response>();
 		const status = exception.getStatus();
 
-		response.status(status).redirect('/api/pass2FA');
+		response.status(status).redirect('/api/auth/pass2FA');
 	}
 }

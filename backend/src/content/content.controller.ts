@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Res, Req, Param, StreamableFile, UseInterceptors, UploadedFile, ParseFilePipeBuilder } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Res, Req, Param, StreamableFile, UseInterceptors, UploadedFile, ParseFilePipeBuilder, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Request, Response } from 'express';
 import { createReadStream } from 'fs';
@@ -7,6 +7,7 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { ContentService } from './content.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('content')
@@ -22,12 +23,22 @@ export class ContentController {
 		res.set({
 			'Content-Type': 'image/' + (picture as string).split('.').pop(),
 			'Content-Disposition': 'attachment; filename="' + picture + '"',
-		  });
+		});
 		return new StreamableFile(file);
 	}
 
+	@Post("display_name")
+	@UseGuards(AuthGuard, JwtAuthGuard)
+	async setDisplayName(@Req() req: Request, @Body('uname') uname: string): Promise<void> {
+	  if (!uname || uname.length === 0) {
+		console.log("You need to select a non empty username");
+		return ;
+	  }
+	  await this.contentService.updateDisplayName(req.cookies['ft_transcendence_sessionId'], uname);
+	}
+
 	@Post('upload')
-	@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard, JwtAuthGuard)
 	@UseInterceptors(FileInterceptor('avatar', {
 		limits: {
 			files: 1,
