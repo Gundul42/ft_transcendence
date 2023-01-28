@@ -1,11 +1,10 @@
 import React from 'react';
-import { getBrowserSize } from './helpers';
+import { getAspects } from './helpers';
 
 function Ball({ x, y }) {
-  const aspect = getBrowserSize().x / getBrowserSize().y;
-  const r = 8 * aspect;
-  x *= aspect;
-  y *= aspect;
+  const r = 8 * getAspects().aspect;
+  x *= getAspects().aspectx;
+  y *= getAspects().aspecty;
   console.log(x, y);
   return (
     <div

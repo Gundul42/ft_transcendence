@@ -13,7 +13,8 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 			<PongField />
 			<Header set_page={set_page} />
 			<Ball x={100} y={50} />
-			<Paddle y={500} side = {true} />
+			<Paddle y={500} isLeft = {false} />
+			<Paddle y={250} isLeft = {true} />
 		</div>
 	)
 }
