@@ -4,10 +4,20 @@ import Paddle from './Components/paddle';
 import PongField from './Components/pongfield';
 import { setWindowSizeLimit } from './Components/helpers';
 import { Header, ISafeAppState } from '../App';
+import { useEffect, useRef, useState } from 'react';
 
-	window.addEventListener("resize", setWindowSizeLimit);
 
 export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
+	const [count, setCount] = useState(0);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setCount(count + 1);
+		}, 100);
+		return () => clearInterval(interval);
+		}, [count]);
+			
+
 	return (
 		<div className="Play">
 			<PongField />
