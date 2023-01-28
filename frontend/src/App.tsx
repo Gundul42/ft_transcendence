@@ -7,6 +7,7 @@ import { Chat } from './Chat/Chat';
 import { Play } from './Play/Play';
 import { OTP } from './OTP';
 import endpoint from './endpoint.json';
+import { Ballpos } from './Play/Components/ball';
 
 export enum Status {
   Starting,
@@ -50,6 +51,10 @@ function Link({link} : {link: string}) {
 
 function Dispatch({app_state, set_page, set_data} : {app_state: IAppState, set_page: any, set_data: any}) {
   let to_render: any;
+  let myBall: Ballpos = { posx:100, posy:200, velx:3, vely:5};
+  myBall.posx = 800;
+
+
   if (app_state.data === null) {
     to_render = <p>*Sad backend noises*</p>;
   }
@@ -69,7 +74,7 @@ function Dispatch({app_state, set_page, set_data} : {app_state: IAppState, set_p
       case "chat":
         return (<Chat app_state={safe_app_state} set_page={set_page} />);
       case "play" :
-        return (<Play app_state={safe_app_state} set_page={set_page} />);
+        return (<Play app_state={safe_app_state} set_page={set_page} ballz={myBall} />);
       default:
         return (<Home app_state={safe_app_state} set_page={set_page} />);
     }
