@@ -1,6 +1,12 @@
 import React from 'react';
+import { getBrowserSize } from './helpers';
 
-function Ball({ x, y, r }) {
+function Ball({ x, y }) {
+  const aspect = getBrowserSize().x / getBrowserSize().y;
+  const r = 8 * aspect;
+  x *= aspect;
+  y *= aspect;
+  console.log(x, y);
   return (
     <div
       style={{

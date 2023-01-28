@@ -1,9 +1,11 @@
 import React from 'react';
+import { getBrowserSize } from "./helpers";
 
 function Paddle({ y, side }) {
-    const screenHeight = 1080;
+    const screenHeight = getBrowserSize().y;
+    console.log(getBrowserSize().y);
     const paddleHeight = screenHeight * 0.1;
-    const paddleWidth = paddleHeight * 0.1;
+    const paddleWidth = paddleHeight * 0.15;
     const halfPaddleHeight = paddleHeight / 2;
     return (
         <div
