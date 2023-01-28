@@ -13,12 +13,12 @@ export function moveIt(Ballref) {
         Ballref.posy *= -1;
         Ballref.vely *= -1;
     }
-    if (Ballref.posx > konst.playFieldXMaxSize) {
-        Ballref.posx -= Ballref.posx - konst.playFieldXMaxSize;
+    if (Ballref.posx >= (konst.playFieldXMaxSize) - 20) {
+        Ballref.posx -= Ballref.posx - (konst.playFieldXMaxSize -20);
         Ballref.velx *= -1;
     }
-    if (Ballref.posy > konst.playFieldYMaxSize) {
-        Ballref.posy -= Ballref.posy - konst.playFieldYMaxSize;
+    if (Ballref.posy >= (konst.playFieldYMaxSize) -20) {
+        Ballref.posy -= Ballref.posy - (konst.playFieldYMaxSize -20);
         Ballref.vely *= -1;
     }
     //console.log(posx, posy, velx, vely);
