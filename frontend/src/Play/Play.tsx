@@ -1,5 +1,4 @@
 import React from 'react';
-import { Header } from '../App';
 import Ball from './Components/ball'
 import Paddle from './Components/paddle';
 import PongField from './Components/pongfield';
