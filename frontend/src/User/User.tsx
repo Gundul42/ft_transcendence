@@ -1,19 +1,28 @@
 import React from 'react';
-import { Header } from '../App';
+import { Header, IAppState, ISafeAppState } from '../App';
 import { RightColumn } from '../Right_column';
 import { PersonalInformation } from './PersonalInformation';
 import { QR } from './QR';
 import { Dashboard } from './Dashboard';
+import endpoint from '../endpoint.json';
 
-export class User extends React.Component <{ app_state: any, set_page: any}, { avatar: string, display_name: string, twoFA: boolean, qr: any }> {
-	constructor(props: any) {
+export interface IUserState {
+	avatar: string,
+	display_name: string,
+	twoFA: boolean,
+	qr: any
+}
+
+export class User extends React.Component <{ app_state: ISafeAppState, set_page: any}, IUserState> {
+	constructor(props: { app_state: ISafeAppState, set_page: any}) {
 		super(props);
 		this.state = {
-			avatar: props.app_state.data.data.avatar,
-			display_name: props.app_state.data.data.display_name,
-			twoFA: props.app_state.data.data.twoFA,
+			avatar: props.app_state.data.avatar,
+			display_name: props.app_state.data.display_name,
+			twoFA: props.app_state.data.twoFA,
 			qr: null
 		}
+
 		this.uploadAvatar = this.uploadAvatar.bind(this);
 		this.setTwoFA = this.setTwoFA.bind(this);
 		this.closeQR = this.closeQR.bind(this);
@@ -37,7 +46,7 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 					}
 					let form_data: FormData = new FormData();
 					form_data.append("avatar", newAvatar, newAvatar.name);
-					fetch('https://localhost/content/upload', {
+					fetch(endpoint.content.upload, {
 						method: "POST",
 						body: form_data,
 						headers: { 'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
@@ -45,10 +54,10 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 					.then(
 						async (res) => {
 							const res_json: any = await res.json(); 
-							this.setState((prev_state) => ({
+							this.setState((prev_state: IUserState) => ({
 								avatar: res_json.new_path,
 								display_name: prev_state.display_name,
-								twoFA: !prev_state.twoFA,
+								twoFA: prev_state.twoFA,
 								qr: null
 							}))
 						},
@@ -62,7 +71,7 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 
 	setTwoFA() {
 		let form_data: FormData = new FormData();
-		fetch("https://localhost/api/twoFA", {
+		fetch(endpoint.auth.twoFA, {
 			method: "POST",
 			body: form_data,
 			headers: { 'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
@@ -70,7 +79,7 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 		.then(
 			async (res: Response) => {
 				const data: any = await res.json();
-				this.setState((prev_state) => ({
+				this.setState((prev_state: IUserState) => ({
 					avatar: prev_state.avatar,
 					display_name: prev_state.display_name,
 					twoFA: !prev_state.twoFA,
@@ -85,7 +94,7 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 	}
 
 	closeQR() {
-		this.setState((prev_state) => ({
+		this.setState((prev_state: IUserState) => ({
 			avatar: prev_state.avatar,
 			display_name: prev_state.display_name,
 			twoFA: prev_state.twoFA,
@@ -94,14 +103,23 @@ export class User extends React.Component <{ app_state: any, set_page: any}, { a
 	}
 
 	render() {
+		let converter: IAppState = {
+			status: this.props.app_state.status,
+			data: {
+				type: "content",
+				link: null,
+				data: this.props.app_state.data
+			},
+			page: this.props.app_state.page
+		}
 		return (
 			<div className="User">
 				{ this.state.qr !== null &&
 				<QR qr_link={this.state.qr} closeQR={this.closeQR}/>}
-				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.data.full_name} email={this.props.app_state.data.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} />
+				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.full_name} email={this.props.app_state.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} />
 				<Header set_page={this.props.set_page} />
 				<Dashboard app_state={this.props.app_state} />
-				<RightColumn app_state={this.props.app_state} set_page={this.props.set_page} />
+				<RightColumn app_state={converter} set_page={this.props.set_page} />
 			</div>
 		)
 	}

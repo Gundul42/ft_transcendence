@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import endpoint from '../endpoint.json';
 
 export function DisplayName({display_name} : {display_name: string}) {
 	const [name, setName] : [name: string, setName: any] = useState(display_name);
-	const handleSubmit = (event: any) => {
+	const handleSubmit = (event: React.SyntheticEvent) => {
 		if (name.length > 0) {
 			event.preventDefault();
-			fetch("https://localhost/api/display_name", {
+			fetch(endpoint.content.display_name, {
 				method: "POST",
 				headers: {
 					'content-type': 'application/x-www-form-urlencoded',
@@ -25,7 +26,7 @@ export function DisplayName({display_name} : {display_name: string}) {
 			<p className="Description">Username</p>
 			<div className="Value">
 				<form onSubmit={handleSubmit} >
-					<input type="text" name="uname" id="uname" value={name} onChange={(event) => {setName(event.target.value)}} required />
+					<input type="text" name="uname" id="uname" value={name} onChange={(event: React.FormEvent<HTMLInputElement>) => {setName((event.target as HTMLInputElement).value)}} required />
 					<input type="submit" value="Change"/>
 				</form>
 			</div>

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import '../App.css';
 import { LeftColumn } from './Left_column';
 import { RightColumn } from '../Right_column';
-import { Status, Header } from '../App';
+import { Status, Header, ISafeAppState, IAppState } from '../App';
+import endpoint from '../endpoint.json'
 
 function DisplayNamePrompt() {
 	const [name, setName] : [name: string, setName: any] = useState("");
 	const handleSubmit = (event: any) => {
 		if (name.length > 0) {
 			event.preventDefault();
-			fetch("https://localhost/api/display_name", {
+			fetch(endpoint.content.display_name, {
 				method: "POST",
 				headers: {
 					'content-type': 'application/x-www-form-urlencoded',
@@ -36,20 +36,29 @@ function DisplayNamePrompt() {
 	)
 }
 
-export function Home({app_state, set_page} : {app_state: any, set_page: any}) {
+export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
+	let converter: IAppState = {
+		status: app_state.status,
+		data: {
+			type: "content",
+			link: null,
+			data: app_state.data
+		},
+		page: app_state.page
+	}
 	return(
 		<div className="Home">
-		{ app_state.status === Status.Success && app_state.data.type === "content" && app_state.data.data.display_name === null &&
+		{ app_state.status === Status.Success && app_state.data.display_name === null &&
 			<DisplayNamePrompt />}
-			<LeftColumn result={app_state} />
+			<LeftColumn app_state={converter} />
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">
-				<h1>Welcome {app_state.data.data.display_name}</h1>
+				<h1>Welcome {app_state.data.display_name}</h1>
 				<button className="button" onClick={() => {set_page("play")}}>
 					Play
 				</button>
 			</div>
-			<RightColumn app_state={app_state} set_page={set_page} />
+			<RightColumn app_state={converter} set_page={set_page} />
 		</div>
 	)
 }

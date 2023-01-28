@@ -5,14 +5,14 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
-import * as oauth_info from './info.json'
+import * as info from './info.json'
 
 @Module({
   imports: [
     HttpModule,
     PassportModule,
     JwtModule.register({ 
-      secret: oauth_info.jwt_secret,
+      secret: info.jwt_secret,
       signOptions: { expiresIn: 600 }
     })
   ],

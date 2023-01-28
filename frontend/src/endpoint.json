@@ -1,0 +1,15 @@
+{
+	"auth": {
+		"login": "https://localhost/api/auth/login",
+		"signup": "https://localhost/api/auth/signup",
+		"confirm": "https://localhost/api/auth/confirm",
+		"logout": "https://localhost/api/auth/logout",
+		"twoFA": "https://localhost/api/auth/twoFA",
+		"pass2FA": "https://localhost/api/auth/login"
+	},
+	"content": {
+		"img": "https://localhost/api/content/img",
+		"display_name": "https://localhost/api/content/display_name",
+		"upload": "https://localhost/api/content/upload"
+	}
+}
