@@ -5,7 +5,7 @@ function Ball({ x, y }) {
   const r = 25 * getAspects().aspect;
   x *= getAspects().aspectx;
   y *= getAspects().aspecty;
-  console.log(x, y);
+  //console.log(x, y);
   return (
     <div
       style={{

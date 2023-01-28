@@ -12,7 +12,7 @@ export function setWindowSizeLimit() {
  export const getBrowserSize = () => {
     let x = window.innerWidth;
     let y = window.innerHeight;
-    console.log(x,y);
+    //console.log(x,y);
     return {x, y};
 };
 

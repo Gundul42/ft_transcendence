@@ -13,10 +13,10 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	useEffect(() => {
 		const interval = setInterval(() => {
 			setCount(count + 1);
-		}, 100);
+			// maybe put fetchdata from backend here ?
+		}, 10);
 		return () => clearInterval(interval);
 		}, [count]);
-			
 
 	return (
 		<div className="Play">

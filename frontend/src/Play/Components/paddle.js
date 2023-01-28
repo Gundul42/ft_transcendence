@@ -8,7 +8,7 @@ function Paddle({ y, isLeft }) {
     const paddleWidth = paddleHeight * 0.15;
     const halfPaddleHeight = paddleHeight / 2;
     y *= getAspects().aspecty;
-    console.log("y-value: ", y)
+    //console.log("y-value: ", y)
     return (
         <div
             style={{
