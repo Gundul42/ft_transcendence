@@ -1,10 +1,12 @@
 import React from 'react';
 import './App.css';
+import { IAPICall, IUser } from './Interfaces';
 import { Home } from './Home/Home';
 import { User } from './User/User';
 import { Chat } from './Chat/Chat';
 import { Play } from './Play/Play';
 import { OTP } from './OTP';
+import endpoint from './endpoint.json';
 
 export enum Status {
   Starting,
@@ -12,6 +14,18 @@ export enum Status {
   Success,
   Error,
   Retrying,
+}
+
+export interface IAppState {
+  status: Status,
+  data: IAPICall | null,
+  page: "home" | "user" | "chat" | "play"
+}
+
+export interface ISafeAppState {
+  status: Status,
+  data: IUser,
+  page: "home" | "user" | "chat" | "play"
 }
 
 export function Header({set_page} : {set_page: any}) {
@@ -22,10 +36,10 @@ export function Header({set_page} : {set_page: any}) {
   )
 }
 
-function Link({data} : {data: any}) {
+function Link({link} : {link: string}) {
   return (
     <div className="Login">
-      <a href={data.link}>
+      <a href={link}>
         <div className="button">
           Login
         </div>
@@ -34,25 +48,30 @@ function Link({data} : {data: any}) {
   )
 }
 
-function Dispatch({app_state, set_page, set_data} : {app_state: any, set_page: any, set_data: any}) {
+function Dispatch({app_state, set_page, set_data} : {app_state: IAppState, set_page: any, set_data: any}) {
   let to_render: any;
   if (app_state.data === null) {
     to_render = <p>*Sad backend noises*</p>;
   }
-  else if (app_state.data.type === 'link') {
-    to_render = <Link data={app_state.data.data} />;
+  else if (app_state.data.type === 'link' && app_state.data.link !== null) {
+    to_render = <Link link={app_state.data.link} />;
   } else if (app_state.data.type === 'twoFA') {
     to_render = <OTP set_data={set_data} />;
-  } else if (app_state.data.type === 'content') {
+  } else if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === 'content') {
+    let safe_app_state: ISafeAppState = {
+      status: app_state.status,
+      data: app_state.data.data,
+      page: app_state.page
+    }
     switch (app_state.page) {
       case "user":
-        return (<User app_state={app_state} set_page={set_page} />);
+        return (<User app_state={safe_app_state} set_page={set_page} />);
       case "chat":
-        return (<Chat app_state={app_state} set_page={set_page}/>);
+        return (<Chat app_state={safe_app_state} set_page={set_page} />);
       case "play" :
-        return (<Play app_state={app_state} set_page={set_page} />);
+        return (<Play app_state={safe_app_state} set_page={set_page} />);
       default:
-        return (<Home app_state={app_state} set_page={set_page} />);
+        return (<Home app_state={safe_app_state} set_page={set_page} />);
     }
   } else {
     to_render = <p>Something went wrong</p>;
@@ -65,12 +84,11 @@ function Dispatch({app_state, set_page, set_data} : {app_state: any, set_page: a
   );
 }
 
-class App extends React.Component {
-  constructor(props: any) {
+class App extends React.Component<{}, IAppState> {
+  constructor(props: {}) {
     super(props);
     this.state = {
       status: Status.Starting,
-      error: null,
       data: null,
       page: "home",
     };
@@ -83,7 +101,6 @@ class App extends React.Component {
     if (window.history.state !== null) {
       this.setState({
         status: window.history.state.status,
-        error: window.history.state.error,
         data: window.history.state.data,
         page: window.history.state.page,
       });
@@ -93,23 +110,23 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    fetch("https://localhost/api/auth", {
+    fetch(endpoint.auth.login, {
       method: "GET"
     })
     .then((value) => value.json())
-    .then((parsed_data) => {
-      localStorage.setItem('csrf_token', parsed_data.data.csrf_token);
+    .then((parsed_data: IAPICall) => {
+      if (parsed_data.data !== null) {
+        localStorage.setItem('csrf_token', parsed_data.data.csrf_token);
+      }
       if (window.history.state === null) {
-        this.setState((previous_state: any) => ({
+        this.setState((previous_state: IAppState) => ({
           status: Status.Success,
-          error: null,
           data: parsed_data,
           page: previous_state.page
         }))
       } else {
         this.setState({
           status: Status.Success,
-          error: null,
           data: parsed_data,
           page: window.history.state.page
         })
@@ -118,19 +135,17 @@ class App extends React.Component {
     window.addEventListener('popstate', this.goBack.bind(this));
   };
 
-  setData(fetched_data: any) {
-    this.setState((prev_state: any) => ({
+  setData(fetched_data: IAPICall) {
+    this.setState((prev_state: IAppState) => ({
       status: prev_state.status,
-      error: prev_state.error,
       data: fetched_data,
       page: prev_state.page
     }))
   }
 
   setPage(new_page: "home" |"user" | "chat" | "play") {
-    this.setState((prev_state: any) => ({
+    this.setState((prev_state: IAppState) => ({
       status: prev_state.status,
-      error: prev_state.error,
       data: prev_state.data,
       page: new_page
     }), () => { window.history.pushState(this.state, "");})

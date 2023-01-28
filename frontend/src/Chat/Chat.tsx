@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
-import { Header } from '../App';
+import { Header, ISafeAppState } from '../App';
 import { io } from 'socket.io-client';
 // import Box from '@mui/material/Box'
 
-const socket = io("https://localhost/chat");
+const socket = io("https://localhost/api/chat");
 
 type ChatMessage = {
 	name : String
@@ -39,7 +39,7 @@ return (
 }
 
 
-const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : ChatMessage[], lastMsg : React.RefObject<HTMLDivElement>}) => { 
+const ChatBody = ({app_state, messages, lastMsg} : {app_state : ISafeAppState, messages : ChatMessage[], lastMsg : React.RefObject<HTMLDivElement>}) => { 
 	
 	return (
 		<>
@@ -71,7 +71,7 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 	);
 	}
 
-	const ChatFooter = ({app_state} : any) => {
+	const ChatFooter = ({app_state} : ISafeAppState) => {
 		const [message, setMessage] = useState("")
 		// const handleTyping = () => socket.emit("typing",`${localStorage.getItem("uname")} is typing`)
 
@@ -130,7 +130,7 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : any, messages : 
 
 //(app_state.data.data.full_name as string).split(' ')[0]
 //Updating last message https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
-export const Chat = ({app_state, set_page} : {app_state: any, set_page: any}) => {
+export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) => {
 	const [messages, setMessages] = useState<ChatMessage[]>([])
 	const lastMessageRef = useRef<HTMLDivElement>(null);
 	

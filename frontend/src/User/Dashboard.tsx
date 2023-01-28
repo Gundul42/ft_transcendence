@@ -1,4 +1,6 @@
 import React from 'react';
+import { ISafeAppState } from '../App';
+import { IAchieve, IMatch } from '../Interfaces';
 
 function LadderLevel({ladder_level} : {ladder_level : number}) {
 	return (
@@ -22,40 +24,40 @@ function WinsLosses({wins, losses} : {wins: number, losses: number}) {
 	)
 }
 
-function Achievements({achievements} : {achievements: any[]}) {
+function Achievements({achievements} : {achievements: IAchieve[]}) {
 	return (
 		<div id="Achievements">
 			<h2 className="Section-title">Achievements</h2>
 			{achievements.length === 0 &&
 			<p>Congrats you achieved NOTHING</p>}
 			{achievements.length > 0 &&
-			achievements.map((achievement) => <p>{achievement}</p>)}
+			achievements.map(achievement => <li>{achievement.description}</li>)}
 		</div>
 	)
 }
 
-function MatchHistory({match_history} : {match_history: any[]}) {
+function MatchHistory({match_history} : {match_history: IMatch[]}) {
 	return (
 		<div id="Match-history">
 			<h2 className="Section-title">Match History</h2>
 			{match_history.length === 0 &&
 			<p>&#129335;</p>}
 			{match_history.length > 0 &&
-			match_history.map((match) => <p>{match}</p>)}
+			match_history.map((match) => <li>{match.winner}</li>)}
 		</div>
 	)
 }
 
-export function Dashboard({app_state} : {app_state: any}) {
+export function Dashboard({app_state} : {app_state: ISafeAppState}) {
 	return (
 		<div className="Dashboard">
 			<div className="Dashboard-row">
-				<LadderLevel ladder_level={app_state.data.data.ladder_level} />
-				<WinsLosses wins={app_state.data.data.wins} losses={app_state.data.data.losses} />
+				<LadderLevel ladder_level={app_state.data.ladder_level} />
+				<WinsLosses wins={app_state.data.wins} losses={app_state.data.losses} />
 			</div>
 			<div className="Dashboard-row">
-				<Achievements achievements={app_state.data.data.achievements} />
-				<MatchHistory match_history={app_state.data.data.match_history} />
+				<Achievements achievements={app_state.data.achievements} />
+				<MatchHistory match_history={app_state.data.match_history} />
 			</div>
 		</div>
 	)

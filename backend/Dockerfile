@@ -4,10 +4,12 @@ RUN apt update\
 	&& apt upgrade -y\
 	&& apt install -y curl\
 	git\
+	apt-utils\
 	&& curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 	&& apt-get install -y nodejs
 
 RUN apt install -y postgresql-client\
+	&& npm install -g npm@latest\
 	&& npm i -g @nestjs/cli\
 	&& useradd -m app_backend\
 	&& nest new -p npm /home/app_backend/backend\

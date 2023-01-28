@@ -27,11 +27,7 @@ services:
     networks:
       - app
     volumes:
-    #  - ./nginx/conf.d:/etc/nginx/conf.d:ro
-    #  - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./frontend/src:/var/www/html/frontend/src
-    #  - ./frontend/src:/home/app_frontend/frontend/src:ro
-    #  - ./frontend/content:/var/www/html/content:ro
 
   backend:
     restart: always

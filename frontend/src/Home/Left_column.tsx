@@ -1,15 +1,16 @@
 import React from 'react';
-import { Status } from '../App';
+import { IAppState } from '../App';
 import '../App.css';
+import { IMatch, IUser } from '../Interfaces';
 
-function Friends({friends_list} : {friends_list: any[]}) {
+function Friends({friends_list} : {friends_list: IUser[]}) {
 	return (
 		<div className="Friends">
 			<h2>Friends</h2>
 			{ friends_list.length > 0 &&
 				friends_list.map((friend) => (
 					<React.Fragment>
-					<p className="Friend">{friend.display_name}</p><div className="circle" id={friend.status}></div>
+					<p className="Friend">{friend.display_name}</p><div className={"circle" + friend.status.toString()}></div>
 					</React.Fragment>
 				))
 			}
@@ -19,7 +20,7 @@ function Friends({friends_list} : {friends_list: any[]}) {
 	)
 }
 
-function Matches({active_matches} : {active_matches: any[]})
+function Matches({active_matches} : {active_matches: IMatch[]})
 {
 	//ToDO
 	return (
@@ -36,15 +37,11 @@ function Matches({active_matches} : {active_matches: any[]})
 	)
 }
 
-export function LeftColumn({result} : {result: any}) {
-	if (result.status !== Status.Success) {
-		return(
-			<div className="Left-column"></div>
-		)
-	} else if (result.data.type === "content") {
+export function LeftColumn({app_state} : {app_state: IAppState}) {
+	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
 		return (
 			<div className="Left-column">
-				<Friends friends_list={result.data.data.friends}/>
+				<Friends friends_list={app_state.data.data.friends}/>
 				<Matches active_matches={[]} />
 			</div>
 		)
