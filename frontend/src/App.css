@@ -75,7 +75,7 @@
 }
 
 .Chat-Body {
-  background-color: #936b96;
+  background-color: #282c34;
   height: 100%;
   width: 70%;
   font-size: calc(4px + 2vmin);
@@ -93,23 +93,23 @@
   padding-inline: 0.5em;
   margin: 5px;
 }
-/* 
-.Msg-Container
-{
-  height: 100%;
-  width: 30%;
-  background-color: #ffffff;
+
+.Message-Chats {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
   justify-content: left;
-  align-items: center;
-} */
+  align-items: flex-start;
+}
+
+.Sender-Name {
+  margin-left: 10px;
+}
 
 .Chat-Contacts {
   height: 100%;
   width: 30%;
-  background-color: #3d4e71;
+  background-color: #282c34;
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
@@ -121,9 +121,10 @@
 .Chat-Box {
   height: 100%;
   width: 100%;
-  background-color: #6ed172;
+  background-color: #282c34;
+  overflow-y: auto;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   flex-direction: column;
   justify-content: left;
   align-items: flex-start;

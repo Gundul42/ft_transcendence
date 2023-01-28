@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 // import { Server, Socket } from '/usr/local/lib/node_modules/socket.io';  //debugging, my IDE doesn't like the above line
 // import {Server, Socket} from "@nestjs/platform-socket.io";
 
-@WebSocketGateway( { namespace: 'chat' })
+@WebSocketGateway( { namespace: 'api/chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	@WebSocketServer() server: Server;
 
@@ -45,13 +45,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("join")
-	async handleJoinEvent(client: Socket, room: string, callback)
+	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
 	{
 		// Validate if client can join room here
 		console.log("joining room", room);
 		client.join(room);
-		// callback(`joined: ${room}`);
-		this.server.emit("messageResponse", "Welcome to ", room);
+		if (callback)
+			callback(`joined: ${room}`);
+		this.server.emit("newRecipientResponse", room);
 	}
 
 	async handleLeaveEvent(client: Socket, room: string, callback)
