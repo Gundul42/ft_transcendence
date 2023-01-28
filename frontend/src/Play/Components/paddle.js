@@ -1,18 +1,19 @@
 import React from 'react';
-import { getBrowserSize } from "./helpers";
+import { getBrowserSize, getAspects } from "./helpers";
 
 function Paddle({ y, isLeft }) {
     const screenHeight = getBrowserSize().y;
     const screenWidth = getBrowserSize().x;
-    console.log(getBrowserSize().y);
     const paddleHeight = screenHeight * 0.1;
     const paddleWidth = paddleHeight * 0.15;
     const halfPaddleHeight = paddleHeight / 2;
+    y *= getAspects().aspecty;
+    console.log("y-value: ", y)
     return (
         <div
             style={{
                 position: 'absolute',
-                left: isLeft ? `${paddleWidth * 2}px` : `${screenWidth * 2}`,
+                left: isLeft ? `${paddleWidth * 2}px` : `${ screenWidth - paddleWidth * 3}px`,
                 top: `${y - halfPaddleHeight}px`,
                 width: `${paddleWidth}px`,
                 height: `${paddleHeight}px`,

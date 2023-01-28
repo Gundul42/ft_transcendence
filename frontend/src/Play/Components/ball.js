@@ -2,7 +2,7 @@ import React from 'react';
 import { getAspects } from './helpers';
 
 function Ball({ x, y }) {
-  const r = 8 * getAspects().aspect;
+  const r = 25 * getAspects().aspect;
   x *= getAspects().aspectx;
   y *= getAspects().aspecty;
   console.log(x, y);

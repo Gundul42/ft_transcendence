@@ -17,9 +17,9 @@ export function setWindowSizeLimit() {
 };
 
 export const getAspects = () => {
-  const aspectx = fixed.playFieldXMaxSize / getBrowserSize().x;
-  const aspecty = fixed.playFieldYMaxSize / getBrowserSize().y;
-  const aspect = getBrowserSize().x / getBrowserSize().y;
+  const aspectx = getBrowserSize().x / fixed.playFieldXMaxSize;
+  const aspecty = getBrowserSize().y / fixed.playFieldYMaxSize;
+  const aspect = getBrowserSize().y / getBrowserSize().x;
 
   return {aspectx, aspecty, aspect};
 };
