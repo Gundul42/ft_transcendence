@@ -5,8 +5,8 @@ import { io } from 'socket.io-client';
 import { IUser } from '../Interfaces';
 // import Box from '@mui/material/Box'
 
-const socket = io("https://localhost/api/chat");
-// const socket = io("https://localhost/chat");
+// const socket = io("https://localhost/api/chat");
+const socket = io("https://localhost/chat");
 
 type ChatMessage = {
 	name : String
@@ -20,8 +20,10 @@ type ChatUser = {
 	socketID : Number
 }
 
+
+//TODO: Instead, fetch from server, both friends and rooms that the user's in
 const ChatBar = ({socket} : {socket: Socket}) => {
-	const [users, setUsers] = useState<ChatUser[]>([])
+	const [users, setUsers] = useState<Array<ChatUser>>(Array<ChatUser>());
 
 	useEffect(()=> {
 			socket.on("newRecipientResponse", (data: any) => setUsers(data))
@@ -33,7 +35,7 @@ return (
 		<div>
 			<div	className='Text-field'>Users and Rooms</div>
 			<div className='chat_users'>
-					{users?.map(user => <p key={user.socketID.toString()}>{user.uname}</p>)}
+					{users.map(user => <p key={user.socketID.toString()}>{user.uname}</p>)}
 			</div>
 		</div>
 	</div>
@@ -90,7 +92,8 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : ISafeAppState, m
 					text: elements.slice(1), 
 					name: (data_state.display_name as string).split(' ')[0], 
 					id: `${socket.id}${Math.random()}`,
-					socketID: socket.id
+					socketID: socket.id,
+					// auth: data_state
 				}, handleCallback);
 		}
 		else
@@ -123,10 +126,11 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : ISafeAppState, m
 	)
 }
 
-// const pingFunc = () =>
-// {
-// 	socket.emit("ping");
-// }
+const pingFunc = () =>
+{
+	socket.emit("ping");
+}
+
 // Input pretty, will implement
 //<div class="search input-group">
 //               <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
@@ -141,7 +145,11 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : ISafeAppState, m
 export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) => {
 	const [messages, setMessages] = useState<ChatMessage[]>([])
 	const lastMessageRef = useRef<HTMLDivElement>(null);
-	
+
+	socket.onAny((event, ...args) => {
+		console.log(event, args);
+	  });
+
 	useEffect(()=> {
 		socket.on("messageResponse", (data: any) => setMessages([...messages, data]))
 	}, [messages])
@@ -157,7 +165,7 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 			<Header set_page={set_page} />
 			<ChatBody app_state={app_state} messages={messages} lastMsg={lastMessageRef}/>
 			<ChatFooter data_state={app_state.data} />
-			{/* <button onClick={pingFunc}>Ping</button> */}
+			<button onClick={pingFunc}>Ping</button>
 		</div>
 	</div>
 	)
