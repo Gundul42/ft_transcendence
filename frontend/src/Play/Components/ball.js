@@ -9,18 +9,18 @@ export type Ballpos = {
 }
 
 function Ball({ x, y }) {
-	const r = 25 * getAspects().aspect;
+	const rx = 15 * getAspects().aspectx;
+	const ry = 15 * getAspects().aspecty;
 	x *= getAspects().aspectx;
 	y *= getAspects().aspecty;
-	//console.log(x, y);
 	return (
 		<div
 			style={{
 				position: 'absolute',
 				left: `${x}px`,
 				top: `${y}px`,
-				width: `${r}px`,
-				height: `${r}px`,
+				width: `${rx}px`,
+				height: `${ry}px`,
 				borderRadius: '50%',
 				backgroundColor: 'red',
 			}}
