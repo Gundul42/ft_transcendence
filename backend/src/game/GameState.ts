@@ -1,4 +1,4 @@
-import constants from './constants.json'
+import * as constants from './constants.json'
 import { GameInstance } from './GameInstance';
 
 export class Coordinate {
@@ -33,7 +33,7 @@ export class GameState {
 		private instance: GameInstance,
 		difficulty: number,
 		round: number
-		) {
+	) {
 		let paddle_height: number = Math.floor(0.25 * constants.game_canvas.height * (1.5 - (difficulty / 10)));
 		this.paddle1 = new Paddle(new Coordinate(constants.paddle.buffer, constants.game_canvas.height / 2), paddle_height);
 		this.paddle2 = new Paddle(new Coordinate(constants.game_canvas.width - constants.paddle.buffer - constants.paddle.width, constants.game_canvas.height / 2), paddle_height);
@@ -53,8 +53,10 @@ export class GameState {
 
 		if (ball_new_y - this.ball.radius < 0) {
 			ball_new_y = (2 * this.ball.radius) - ball_new_y;
+			this.ball.direction.y *= -1;
 		} else if (ball_new_y + this.ball.radius > constants.game_canvas.height) {
 			ball_new_y = (2 * constants.game_canvas.height) - (2 * this.ball.radius) - ball_new_y;
+			this.ball.direction.y *= -1;
 		}
 		if (ball_new_x - this.ball.radius < constants.paddle.buffer) {
 			if (((ball_new_y - this.ball.radius) > this.paddle1.position.y) || ((ball_new_y + this.ball.radius) < (this.paddle1.position.y - this.paddle1.height))) {
@@ -62,6 +64,7 @@ export class GameState {
 				this.instance.scored = true;
 			} else {
 				ball_new_x = (2 * this.paddle1.position.x) + (2 * constants.paddle.width) + this.ball.radius - ball_new_x;
+				this.ball.direction.x *= -1;
 			}
 		} else if (ball_new_x + this.ball.radius > (constants.game_canvas.width - constants.paddle.buffer)) {
 			if (((ball_new_y - this.ball.radius) > this.paddle2.position.y) || ((ball_new_y + this.ball.radius) < (this.paddle2.position.y - this.paddle2.height))) {
@@ -69,6 +72,7 @@ export class GameState {
 				this.instance.scored = true;
 			} else {
 				ball_new_x = (2 * this.paddle2.position.x) - ball_new_x - this.ball.radius;
+				this.ball.direction.x *= -1;
 			}
 		}
 		this.ball.position.x = ball_new_x;

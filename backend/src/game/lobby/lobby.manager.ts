@@ -29,11 +29,13 @@ export class LobbyManager {
 		});
 		if (lobby_id.length === 0) {
 			upsertedLobby = new Lobby(this.server, this);
+			this.lobbies.set(upsertedLobby.id, upsertedLobby);
 			client.data.role = "player1";
 			upsertedLobby.addClient(client);
 		} else {
 			client.data.role = "player2";
 			upsertedLobby = this.lobbies[lobby_id];
+			console.log(this.lobbies[lobby_id])
 			upsertedLobby.addClient(client);
 			this.prisma.match.create({
 				data: {
@@ -68,17 +70,19 @@ export class LobbyManager {
 	}
 
 	public destroyLobby(lobby_id: string) : void {
-		this.prisma.match.update({
-			where: {
-				id: lobby_id
-			},
-			data: {
-				winner: this.lobbies[lobby_id].game_instance.winner
-			}
-		})
-		.catch((err: any) => { console.log(err) });
-		this.updateUserStatus(this.lobbies[lobby_id], 1);
-		this.lobbies[lobby_id].server.socketsLeave(lobby_id);
+		if (this.lobbies.get(lobby_id)?.game_instance.started) {
+			this.prisma.match.update({
+				where: {
+					id: lobby_id
+				},
+				data: {
+					winner: this.lobbies[lobby_id].game_instance.winner
+				}
+			})
+			.catch((err: any) => { console.log(err) });
+			this.updateUserStatus(this.lobbies[lobby_id], 1);
+		}
+		this.lobbies.get(lobby_id)?.expelAll;
 		this.lobbies.delete(lobby_id);
 	}
 

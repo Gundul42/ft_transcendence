@@ -26,20 +26,22 @@ export class Lobby {
 		client.data.lobby = this;
 		if (client.data.role === "player1") {
 			this.player1 = client;
+			return ;
 		} else if (client.data.role === "player2") {
 			this.player2 = client;
 			this.game_instance.started = true;
 			this.game_instance.start();
+			this.dispatchToLobby(ServerEvents.Ready, {});
 		} else {
 			this.spectators.set(client.id, client);
+			this.dispatchToLobby(ServerEvents.LobbyState, {
+				lobbyId: this.id,
+				spectators: this.spectators.size,
+				p1_points: this.game_instance.player1_points,
+				p2_points: this.game_instance.player2_points,
+				round: this.game_instance.round
+			})
 		}
-		this.dispatchToLobby(ServerEvents.LobbyState, {
-			lobbyId: this.id,
-			spectators: this.spectators.size,
-			p1_points: this.game_instance.player1_points,
-			p2_points: this.game_instance.player2_points,
-			round: this.game_instance.round
-		})
 	}
 
 	public removeClient(client: AuthenticatedSocket) : void {
@@ -73,5 +75,9 @@ export class Lobby {
 
 	public dispatchToLobby<T>(event: ServerEvents, payload: T) : void {
 		this.server.to(this.id).emit(event, payload);
+	}
+
+	public expelAll() : void {
+		this.server.socketsLeave(this.id);
 	}
 }

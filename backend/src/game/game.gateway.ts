@@ -54,6 +54,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	async handleDisconnect(client: AuthenticatedSocket): Promise<void> {
+		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
+			this.lobbyManager.destroyLobby(client.data.lobby.id);
+		}
 		this.lobbyManager.terminateSocket(client);
 		this.prisma.appUser.update({
 			where: { id: client.data.userid },
@@ -65,6 +68,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage(ClientEvents.Play)
 	joinPlayer(client: AuthenticatedSocket) : void {
+		console.log("Upserting lobby");
 		const lobby: Lobby = this.lobbyManager.upsertLobby(client);
 		if (lobby.game_instance.started) {
 			this.lobbyManager.server.of("/game").emit(ServerEvents.GlobalState, {
@@ -76,6 +80,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 					});
 				})
 			})
+		}
+	}
+
+	@SubscribeMessage(ClientEvents.Cancel)
+	cancelLobbyCreation(client: AuthenticatedSocket) : void {
+		console.log("purging lobby");
+		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
+			this.lobbyManager.destroyLobby(client.data.lobby.id);
 		}
 	}
 
