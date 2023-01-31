@@ -44,7 +44,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.disconnect(true);
 			return ;
 		}
-		this.lobbyManager.initializeSocket(client as AuthenticatedSocket, session_user.user.id);
+		this.lobbyManager.initializeSocket(client as AuthenticatedSocket, session_user.user);
 		this.prisma.appUser.update({
 			where: { id: session_user.user.id },
 			data: {
@@ -94,5 +94,31 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage(ClientEvents.Watch)
 	joinSpectator(client: AuthenticatedSocket, data: {lobbyId: string}) : void {
 		this.lobbyManager.joinAsSpectator(client, data.lobbyId);
+	}
+
+	@SubscribeMessage(ClientEvents.Up)
+	moveUp(client: AuthenticatedSocket) : void {
+		let id: number;
+		if (client.data.role === "player1") {
+			id = 1;
+		} else if (client.data.role === "player2") {
+			id = 2;
+		} else {
+			return ;
+		}
+		client.data.lobby?.game_instance.state.movePaddle(id, 1);
+	}
+
+	@SubscribeMessage(ClientEvents.Down)
+	moveDown(client: AuthenticatedSocket) : void {
+		let id: number;
+		if (client.data.role === "player1") {
+			id = 1;
+		} else if (client.data.role === "player2") {
+			id = 2;
+		} else {
+			return ;
+		}
+		client.data.lobby?.game_instance.state.movePaddle(id, -1);
 	}
 }

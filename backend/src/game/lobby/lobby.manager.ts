@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { ServerEvents } from '../events';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AppUser } from '@prisma/client';
 
 export class LobbyManager {
 	public server: Server;
@@ -10,9 +11,14 @@ export class LobbyManager {
 
 	constructor(private readonly prisma: PrismaService) {}
 
-	public initializeSocket(client: AuthenticatedSocket, userid: number) : void {
+	public initializeSocket(client: AuthenticatedSocket, user: AppUser) : void {
 		client.data.lobby = null;
-		client.data.userid = userid;
+		client.data.userid = user.id;
+		client.data.info = {
+			display_name: user.display_name,
+			avatar: user.avatar,
+			status: user.status
+		}
 	};
 
 	public terminateSocket(client: AuthenticatedSocket) : void {

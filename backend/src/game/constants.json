@@ -5,7 +5,8 @@
 	},
 	"paddle": {
 		"buffer": 50,
-		"width": 50
+		"width": 50,
+		"velocity": 5
 	},
 	"fps": 25
 }

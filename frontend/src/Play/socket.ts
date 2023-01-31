@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { ServerEvents, ClientEvents } from './events';
+import { ClientEvents } from '../events';
 
 export const socket = io("https://localhost/game", {'transports': ['polling', 'websocket']});
 

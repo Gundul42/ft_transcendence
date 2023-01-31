@@ -18,7 +18,6 @@ export class Lobby {
 	constructor(
 		private readonly server: Server,
 		private readonly lobbyManager: LobbyManager
-		//public readonly ladder_level: number
 	) {}
 
 	public addClient(client: AuthenticatedSocket) : void {
@@ -30,11 +29,13 @@ export class Lobby {
 		} else if (client.data.role === "player2") {
 			this.player2 = client;
 			this.game_instance.started = true;
-			this.game_instance.start();
 			this.dispatchToLobby(ServerEvents.Ready, {});
+			this.game_instance.start();
 		} else {
 			this.spectators.set(client.id, client);
 			this.dispatchToLobby(ServerEvents.LobbyState, {
+				player1: this.player1.data.info,
+				player2: this.player2.data.info,
 				lobbyId: this.id,
 				spectators: this.spectators.size,
 				p1_points: this.game_instance.player1_points,
@@ -64,6 +65,8 @@ export class Lobby {
 		} else {
 			this.spectators.delete(client.id);
 			this.dispatchToLobby(ServerEvents.LobbyState, {
+				player1: this.player1.data.info,
+				player2: this.player2.data.info,
 				lobbyId: this.id,
 				spectators: this.spectators.size,
 				p1_points: this.game_instance.player1_points,

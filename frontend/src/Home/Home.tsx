@@ -4,7 +4,7 @@ import { LeftColumn } from './Left_column';
 import { RightColumn } from '../Right_column';
 import { Status, Header, ISafeAppState, IAppState } from '../App';
 import endpoint from '../endpoint.json'
-import { ClientEvents, ServerEvents } from '../Play/events';
+import { ClientEvents, ServerEvents } from '../events';
 
 function DisplayNamePrompt() {
 	const [name, setName] : [name: string, setName: any] = useState("");

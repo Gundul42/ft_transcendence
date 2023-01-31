@@ -78,4 +78,20 @@ export class GameState {
 		this.ball.position.x = ball_new_x;
 		this.ball.position.y = ball_new_y;
 	}
+
+	public movePaddle(id: number, direction: number) : void {
+		let paddle: Paddle;
+		if (id === 1) {
+			paddle = this.paddle1;
+		} else {
+			paddle = this.paddle2;
+		}
+		if (paddle.position.y + direction > constants.game_canvas.height) {
+			paddle.position.y = constants.game_canvas.height;
+		} else if ((paddle.position.y + direction - paddle.height) < 0) {
+			paddle.position.y = 0;
+		} else {
+			paddle.position.y += direction * constants.paddle.velocity;
+		}
+	}
 }
