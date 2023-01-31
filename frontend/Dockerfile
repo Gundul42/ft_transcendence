@@ -11,4 +11,10 @@ RUN apt update\
 RUN mkdir -p /var/www/html\
 	&& echo "yes" | npx create-react-app /var/www/html/frontend --template typescript
 
+WORKDIR /var/www/html/frontend
+
+COPY ./resources/package.json .
+
+RUN npm install
+
 CMD [ "npm", "--prefix", "/var/www/html/frontend", "start" ]

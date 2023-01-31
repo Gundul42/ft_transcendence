@@ -3,15 +3,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { PlayModule } from './play/play.module';
+import { GameModule } from './game/game.module';
 
 
 @Module({
   imports: [
     AuthModule,
     ContentModule,
-    PlayModule,
     PrismaModule,
+    GameModule,
     ConfigModule.forRoot()
   ], 
 })
