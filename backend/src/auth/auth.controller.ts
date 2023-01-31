@@ -113,4 +113,33 @@ export class AuthController {
   pass2FA() : { type: string, data: null, link: null} {
     return ({ type: "twoFA", data: null, link: null })
   }
+
+  @Get(':id')
+  createDummy(@Param('id') id: string) : {
+	this.prismaclient.AppUser.create({
+		data: {
+			id: Math.floor(Math.random() * 800),
+			session: {
+				create: {
+					id: "dummysession${id}",
+				},
+			},
+			token: {
+				create: {
+					access_token: "dummytoken${id}",
+					token_type: "dummytokentype${id}",
+					expires_in:	999,
+					refresh_token: "dummyrefreshtoken${id}",
+					scope: "dummyscope${id}",
+					created_at: 42,
+				},
+			},
+			full_name:	'dummy ${id}',
+			display_name: 'dummy ${id}',
+		},
+	})
+
+
+
+  }
 }
