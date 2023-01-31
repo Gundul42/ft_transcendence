@@ -11,16 +11,14 @@ import { Server, Socket } from 'socket.io';
 import { ParsedUrlQuery } from 'querystring';
 import { PrismaService } from '../prisma/prisma.service';
 import { Room, Session, AppUser } from '@prisma/client';
-// import { User } from '@auth0/auth0-spa-js';
-// import { AuthService } from '../auth/auth.service';
-// import { AuthGuard } from '../auth/auth.guard';
-
-// import { Server, Socket } from '/usr/local/lib/node_modules/socket.io';	//debugging, my IDE doesn't like the above line
-// import {Server, Socket} from "@nestjs/platform-socket.io";
+import { RoomsManager } from './rooms/rooms.manager';
 
 @WebSocketGateway( { namespace: 'chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-	constructor (private prisma: PrismaService) {}
+	constructor (
+		private prisma: PrismaService,
+		private readonly rooms: RoomsManager
+		) {}
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server)
@@ -57,24 +55,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	}
 
-	@SubscribeMessage("join")
-	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
+	async findUser(client: Socket) : Promise<AppUser>
 	{
-		await this.prisma.session.findUnique({
+		return await this.prisma.session.findUnique({
 			where: {
 			  id: client.request.headers.cookie.slice('ft_transcendence_sessionId'.length + 1),
 			},
 			include: { user: true }
-		  })
-		  .then(
-			(value: Session & { user: AppUser }) => {
-			  value.user.rooms;
-			},
-			(err: any) => {
+			})
+			.catch((err: any) => {
 			  console.log(err);
-			  return false;
-			}
-		  )
+			  return null;
+			});
+	}
+
+	@SubscribeMessage("join")
+	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
+	{
+		const user = await this.findUser(client);
 		// this.prisma.appUser.findUnique({
 		// 	where: {
 		// 	  id: client.request.
@@ -83,7 +81,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//   })
 		// Validate if client can join room here
 		console.log("joining room", room);
-		client.join(room);
+		const res = await this.rooms.makeRoom(client, user, room);
+		if (res != null)
+			console.log("room creation succesful");
+		// client.join(room);
 		if (callback)
 			callback(`joined: ${room}`);
 		this.server.emit("newRecipientResponse", room);

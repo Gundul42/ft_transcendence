@@ -22,8 +22,6 @@ services:
       - backend
     build: "./frontend"
     image: "frontend:latest"
-    ports:
-      - "3000:3000"
     networks:
       - app
     volumes:
@@ -35,8 +33,6 @@ services:
       - pgsql
     build: "./backend"
     image: "backend:latest"
-    ports:
-      - "8000:3000"
     networks:
       - app
     volumes:
