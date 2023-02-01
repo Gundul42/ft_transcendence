@@ -8,6 +8,7 @@ import { playFieldXMaxSize, playFieldYMaxSize, paddleHeight } from '../constants
 import { ServerEvents, ClientEvents } from '../events';
 import { IGameState, ILobbyState } from '../Interfaces';
 import { UserPublic } from '../UserPublic';
+import { Canvas } from './Canvas';
 
 export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
 	const [gameState, setGameState] : [IGameState, any] = useState({
@@ -24,7 +25,7 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	const keydown = (keyEvent: KeyboardEvent) => {
 		if (keyEvent.key === "w" || keyEvent.key === "ArrowUp") {
 			socket.emit(ClientEvents.Up);
-		} else if (keyEvent.key === "s" || keyEvent.key === "ArrowUp") {
+		} else if (keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
 			socket.emit(ClientEvents.Down);
 		}
 	}
@@ -58,16 +59,19 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 		<div className="Play">
 			{lobbyState !== null &&
 				<InfoHeader lobbyState={lobbyState} />}
-			<PongField />
-			<Header set_page={set_page} />
-			<Ball x={gameState.ball.x} y={gameState.ball.y} />
-			<Paddle y={gameState.paddle2.y} isLeft={false} />
-			<Paddle y={gameState.paddle1.y} isLeft={true} />
+			<Canvas gameState={gameState} />
 			{lobbyState !== null &&
 				<InfoFooter lobbyState={lobbyState} />}
 		</div>
 	)
 }
+
+
+/* <PongField />
+<Header set_page={set_page} />
+<Ball x={gameState.ball.x} y={gameState.ball.y} />
+<Paddle y={gameState.paddle2.y} isLeft={false} />
+<Paddle y={gameState.paddle1.y} isLeft={true} /> */
 
 function InfoHeader({lobbyState} : {lobbyState: ILobbyState}) {
 	return (

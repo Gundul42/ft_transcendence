@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Param } from '@nestjs/common';
 import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
@@ -18,7 +18,7 @@ export class AuthController {
   @Get("login")
   @UseGuards(AuthGuard)
   @UseFilters(AuthFilter, TwoFAFilter)
-  async login(@Req() req: Request, @Res() res, @RealIP() ip: string): Promise<void> {
+  async login(@Req() req: Request, @Res() res: Response, @RealIP() ip: string): Promise<void> {
     this.authService.deleteNullSessions();
     var user: AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[] } = await this.authService.getUserSessionAchieve(req.cookies['ft_transcendence_sessionId']);
     if (user === null) {
@@ -114,32 +114,42 @@ export class AuthController {
     return ({ type: "twoFA", data: null, link: null })
   }
 
-  @Get(':id')
-  createDummy(@Param('id') id: string) : {
-	this.prismaclient.AppUser.create({
-		data: {
-			id: Math.floor(Math.random() * 800),
-			session: {
-				create: {
-					id: "dummysession${id}",
-				},
-			},
-			token: {
-				create: {
-					access_token: "dummytoken${id}",
-					token_type: "dummytokentype${id}",
-					expires_in:	999,
-					refresh_token: "dummyrefreshtoken${id}",
-					scope: "dummyscope${id}",
-					created_at: 42,
-				},
-			},
-			full_name:	'dummy ${id}',
-			display_name: 'dummy ${id}',
-		},
-	})
-
-
-
+  @Get('/dummy/:id')
+  createDummy(@Res() res: Response, @Param('id') id: string) : void {
+    res.cookie('ft_transcendence_sessionId', `dummysession${id}`, { sameSite: 'none', secure: true, httpOnly: true});
+    this.prisma.appUser.create({
+      data: {
+        id: Math.floor(Math.random() * 800),
+        session: {
+          create: {
+            id: `dummysession${id}`,
+            state: uuidv4()
+          },
+        },
+        token: {
+          create: {
+            access_token: `dummytoken${id}`,
+            token_type: `dummytokentype${id}`,
+            expires_in:	999,
+            refresh_token: `dummyrefreshtoken${id}`,
+            scope: `dummyscope${id}`,
+            created_at: 42,
+          },
+        },
+        full_name:	`dummy${id}`,
+        display_name: `dummy${id}`,
+        email: "nope@nope.nope",
+      }
+    })
+    .then(
+      (value) => {
+        console.log(value);
+        res.redirect("/");
+      },
+      (err) => {
+        console.log(err);
+        res.end();
+      }
+    )
   }
 }

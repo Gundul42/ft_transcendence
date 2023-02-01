@@ -3,7 +3,6 @@ import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { GameInstance } from '../GameInstance';
 import { ClientEvents, ServerEvents } from '../events';
-import { PrismaService } from '../../prisma/prisma.service';
 import { LobbyManager } from './lobby.manager';
 
 export class Lobby {
@@ -49,19 +48,9 @@ export class Lobby {
 		client.data.lobby = null;
 		client.leave(this.id);
 		if (client.data.role == "player1") {
-			this.game_instance.winner = 2;
-			this.dispatchToLobby(ServerEvents.Finish, {
-				winner: "player2",
-				message: "Player 1 has left"
-			});
-			this.game_instance.finished = true;
+			this.finishGame({winner: 2, message: "Player 1 has left"});
 		} else if (client.data.role == "player2") {
-			this.game_instance.winner = 1;
-			this.dispatchToLobby(ServerEvents.Finish, {
-				winner: "player1",
-				message: "Player 2 has left"
-			});
-			this.game_instance.finished = true;
+			this.finishGame({winner: 1, message: "Player 2 has left"});
 		} else {
 			this.spectators.delete(client.id);
 			this.dispatchToLobby(ServerEvents.LobbyState, {
@@ -74,6 +63,17 @@ export class Lobby {
 				round: this.game_instance.round
 			})
 		}
+	}
+
+	public finishGame({winner, message} : {winner: number, message: string}) : void {
+		if (!this.game_instance.intervalId) return;
+		clearInterval(this.game_instance.intervalId);
+		this.game_instance.finished = true;
+		this.game_instance.winner = winner;
+		this.dispatchToLobby(ServerEvents.Finish, {
+			winner: "player" + winner.toString(),
+			message: message
+		});
 	}
 
 	public dispatchToLobby<T>(event: ServerEvents, payload: T) : void {

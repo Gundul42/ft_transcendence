@@ -24,32 +24,30 @@ export class Ball {
 	) {}
 }
 
-//Difficulty: number between 1 and 10
 export class GameState {
 	public paddle1: Paddle;
 	public paddle2: Paddle;
 	public ball: Ball;
 	constructor(
 		private instance: GameInstance,
-		difficulty: number,
 		round: number
 	) {
-		let paddle_height: number = Math.floor(0.25 * constants.game_canvas.height * (1.5 - (difficulty / 10)));
+		let paddle_height: number = constants.paddle.height;
 		this.paddle1 = new Paddle(new Coordinate(constants.paddle.buffer, constants.game_canvas.height / 2), paddle_height);
 		this.paddle2 = new Paddle(new Coordinate(constants.game_canvas.width - constants.paddle.buffer - constants.paddle.width, constants.game_canvas.height / 2), paddle_height);
-		this.ball = new Ball(this.calcRandomDirection(round), Math.ceil(difficulty / 2 + round / 2));
+		this.ball = new Ball(this.calcRandomDirection(round), constants.ball.velocity);
 	}
 
 	public calcRandomDirection(round: number) : Coordinate {
 		let x: number = (round % 2 === 1) ? 1 : -1;
 		let y: number = (Math.random() * 2) - 1;
-		let magnitude: number = Math.sqrt(Math.pow(x, x) + Math.pow(y, y));
+		let magnitude: number = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		return new Coordinate(x / magnitude, y / magnitude);
 	}
 
-	public calcNewPosition(time_passed: number) : void {
-		let ball_new_x: number = this.ball.position.x + Math.round(this.ball.velocity * (time_passed / 1000) * this.ball.direction.x);
-		let ball_new_y: number = this.ball.position.y + Math.round(this.ball.velocity * (time_passed / 1000) * this.ball.direction.y);
+	public calcNewPosition() : void {
+		let ball_new_x: number = this.ball.position.x + Math.round(this.ball.velocity * this.ball.direction.x);
+		let ball_new_y: number = this.ball.position.y + Math.round(this.ball.velocity * this.ball.direction.y);
 
 		if (ball_new_y - this.ball.radius < 0) {
 			ball_new_y = (2 * this.ball.radius) - ball_new_y;
@@ -58,16 +56,16 @@ export class GameState {
 			ball_new_y = (2 * constants.game_canvas.height) - (2 * this.ball.radius) - ball_new_y;
 			this.ball.direction.y *= -1;
 		}
-		if (ball_new_x - this.ball.radius < constants.paddle.buffer) {
-			if (((ball_new_y - this.ball.radius) > this.paddle1.position.y) || ((ball_new_y + this.ball.radius) < (this.paddle1.position.y - this.paddle1.height))) {
+		if ((ball_new_x - this.ball.radius) < (constants.paddle.buffer + constants.paddle.width)) {
+			if (((ball_new_y - this.ball.radius) > (this.paddle1.position.y + this.paddle1.height)) || ((ball_new_y + this.ball.radius) < this.paddle1.position.y)) {
 				this.instance.player2_points++;
 				this.instance.scored = true;
 			} else {
 				ball_new_x = (2 * this.paddle1.position.x) + (2 * constants.paddle.width) + this.ball.radius - ball_new_x;
 				this.ball.direction.x *= -1;
 			}
-		} else if (ball_new_x + this.ball.radius > (constants.game_canvas.width - constants.paddle.buffer)) {
-			if (((ball_new_y - this.ball.radius) > this.paddle2.position.y) || ((ball_new_y + this.ball.radius) < (this.paddle2.position.y - this.paddle2.height))) {
+		} else if (ball_new_x + this.ball.radius > (constants.game_canvas.width - constants.paddle.buffer - constants.paddle.width)) {
+			if (((ball_new_y - this.ball.radius) > (this.paddle2.position.y + this.paddle1.height)) || ((ball_new_y + this.ball.radius) < this.paddle2.position.y)) {
 				this.instance.player1_points++;
 				this.instance.scored = true;
 			} else {
@@ -86,12 +84,21 @@ export class GameState {
 		} else {
 			paddle = this.paddle2;
 		}
-		if (paddle.position.y + direction > constants.game_canvas.height) {
-			paddle.position.y = constants.game_canvas.height;
-		} else if ((paddle.position.y + direction - paddle.height) < 0) {
+		if (paddle.position.y + direction < 0) {
 			paddle.position.y = 0;
+		} else if ((paddle.position.y + paddle.height + direction) > constants.game_canvas.height) {
+			paddle.position.y = constants.game_canvas.height - paddle.height;
 		} else {
 			paddle.position.y += direction * constants.paddle.velocity;
 		}
+	}
+
+	public resetGameState() : void {
+		this.ball.position.x = constants.game_canvas.width / 2;
+		this.ball.position.y = constants.game_canvas.height / 2;
+		this.ball.direction = this.calcRandomDirection(this.instance.round);
+
+		this.paddle1.position.y = (constants.game_canvas.height - this.paddle1.height) / 2;
+		this.paddle2.position.y = (constants.game_canvas.height - this.paddle2.height) / 2;
 	}
 }
