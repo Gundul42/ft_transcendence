@@ -83,6 +83,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// 	include: { user: true }
 		//   })
 		// Validate if client can join room here
+		this.rooms.checkRoomStatus(room);
 		console.log("joining room", room);
 		console.log(session.user);
 		const res = await this.rooms.makeRoom(client, session.user, room);

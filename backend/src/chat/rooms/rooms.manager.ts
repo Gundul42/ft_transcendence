@@ -12,7 +12,18 @@ export class RoomsManager {
 		
 	}
 
-	async makeRoom(client: Socket, user: AppUser, name: string) : Promise<Room> {
+	async checkRoomStatus(room: string) : Promise<boolean>
+	{
+		const exists = await this.prisma.room.findFirst({
+			where: { name: room	},
+			});
+		//  check if doesn't exist
+		//	check if pass protected, if yes, check pass
+		return (true);
+	}
+
+	async makeRoom(client: Socket, user: AppUser, name: string) : Promise<Room | null>
+	{
 		const result = await this.prisma.room.create({
 		  data: {
 			participants: {
