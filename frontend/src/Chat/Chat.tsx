@@ -132,6 +132,10 @@ const pingFunc = () =>
 	socket.emit("ping");
 }
 
+const joinAll = () =>
+{
+	socket.emit("join", "all");
+}
 // Input pretty, will implement
 //<div class="search input-group">
 //               <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
@@ -167,6 +171,7 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 			<ChatBody app_state={app_state} messages={messages} lastMsg={lastMessageRef}/>
 			<ChatFooter data_state={app_state.data} />
 			<button onClick={pingFunc}>Ping</button>
+			<button onClick={joinAll}>Join Room</button>
 		</div>
 	</div>
 	)

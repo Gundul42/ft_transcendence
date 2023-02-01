@@ -7,16 +7,16 @@ export class RoomsManager {
 	public server: Server;
 	public counter = 0;
 
-	constructor(private readonly prisma: PrismaService)
+	constructor(public prisma: PrismaService)
 	{
 		
 	}
 
 	async makeRoom(client: Socket, user: AppUser, name: string) : Promise<Room> {
 		const result = await this.prisma.room.create({
-		  data : {
-			participants:{
-				connect: user
+		  data: {
+			participants: {
+				connect: { id: user.id }
 			},
 			name: name,
 		  }
@@ -25,8 +25,20 @@ export class RoomsManager {
 		  console.log(err);
 		  return null;
 		});
-		if (result != null)
-			client.join(name);
+		if (result === null)
+			return (null)
+		client.join(name);
+		await this.prisma.appUser.update(
+			{
+				where: {
+					id: user.id,
+				},
+				data:
+				{
+					rooms: {connect: { id: result.id }},
+				}
+			}
+		)
 		return result;
 	}
 }

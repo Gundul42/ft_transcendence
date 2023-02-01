@@ -16,9 +16,12 @@ import { RoomsManager } from './rooms/rooms.manager';
 @WebSocketGateway(3030, { namespace: 'chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor (
-		private prisma: PrismaService,
-		private readonly rooms: RoomsManager
-		) {}
+		private readonly prisma: PrismaService,
+		private readonly rooms: RoomsManager)
+	{
+		rooms.prisma = this.prisma;
+	}
+
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server)
@@ -40,7 +43,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleConnection(client: Socket)
 	{
-		console.log("hm?");
 		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
 		client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
 	}
@@ -55,7 +57,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	}
 
-	async findUser(client: Socket) : Promise<AppUser>
+	async findUser(client: Socket) : Promise<(Session & { user: AppUser | null}) | null>
 	{
 		return await this.prisma.session.findUnique({
 			where: {
@@ -72,7 +74,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage("join")
 	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
 	{
-		const user = await this.findUser(client);
+		const session: Session & { user: AppUser } = await this.findUser(client);
+		// const user = await this.findUser(client);
 		// this.prisma.appUser.findUnique({
 		// 	where: {
 		// 	  id: client.request.
@@ -81,7 +84,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//   })
 		// Validate if client can join room here
 		console.log("joining room", room);
-		const res = await this.rooms.makeRoom(client, user, room);
+		console.log(session.user);
+		const res = await this.rooms.makeRoom(client, session.user, room);
 		if (res != null)
 			console.log("room creation succesful");
 		// client.join(room);
