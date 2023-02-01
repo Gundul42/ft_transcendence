@@ -65,6 +65,27 @@
   background-color: #282c34;
   height: 100%;
   width: 100%;
+  font-size: calc(4px + 2vmin);
+  color: white;
+}
+
+.Lobby-state {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.User-public {
+  display: flex;
+  align-items: center;
+}
+
+.User-public>img{
+  height: 5vh;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 2px solid white;
 }
 
 .Chat {
