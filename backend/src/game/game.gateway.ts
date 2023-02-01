@@ -24,6 +24,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	afterInit(server: Server) {
 		this.lobbyManager.server = server;
+		this.lobbyManager.prisma = this.prisma;
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void> {
@@ -44,7 +45,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.disconnect(true);
 			return ;
 		}
-		this.lobbyManager.initializeSocket(client as AuthenticatedSocket, session_user.user.id);
+		this.lobbyManager.initializeSocket(client as AuthenticatedSocket, session_user.user);
 		this.prisma.appUser.update({
 			where: { id: session_user.user.id },
 			data: {
@@ -69,14 +70,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage(ClientEvents.Play)
 	joinPlayer(client: AuthenticatedSocket) : void {
 		console.log("Upserting lobby");
-		const lobby: Lobby = this.lobbyManager.upsertLobby(client);
+		try {
+			var lobby: Lobby = this.lobbyManager.upsertLobby(client);
+		} catch (err: any) {
+			console.log(err);
+			return ;
+		}
 		if (lobby.game_instance.started) {
-			this.lobbyManager.server.of("/game").emit(ServerEvents.GlobalState, {
+			this.lobbyManager.server.emit(ServerEvents.GlobalState, {
 				ongoing_matches: Array.from(this.lobbyManager.getLobbies(), (entry) => {
 					return ({
 						lobbyId: entry[0],
-						player1: entry[1].player1,
-						player2: entry[1].player2
+						player1: entry[1].player1.data.info,
+						player2: entry[1].player2.data.info
 					});
 				})
 			})
@@ -94,5 +100,35 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage(ClientEvents.Watch)
 	joinSpectator(client: AuthenticatedSocket, data: {lobbyId: string}) : void {
 		this.lobbyManager.joinAsSpectator(client, data.lobbyId);
+	}
+
+	/*
+	The direction of the keys is inverse compared to the direction of html canvas,
+	therefore the direction is inverted in the next two functions
+	*/
+	@SubscribeMessage(ClientEvents.Up)
+	moveUp(client: AuthenticatedSocket) : void {
+		let id: number;
+		if (client.data.role === "player1") {
+			id = 1;
+		} else if (client.data.role === "player2") {
+			id = 2;
+		} else {
+			return ;
+		}
+		client.data.lobby?.game_instance.state.movePaddle(id, -1);
+	}
+
+	@SubscribeMessage(ClientEvents.Down)
+	moveDown(client: AuthenticatedSocket) : void {
+		let id: number;
+		if (client.data.role === "player1") {
+			id = 1;
+		} else if (client.data.role === "player2") {
+			id = 2;
+		} else {
+			return ;
+		}
+		client.data.lobby?.game_instance.state.movePaddle(id, 1);
 	}
 }

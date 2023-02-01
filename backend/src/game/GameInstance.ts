@@ -2,7 +2,7 @@ import { GameState } from "./GameState";
 import { Lobby } from "./lobby/lobby";
 import { ServerEvents } from "./events";
 import { PrismaService } from '../prisma/prisma.service';
-import constants from './constants.json';
+import * as constants from './constants.json';
 
 export interface ICoordinate {
 	x: number;
@@ -24,39 +24,43 @@ export class GameInstance {
 	public player2_points: number = 0;
 	public max_points: number = 11;
 	public round: number = 1;
+	public intervalId: any = 0;
 
-	public state: GameState = new GameState(this, this.difficulty, this.round);
+	public state: GameState = new GameState(this, this.difficulty);
 	constructor(
 		private readonly lobby: Lobby,
 		public readonly difficulty: number
 	) {}
 
 	public start() : void {
-		while (!this.finished && this.player1_points < this.max_points && this.player2_points < this.max_points) {
-			this.play(constants.fps);
-		}
-		if (this.winner === 0) {
-			if (this.player1_points > this.player2_points) {
-				this.winner = 1;
-			} else {
-				this.winner = 2;
-			}
-		}
-	}
-
-	public play(fps: number) : void {
+		this.state.resetGameState();
 		this.scored = false;
-		this.lobby.dispatchToLobby(ServerEvents.GameState, this.render(0))
+		this.lobby.dispatchToLobby(ServerEvents.GameState, this.render())
 		this.sleep(3000);
-		let waiting_time: number = 1000 / fps;
-		while (!this.scored) {
-			this.sleep(waiting_time)
-			this.render(waiting_time);
-		}
+		let waiting_time: number = 1000 / constants.fps;
+		this.intervalId = setInterval(this.play.bind(this), waiting_time, waiting_time);
 	}
 
-	public render(milliseconds: number) : IGameState {
-		this.state.calcNewPosition(milliseconds);
+	public play(waiting_time: number) : void {
+		if (this.scored) {
+			if (this.player1_points === this.max_points) {
+				this.lobby.finishGame({winner: 1, message: "Player 1 won"});
+				return ;
+			} else if (this.player2_points === this.max_points) {
+				this.lobby.finishGame({winner: 2, message: "Player 2 won"});
+				return ;
+			}
+			this.round++;
+			this.state.resetGameState();
+			this.scored = false;
+			this.lobby.dispatchToLobby(ServerEvents.GameState, this.render())
+			this.sleep(3000);
+		}
+		this.lobby.dispatchToLobby(ServerEvents.GameState, this.render());
+	}
+
+	public render() : IGameState {
+		this.state.calcNewPosition();
 		return ({
 			ball: {
 				x: this.state.ball.position.x,

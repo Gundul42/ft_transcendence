@@ -3,16 +3,22 @@ import { Server } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { ServerEvents } from '../events';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AppUser } from '@prisma/client';
 
 export class LobbyManager {
+	constructor(public prisma: PrismaService) {}
+
 	public server: Server;
 	private readonly lobbies: Map<Lobby['id'], Lobby> = new Map<Lobby['id'], Lobby>();
 
-	constructor(private readonly prisma: PrismaService) {}
-
-	public initializeSocket(client: AuthenticatedSocket, userid: number) : void {
+	public initializeSocket(client: AuthenticatedSocket, user: AppUser) : void {
 		client.data.lobby = null;
-		client.data.userid = userid;
+		client.data.userid = user.id;
+		client.data.info = {
+			display_name: user.display_name,
+			avatar: user.avatar,
+			status: user.status
+		}
 	};
 
 	public terminateSocket(client: AuthenticatedSocket) : void {
@@ -21,7 +27,7 @@ export class LobbyManager {
 
 	public upsertLobby(client: AuthenticatedSocket) : Lobby {
 		let lobby_id: string = "";
-		var upsertedLobby: Lobby;
+		var upsertedLobby: Lobby | undefined;
 		this.lobbies.forEach((value: Lobby, key: string, map: Map<string, Lobby>) => {
 			if (!value.game_instance.started) {
 				lobby_id = value.id;
@@ -34,8 +40,10 @@ export class LobbyManager {
 			upsertedLobby.addClient(client);
 		} else {
 			client.data.role = "player2";
-			upsertedLobby = this.lobbies[lobby_id];
-			console.log(this.lobbies[lobby_id])
+			upsertedLobby = this.lobbies.get(lobby_id);
+			if (upsertedLobby === undefined) {
+				throw new Error("Found id of invalid lobby");
+			}
 			upsertedLobby.addClient(client);
 			this.prisma.match.create({
 				data: {

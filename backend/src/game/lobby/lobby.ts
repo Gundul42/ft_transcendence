@@ -3,7 +3,6 @@ import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { GameInstance } from '../GameInstance';
 import { ClientEvents, ServerEvents } from '../events';
-import { PrismaService } from '../../prisma/prisma.service';
 import { LobbyManager } from './lobby.manager';
 
 export class Lobby {
@@ -18,7 +17,6 @@ export class Lobby {
 	constructor(
 		private readonly server: Server,
 		private readonly lobbyManager: LobbyManager
-		//public readonly ladder_level: number
 	) {}
 
 	public addClient(client: AuthenticatedSocket) : void {
@@ -30,11 +28,13 @@ export class Lobby {
 		} else if (client.data.role === "player2") {
 			this.player2 = client;
 			this.game_instance.started = true;
-			this.game_instance.start();
 			this.dispatchToLobby(ServerEvents.Ready, {});
+			this.game_instance.start();
 		} else {
 			this.spectators.set(client.id, client);
 			this.dispatchToLobby(ServerEvents.LobbyState, {
+				player1: this.player1.data.info,
+				player2: this.player2.data.info,
 				lobbyId: this.id,
 				spectators: this.spectators.size,
 				p1_points: this.game_instance.player1_points,
@@ -48,22 +48,14 @@ export class Lobby {
 		client.data.lobby = null;
 		client.leave(this.id);
 		if (client.data.role == "player1") {
-			this.game_instance.winner = 2;
-			this.dispatchToLobby(ServerEvents.Finish, {
-				winner: "player2",
-				message: "Player 1 has left"
-			});
-			this.game_instance.finished = true;
+			this.finishGame({winner: 2, message: "Player 1 has left"});
 		} else if (client.data.role == "player2") {
-			this.game_instance.winner = 1;
-			this.dispatchToLobby(ServerEvents.Finish, {
-				winner: "player1",
-				message: "Player 2 has left"
-			});
-			this.game_instance.finished = true;
+			this.finishGame({winner: 1, message: "Player 2 has left"});
 		} else {
 			this.spectators.delete(client.id);
 			this.dispatchToLobby(ServerEvents.LobbyState, {
+				player1: this.player1.data.info,
+				player2: this.player2.data.info,
 				lobbyId: this.id,
 				spectators: this.spectators.size,
 				p1_points: this.game_instance.player1_points,
@@ -71,6 +63,17 @@ export class Lobby {
 				round: this.game_instance.round
 			})
 		}
+	}
+
+	public finishGame({winner, message} : {winner: number, message: string}) : void {
+		if (!this.game_instance.intervalId) return;
+		clearInterval(this.game_instance.intervalId);
+		this.game_instance.finished = true;
+		this.game_instance.winner = winner;
+		this.dispatchToLobby(ServerEvents.Finish, {
+			winner: "player" + winner.toString(),
+			message: message
+		});
 	}
 
 	public dispatchToLobby<T>(event: ServerEvents, payload: T) : void {

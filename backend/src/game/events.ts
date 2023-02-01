@@ -2,7 +2,9 @@ export enum ClientEvents {
 	Play = "Play",
 	Watch = "Watch",
 	Leave = "Leave",
-	Cancel = "Cancel"
+	Cancel = "Cancel",
+	Up = "Up",
+	Down = "Down"
 }
 
 export enum ServerEvents {

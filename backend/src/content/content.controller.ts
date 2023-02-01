@@ -24,7 +24,7 @@ export class ContentController {
 			'Content-Type': 'image/' + (picture as string).split('.').pop(),
 			'Content-Disposition': 'attachment; filename="' + picture + '"',
 		});
-		return new StreamableFile(file);
+		return new StreamableFile(file).setErrorHandler((err: any) => { console.log(err); });
 	}
 
 	@Post("display_name")
