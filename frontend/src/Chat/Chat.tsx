@@ -76,39 +76,40 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : ISafeAppState, m
 	}
 
 	const ChatFooter = ({data_state} : {data_state : IUser}) => {
-		const [message, setMessage] = useState("")
-		// const handleTyping = () => socket.emit("typing",`${localStorage.getItem("uname")} is typing`)
+		const [message, setMessage] = useState("");
 
-		const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
-				e.preventDefault()
-				if(message.trim() && (data_state.display_name as string).split(' ')[0]) {
-		console.log(message);
-		if (message[0] === '/')
+		const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => 
 		{
-			const elements = message.substring(1, message.length).split(" ");
-			console.log(elements);
-			socket.emit(elements[0], 
-				{
-					text: elements.slice(1), 
+			e.preventDefault()
+			if (message.trim() && (data_state.display_name as string).split(' ')[0]) 
+			{
+			console.log(message);
+			if (message[0] === '/')
+			{
+				const elements = message.substring(1, message.length).split(" ");
+				console.log(elements);
+				socket.emit(elements[0], 
+					{
+						text: elements.slice(1), 
+						name: (data_state.display_name as string).split(' ')[0], 
+						id: `${socket.id}${Math.random()}`,
+						socketID: socket.id,
+						// auth: data_state
+					}, handleCallback);
+			}
+			else
+			{
+				socket.emit("message", 
+					{
+					text: message, 
 					name: (data_state.display_name as string).split(' ')[0], 
 					id: `${socket.id}${Math.random()}`,
-					socketID: socket.id,
-					// auth: data_state
-				}, handleCallback);
-		}
-		else
-				{
-			socket.emit("message", 
-				{
-				text: message, 
-				name: (data_state.display_name as string).split(' ')[0], 
-				id: `${socket.id}${Math.random()}`,
-				socketID: socket.id
-				});
-		}
-		console.log("msg sent");
-				}
-				setMessage("");
+					socketID: socket.id
+					});
+			}
+			console.log("msg sent");
+			}
+			setMessage("");
 		}
 	return (
 		<div className='Chat-Input'>

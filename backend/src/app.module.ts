@@ -4,7 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatGateway } from './chat/chat.gateway';
-import { PlayModule } from './play/play.module';
+import { GameModule } from './game/game.module';
 import { ChatModule } from './chat/chat.module';
 import { RoomsManager } from './chat/rooms/rooms.manager';
 
@@ -13,8 +13,8 @@ import { RoomsManager } from './chat/rooms/rooms.manager';
   imports: [
     AuthModule,
     ContentModule,
-    PlayModule,
     PrismaModule,
+    GameModule,
     ConfigModule.forRoot(),
     ChatModule
   ], 

@@ -79,7 +79,7 @@ model TwoFA {
 }
 
 model Match {
-	id				Int			@id @default(autoincrement())
+	id				String		@id
 	started_at		DateTime	@default(now())
 	finished_at		DateTime?
 	player1id		Int
@@ -87,7 +87,7 @@ model Match {
 	player1			AppUser		@relation("player1", fields: [player1id], references: [id])
 	player2			AppUser		@relation("player2", fields: [player2id], references: [id])
 	winner			Int?
-	ladder			Int
+	//ladder			Int
 }
 
 model Room {

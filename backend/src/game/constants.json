@@ -1,0 +1,11 @@
+{
+	"game_canvas": {
+		"width": 1600,
+		"height": 1200
+	},
+	"paddle": {
+		"buffer": 50,
+		"width": 50
+	},
+	"fps": 25
+}

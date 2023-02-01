@@ -13,7 +13,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Room, Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 
-@WebSocketGateway( { namespace: 'chat' })
+@WebSocketGateway(3030, { namespace: 'chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor (
 		private prisma: PrismaService,

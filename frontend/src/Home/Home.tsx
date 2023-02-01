@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { socket } from '../Play/socket';
 import { LeftColumn } from './Left_column';
 import { RightColumn } from '../Right_column';
 import { Status, Header, ISafeAppState, IAppState } from '../App';
 import endpoint from '../endpoint.json'
+import { ClientEvents, ServerEvents } from '../Play/events';
 
 function DisplayNamePrompt() {
 	const [name, setName] : [name: string, setName: any] = useState("");
@@ -36,7 +38,39 @@ function DisplayNamePrompt() {
 	)
 }
 
+function PlayButton({setClicked} : {setClicked: any}) {
+	return (
+		<button className="button" onClick={() => {setClicked(true); socket.emit(ClientEvents.Play)}}>
+			Play
+		</button>
+	)
+}
+
+function Loading({setClicked} : {setClicked: any}) {
+	return (
+		<div>
+			<div className="lds-ring"><div></div><div></div><div></div><div></div></div>
+			<div className="break"></div>
+			<button className="button" onClick={() => {setClicked(false); socket.emit(ClientEvents.Cancel)}}>
+				Cancel
+			</button>
+		</div>
+	)
+}
+
 export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
+	const [isClicked, setClicked] : [boolean, any] = useState(false);
+
+	useEffect(() => {
+		socket.on(ServerEvents.Ready, () => {
+			set_page("play");
+		});
+
+		return () => {
+			socket.off(ServerEvents.Ready);
+		};
+	}, []);
+
 	let converter: IAppState = {
 		status: app_state.status,
 		data: {
@@ -54,9 +88,10 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">
 				<h1>Welcome {app_state.data.display_name}</h1>
-				<button className="button" onClick={() => {set_page("play")}}>
-					Play
-				</button>
+				{!isClicked &&
+					<PlayButton setClicked={setClicked}/>}
+				{isClicked &&
+					<Loading setClicked={setClicked} />}
 			</div>
 			<RightColumn app_state={converter} set_page={set_page} />
 		</div>
