@@ -32,15 +32,7 @@ export class Lobby {
 			this.game_instance.start();
 		} else {
 			this.spectators.set(client.id, client);
-			this.dispatchToLobby(ServerEvents.LobbyState, {
-				player1: this.player1.data.info,
-				player2: this.player2.data.info,
-				lobbyId: this.id,
-				spectators: this.spectators.size,
-				p1_points: this.game_instance.player1_points,
-				p2_points: this.game_instance.player2_points,
-				round: this.game_instance.round
-			})
+			this.sendLobbyState();
 		}
 	}
 
@@ -53,15 +45,7 @@ export class Lobby {
 			this.finishGame({winner: 1, message: "Player 2 has left"});
 		} else {
 			this.spectators.delete(client.id);
-			this.dispatchToLobby(ServerEvents.LobbyState, {
-				player1: this.player1.data.info,
-				player2: this.player2.data.info,
-				lobbyId: this.id,
-				spectators: this.spectators.size,
-				p1_points: this.game_instance.player1_points,
-				p2_points: this.game_instance.player2_points,
-				round: this.game_instance.round
-			})
+			this.sendLobbyState();
 		}
 	}
 
@@ -73,6 +57,18 @@ export class Lobby {
 		this.dispatchToLobby(ServerEvents.Finish, {
 			winner: "player" + winner.toString(),
 			message: message
+		});
+	}
+
+	public sendLobbyState() : void {
+		this.dispatchToLobby(ServerEvents.LobbyState, {
+			player1: this.player1.data.info,
+			player2: this.player2.data.info,
+			lobbyId: this.id,
+			spectators: this.spectators.size,
+			p1_points: this.game_instance.player1_points,
+			p2_points: this.game_instance.player2_points,
+			round: this.game_instance.round
 		});
 	}
 

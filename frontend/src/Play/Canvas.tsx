@@ -8,7 +8,7 @@ export function Canvas({gameState} : {gameState: IGameState}) {
 	const draw = (ctx: CanvasRenderingContext2D) => {
 		//Canvas
 		ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-		ctx.fillStyle = '#000000';
+		ctx.fillStyle = '#FFFFFF';
 		//Ball
 		ctx.beginPath();
 		ctx.arc(gameState.ball.x, gameState.ball.y, constants.ball.radius, 0, 2*Math.PI);
@@ -51,7 +51,7 @@ export function Canvas({gameState} : {gameState: IGameState}) {
 		<canvas style={{
 			height: canvas_height,
 			width: canvas_width,
-			border: "5px solid red"
+			border: "5px solid white"
 		}} width={constants.game_canvas.width} height={constants.game_canvas.height} ref={canvasRef} />
 	)
 }

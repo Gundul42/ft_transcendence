@@ -35,7 +35,7 @@ export class GameInstance {
 	public start() : void {
 		this.state.resetGameState();
 		this.scored = false;
-		this.lobby.dispatchToLobby(ServerEvents.GameState, this.render())
+		this.lobby.sendLobbyState()
 		this.sleep(3000);
 		let waiting_time: number = 1000 / constants.fps;
 		this.intervalId = setInterval(this.play.bind(this), waiting_time, waiting_time);
@@ -43,6 +43,7 @@ export class GameInstance {
 
 	public play(waiting_time: number) : void {
 		if (this.scored) {
+			this.lobby.sendLobbyState();
 			if (this.player1_points === this.max_points) {
 				this.lobby.finishGame({winner: 1, message: "Player 1 won"});
 				return ;
