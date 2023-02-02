@@ -32,30 +32,29 @@ export class GameInstance {
 		public readonly difficulty: number
 	) {}
 
-	public start() : void {
+	public async start() : Promise<void> {
 		this.state.resetGameState();
 		this.scored = false;
-		this.lobby.sendLobbyState()
-		this.sleep(3000);
+		this.lobby.sendLobbyState();
+		await this.sleep(3000);
 		let waiting_time: number = 1000 / constants.fps;
 		this.intervalId = setInterval(this.play.bind(this), waiting_time, waiting_time);
 	}
 
-	public play(waiting_time: number) : void {
+	public play() : void {
 		if (this.scored) {
 			this.lobby.sendLobbyState();
 			if (this.player1_points === this.max_points) {
-				this.lobby.finishGame({winner: 1, message: "Player 1 won"});
+				this.lobby.finishGame({winner: 1, message: "The Match has ended"});
 				return ;
 			} else if (this.player2_points === this.max_points) {
-				this.lobby.finishGame({winner: 2, message: "Player 2 won"});
+				this.lobby.finishGame({winner: 2, message: "The Match has ended"});
 				return ;
 			}
 			this.round++;
 			this.state.resetGameState();
 			this.scored = false;
-			this.lobby.dispatchToLobby(ServerEvents.GameState, this.render())
-			this.sleep(3000);
+			this.lobby.dispatchToLobby(ServerEvents.GameState, this.render());
 		}
 		this.lobby.dispatchToLobby(ServerEvents.GameState, this.render());
 	}

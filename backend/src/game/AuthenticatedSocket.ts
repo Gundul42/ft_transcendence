@@ -6,7 +6,7 @@ export type AuthenticatedSocket = Socket & {
 	data: {
 		lobby: null | Lobby,
 		userid: number,
-		role: "player1" | "player2" | "spectator",
+		role: "noRole" | "player1" | "player2" | "spectator",
 		info: IUserPublic
 	}
 }

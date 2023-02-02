@@ -131,4 +131,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		client.data.lobby?.game_instance.state.movePaddle(id, 1);
 	}
+
+	@SubscribeMessage(ClientEvents.Leave)
+	handleLeave(client: AuthenticatedSocket) : void {
+		console.log("client is leaving match");
+		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
+			this.lobbyManager.destroyLobby(client.data.lobby.id);
+		}
+		this.lobbyManager.terminateSocket(client);
+	}
 }

@@ -70,3 +70,8 @@ export interface ILobbyState {
 	p2_points:	number,
 	round:		number
 }
+
+export interface IFinish {
+	winner:		string,
+	message:	string
+}

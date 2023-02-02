@@ -56,6 +56,7 @@ export class LobbyManager {
 					}
 				}
 			})
+			.catch((err: any) => {console.log(err)})
 		}
 		return upsertedLobby;
 	}
@@ -84,11 +85,15 @@ export class LobbyManager {
 					id: lobby_id
 				},
 				data: {
-					winner: this.lobbies[lobby_id].game_instance.winner
+					winner: this.lobbies.get(lobby_id)?.game_instance.winner,
+					finished_at: new Date()
 				}
 			})
 			.catch((err: any) => { console.log(err) });
-			this.updateUserStatus(this.lobbies[lobby_id], 1);
+			if (this.lobbies.get(lobby_id) !== undefined) {
+				this.updateUserStatus(this.lobbies.get(lobby_id), 1);
+				this.lobbies.get(lobby_id).expelAll();
+			}
 		}
 		this.lobbies.get(lobby_id)?.expelAll;
 		this.lobbies.delete(lobby_id);
