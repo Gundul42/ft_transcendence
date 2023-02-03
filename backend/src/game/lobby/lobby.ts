@@ -58,6 +58,7 @@ export class Lobby {
 			winner: "player" + winner.toString(),
 			message: message
 		});
+		this.lobbyManager.destroyLobby(this.id);
 	}
 
 	public sendLobbyState() : void {
@@ -78,5 +79,13 @@ export class Lobby {
 
 	public expelAll() : void {
 		this.server.socketsLeave(this.id);
+		this.player1.data.lobby = null;
+		this.player1.data.role = "noRole";
+		this.player2.data.lobby = null;
+		this.player2.data.role = "noRole";
+		this.spectators.forEach((value: AuthenticatedSocket, key: string, map: Map<string, AuthenticatedSocket>) => {
+			value.data.lobby = null;
+			value.data.role = "noRole";
+		})
 	}
 }

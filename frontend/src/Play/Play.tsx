@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Ball from './Components/Ball'
-import Paddle from './Components/Paddle';
-import PongField from './Components/Pongfield';
-import { Header, ISafeAppState } from '../App';
+import { ISafeAppState } from '../App';
 import { socket } from './socket';
 import { playFieldXMaxSize, playFieldYMaxSize, paddleHeight } from '../constants';
 import { ServerEvents, ClientEvents } from '../events';
-import { IGameState, ILobbyState } from '../Interfaces';
+import { IFinish, IGameState, ILobbyState, IUserPublic } from '../Interfaces';
 import { UserPublic } from '../UserPublic';
 import { Canvas } from './Canvas';
 
@@ -21,6 +18,7 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	})
 
 	const [lobbyState, setLobbyState] : [ILobbyState | null, any] = useState(null);
+	const [winner, SetWinner] : [IFinish | null, any] = useState(null);
 
 	const keydown = (keyEvent: KeyboardEvent) => {
 		if (keyEvent.key === "w" || keyEvent.key === "ArrowUp") {
@@ -30,33 +28,42 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 		}
 	}
 
+	const leave = (e: BeforeUnloadEvent) => {
+		socket.emit(ClientEvents.Leave);
+	}
+
 	useEffect(() => {
 		window.addEventListener("keydown", keydown);
-		return () => window.removeEventListener("keydown", keydown);
+		window.addEventListener("beforeunload", leave);
+
+		return () => {
+			window.removeEventListener("keydown", keydown);
+			window.removeEventListener("beforeunload", leave);
+		};
 	}, [])
 
 	useEffect(() => {
 		socket.on(ServerEvents.GameState, (data: IGameState) => {
 			setGameState(data);
 		});
-
-		return () => {
-			socket.off(ServerEvents.GameState);
-		};
-	}, []);
-
-	useEffect(() => {
 		socket.on(ServerEvents.LobbyState, (data: ILobbyState) => {
 			setLobbyState(data);
 		});
+		socket.on(ServerEvents.Finish, (data: IFinish) => {
+			SetWinner(data);
+		})
 
 		return () => {
 			socket.off(ServerEvents.GameState);
+			socket.off(ServerEvents.LobbyState);
+			socket.off(ServerEvents.Finish);
 		};
 	}, []);
 
 	return (
 		<div className="Play">
+			{winner !== null && lobbyState !== null &&
+				<Winner data={winner} lobby_state={lobbyState} set_page={set_page} />}
 			{lobbyState !== null &&
 				<InfoHeader lobbyState={lobbyState} />}
 			<Canvas gameState={gameState} />
@@ -66,12 +73,19 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	)
 }
 
-
-/* <PongField />
-<Header set_page={set_page} />
-<Ball x={gameState.ball.x} y={gameState.ball.y} />
-<Paddle y={gameState.paddle2.y} isLeft={false} />
-<Paddle y={gameState.paddle1.y} isLeft={true} /> */
+function Winner({ data, lobby_state, set_page } : { data: IFinish, lobby_state: ILobbyState, set_page: any }) {
+	let winner: IUserPublic = data.winner === "player1" ? lobby_state.player1 : lobby_state.player2;
+	return(
+		<div className="Wall">
+			<h1>{data.message}</h1>
+			<div style={{display: "flex", flexDirection: "row"}}>
+				<p>The Winner is:&nbsp;</p>
+			<UserPublic user_info={winner} display_img={true} display_status={false} />
+			</div>
+			<button type="button" className="button" onClick={() => {set_page("home")}}>Go Back</button>
+		</div>
+	)
+}
 
 function InfoHeader({lobbyState} : {lobbyState: ILobbyState}) {
 	return (
@@ -86,9 +100,9 @@ function InfoHeader({lobbyState} : {lobbyState: ILobbyState}) {
 function InfoFooter({lobbyState} : {lobbyState: ILobbyState}) {
 	return (
 		<div className="Lobby-state">
-			<UserPublic user_info={lobbyState.player1} display_status={false} />
+			<UserPublic user_info={lobbyState.player1} display_img={true} display_status={false} />
 			<p>Spectators: {lobbyState.spectators}</p>
-			<UserPublic user_info={lobbyState.player2} display_status={false} />
+			<UserPublic user_info={lobbyState.player2} display_img={true} display_status={false} />
 		</div>
 	)
 }

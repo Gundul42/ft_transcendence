@@ -17,7 +17,7 @@ export class Paddle {
 
 export class Ball {
 	public position: Coordinate = new Coordinate(constants.game_canvas.width / 2, constants.game_canvas.height / 2);
-	public radius: number = 5;
+	public radius: number = constants.ball.radius;
 	constructor(
 		public direction: Coordinate,
 		public readonly velocity: number
