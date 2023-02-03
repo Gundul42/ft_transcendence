@@ -35,6 +35,7 @@ export class GameInstance {
 	public async start() : Promise<void> {
 		this.state.resetGameState();
 		this.scored = false;
+		await this.sleep(50);
 		this.lobby.sendLobbyState();
 		await this.sleep(3000);
 		let waiting_time: number = 1000 / constants.fps;
@@ -75,5 +76,5 @@ export class GameInstance {
 		})
 	}
 
-	private sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+	sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 }

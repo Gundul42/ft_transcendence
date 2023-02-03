@@ -5,6 +5,7 @@ export enum UserStatus {
 }
 
 export interface IUser {
+	id:				number,
 	full_name:		string,
 	email:			string,
 	display_name:	string,
@@ -14,13 +15,16 @@ export interface IUser {
 	wins:			number,
 	losses:			number,
 	ladder_level:	number,
-	friends:		IUser[],
+	friends:		IUserPublic[],
 	achievements:	IAchieve[],
 	match_history:	IMatch[],
-	csrf_token:		string
+	csrf_token:		string,
+	requests_sent:	IUserRequest[],
+	requests_rec:	(IUserRequest & {from: {display_name: string}})[]
 }
 
 export interface IUserPublic {
+	id:				number,
 	display_name:	string,
 	avatar:			string,
 	status:			number
@@ -74,4 +78,11 @@ export interface ILobbyState {
 export interface IFinish {
 	winner:		string,
 	message:	string
+}
+
+export interface IUserRequest {
+	id:				number,
+	sender_id:		number,
+	receiver_id:	number,
+	type:			string
 }

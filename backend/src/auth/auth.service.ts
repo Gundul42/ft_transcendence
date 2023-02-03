@@ -5,8 +5,9 @@ import { AxiosResponse } from 'axios';
 import * as info from './info.json'
 import * as twofactor from 'node-2fa';
 import { PrismaService } from '../prisma/prisma.service';
-import { Session, AppUser, Achieve, Token, TwoFA } from '@prisma/client';
+import { Session, AppUser, Achieve, Token, TwoFA, UserRequest } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { IUserPublic } from '../Interfaces';
 
 @Injectable()
 export class AuthService {
@@ -228,13 +229,28 @@ export class AuthService {
     });
   }
 
-  async getUserSessionAchieve(sessionid: string) : Promise<AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[] }> {
+  async getUserSessionAchieve(sessionid: string) : Promise<AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] }> {
     return await this.prisma.appUser.findUnique({
       where: { sessionid: sessionid},
       include: {
         session: true,
-        friends: true,
-        achievements: true
+        friends: {
+          select: {
+            id: true,
+            display_name: true,
+            avatar: true,
+            status: true
+          }
+        },
+        achievements: true,
+        requests_sent: true,
+        requests_rec: {
+          include: {
+            from: { 
+              select: { display_name: true }
+            }
+          }
+        }
       },
     })
     .catch((err: any) => {

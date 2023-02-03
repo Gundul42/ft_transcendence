@@ -63,8 +63,8 @@ export class Lobby {
 
 	public sendLobbyState() : void {
 		this.dispatchToLobby(ServerEvents.LobbyState, {
-			player1: this.player1.data.info,
-			player2: this.player2.data.info,
+			player1: {...this.player1.data.info, id: this.player1.data.userid},
+			player2: {...this.player2.data.info, id: this.player2.data.userid},
 			lobbyId: this.id,
 			spectators: this.spectators.size,
 			p1_points: this.game_instance.player1_points,

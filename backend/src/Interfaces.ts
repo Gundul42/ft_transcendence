@@ -21,6 +21,7 @@ export interface IUser {
 }
 
 export interface IUserPublic {
+	id:				number,
 	display_name:	string,
 	avatar:			string,
 	status:			number
@@ -69,4 +70,9 @@ export interface ILobbyState {
 	p1_points:	number,
 	p2_points:	number,
 	round:		number
+}
+
+export interface IFinish {
+	winner:		string,
+	message:	string
 }

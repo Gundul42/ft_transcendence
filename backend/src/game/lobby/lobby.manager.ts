@@ -15,6 +15,7 @@ export class LobbyManager {
 		client.data.lobby = null;
 		client.data.userid = user.id;
 		client.data.info = {
+			id: user.id,
 			display_name: user.display_name,
 			avatar: user.avatar,
 			status: user.status
@@ -57,6 +58,7 @@ export class LobbyManager {
 				}
 			})
 			.catch((err: any) => {console.log(err)})
+			this.updateUserStatus(upsertedLobby, 2);
 		}
 		return upsertedLobby;
 	}
@@ -78,7 +80,7 @@ export class LobbyManager {
 		}
 	}
 
-	public destroyLobby(lobby_id: string) : void {
+	public async destroyLobby(lobby_id: string) : Promise<void> {
 		if (this.lobbies.get(lobby_id)?.game_instance.started) {
 			this.prisma.match.update({
 				where: {
@@ -92,6 +94,8 @@ export class LobbyManager {
 			.catch((err: any) => { console.log(err) });
 			if (this.lobbies.get(lobby_id) !== undefined) {
 				this.updateUserStatus(this.lobbies.get(lobby_id), 1);
+				await this.updateStats(this.lobbies.get(lobby_id));
+				this.updateLadder();
 				this.lobbies.get(lobby_id).expelAll();
 			}
 		}
@@ -113,4 +117,74 @@ export class LobbyManager {
 			data: { status: status }
 		})
 	}
+
+	private async updateStats(lobby: Lobby) : Promise<void> {
+		let player1: AppUser = await this.prisma.appUser.findUnique({
+			where: { id: lobby.player1.data.userid }
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		let player2: AppUser = await this.prisma.appUser.findUnique({
+			where: { id: lobby.player2.data.userid }
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		if (player1 === null || player2 === null) return;
+		let winner: AppUser;
+		let loser: AppUser;
+		if (lobby.game_instance.winner === 1) {
+			winner = player1;
+			loser = player2;
+		} else {
+			winner = player2;
+			loser = player1;
+		}
+		this.prisma.appUser.update({
+			where: { id: winner.id },
+			data: {
+				wins: winner.wins + 1,
+			}
+		})
+		.catch((err: any) => {console.log(err)});
+		this.prisma.appUser.update({
+			where: { id: loser.id },
+			data: {
+				losses: loser.losses + 1,
+			}
+		})
+		.catch((err: any) => {console.log(err)});
+	}
+
+	private async updateLadder() : Promise<void> {
+		const all_users: AppUser[] = await this.prisma.appUser.findMany({
+			orderBy: [
+				{ wins: "desc" },
+				{ losses: "asc" }
+			]
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return ([]);
+		});
+		let ladder_level: number = 1;
+		for (let i = 0; i < all_users.length; i++) {
+			if (i === (ladder_level * (ladder_level + 1)) / 2) {
+				ladder_level++;
+			}
+			if (all_users[i].ladder_level !== ladder_level) {
+				await this.prisma.appUser.update({
+					where: { id: all_users[i].id },
+					data: {
+						ladder_level: ladder_level
+					}
+				})
+				.catch((err: any) => {console.log(err)});
+			}
+		}
+	}
+
 }

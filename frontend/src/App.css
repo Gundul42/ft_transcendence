@@ -79,6 +79,8 @@
 .User-public {
   display: flex;
   align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .User-public>img{
@@ -134,6 +136,8 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .Menu-icon, .Avatar-container {
@@ -350,6 +354,133 @@
   100% {
     transform: rotate(360deg);
   }
+}
+
+.tooltip {
+  visibility: hidden;
+  width: 12vw;
+  height: 25vh;
+  background-color: rgba(255, 255, 255, 0.8);
+  color:rgb(102, 110, 117);
+  font-size: 2vmin;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  position: absolute;
+  z-index: 1;
+  top: auto;
+  transition-timing-function: ease;
+  transition: 0.5s;
+}
+
+.tooltip>img {
+  border: 1px solid black;
+  max-width: 40%;
+  max-height: 50%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+}
+
+.tooltip-button {
+  height: 100%;
+  width: 45%;
+  background-color: rgb(255, 255, 255);
+}
+
+.tooltip-button:hover {
+  cursor: pointer;
+}
+
+.tooltip-button>img {
+  max-width: 50%;
+  max-height: 90%;
+  aspect-ratio: 1 / 1;
+}
+
+.User-public:hover>.tooltip, .tooltip:hover {
+  visibility: visible;
+}
+
+.Friends-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.list {
+  width: 60%
+}
+
+.list .User-public {
+  justify-content: space-around;
+}
+
+.circle0, .circle1, .circle2 {
+  border-radius: 50%;
+  height: 2vh;
+  aspect-ratio: 1 / 1;
+}
+
+.circle0 {
+  background-color: red;
+}
+
+.circle1 {
+  background-color: green;
+}
+
+.circle2 {
+  background-color: yellow;
+}
+
+.Requests {
+  width: 90%;
+  max-height: 50%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+
+.record {
+  display: flex;
+  flex-direction: row;
+  height: 10%;
+  width: 100%;
+  justify-content: space-between;
+  padding: 2%;
+  border-bottom: 1px solid black;
+}
+
+.record-name {
+  width: 50%;
+}
+
+.record-buttons {
+  width: 50%;
+}
+
+.Check-button {
+  background-color: rgb(79, 170, 79);
+}
+
+.Cancellation-button {
+  background-color: rgb(238, 116, 116);
+}
+
+.Check-button, .Cancellation-button {
+  border-radius: 5px;
+  height: 100%;
+  width: 25%;
+}
+
+.Check-button:hover, .Cancellation-button:hover {
+  cursor: pointer;
+}
+
+html {
+  background-color: #282c34;
 }
 
 a {
