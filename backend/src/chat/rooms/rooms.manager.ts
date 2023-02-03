@@ -2,6 +2,7 @@
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Room, Session, AppUser } from '@prisma/client';
+import { IRoomAccess } from '../../Interfaces';
 
 export class RoomsManager {
 	public server: Server;
@@ -17,6 +18,10 @@ export class RoomsManager {
 		const exists = await this.prisma.room.findFirst({
 			where: { name: room	},
 			});
+		if (exists === null)
+			return true;
+		if (exists.accessibility == IRoomAccess.Private)
+			return false;
 		//  check if doesn't exist
 		//	check if pass protected, if yes, check pass
 		return (true);
@@ -30,6 +35,7 @@ export class RoomsManager {
 				connect: { id: user.id }
 			},
 			name: name,
+			accessibility: IRoomAccess.Public
 		  }
 		})
 		.catch((err: any) => {

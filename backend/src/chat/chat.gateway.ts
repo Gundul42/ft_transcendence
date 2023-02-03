@@ -12,14 +12,17 @@ import { ParsedUrlQuery } from 'querystring';
 import { PrismaService } from '../prisma/prisma.service';
 import { Room, Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
+import { StorageManager } from './storage/storage.manager';
 
 @WebSocketGateway(3030, { namespace: 'chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor (
 		private readonly prisma: PrismaService,
-		private readonly rooms: RoomsManager)
+		private readonly rooms: RoomsManager,
+		private readonly storage: StorageManager)
 	{
 		rooms.prisma = this.prisma;
+		storage.prisma = this.prisma;
 	}
 
 	@WebSocketServer() server: Server;
@@ -135,11 +138,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("message")
-	handleMsg(@MessageBody() message : string) : void
+	handleMsg(client: Socket, @MessageBody() message : string) : void
 	{
 		console.log("in handling");
 		console.log(message);
 		this.server.emit("messageResponse", message, "hmm");
+		this.storage.saveMessage(message, client);
 		// this.server.emit("messageResponse", 
 		// 	{
 		// 		text: message, 

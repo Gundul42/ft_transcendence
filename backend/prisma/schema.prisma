@@ -53,6 +53,7 @@ model AppUser {
 	rooms			Room[]		@relation("participate")
 	adminOf			Room[]		@relation("administrate")
 	penalties		Penalty[]
+	messages		Message[]	@relation("message")
 }
 
 model Achieve {
@@ -98,6 +99,15 @@ model Room {
 	accessibility	Int			@default(0)
 	name			String
 	password		String		@default("")
+	messages		Message[]	@relation("roomMsg")
+}
+
+model Message {
+	id				Int			@id
+	appUserId		Int
+	sender			AppUser?	@relation("message", fields: [appUserId], references: [id])
+	roomId			Int
+	room			Room?		@relation("roomMsg", fields: [roomId], references: [id])
 }
 
 model Penalty {

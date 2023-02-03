@@ -70,3 +70,9 @@ export interface ILobbyState {
 	p2_points:	number,
 	round:		number
 }
+
+export enum IRoomAccess {
+	Public,
+	Private,
+	PassProtected
+}

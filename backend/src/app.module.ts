@@ -7,7 +7,7 @@ import { ChatGateway } from './chat/chat.gateway';
 import { GameModule } from './game/game.module';
 import { ChatModule } from './chat/chat.module';
 import { RoomsManager } from './chat/rooms/rooms.manager';
-
+import { StorageManager } from './chat/storage/storage.manager';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { RoomsManager } from './chat/rooms/rooms.manager';
   ], 
   providers: 
   [
-    ChatGateway, RoomsManager
+    ChatGateway, RoomsManager, StorageManager
   ]
 })
 export class AppModule {}
