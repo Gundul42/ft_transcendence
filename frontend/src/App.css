@@ -291,6 +291,19 @@
   align-items: center;
 }
 
+.Match-lost {
+  background-color: rgb(233, 136, 136);
+}
+
+.Match-won {
+  background-color: rgb(109, 182, 119);
+}
+
+.Match-lost, .Match-won {
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
 .Section-title {
   padding: 10% 0;
   align-self: flex-start;

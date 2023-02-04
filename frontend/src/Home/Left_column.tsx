@@ -72,7 +72,7 @@ function Matches({active_matches} : {active_matches: IMatch[]})
 			<h2>Ongoing Matches</h2>
 			{ active_matches.length > 0 &&
 				active_matches.map((match) => (
-					<p className="Friend">{match.player1.display_name} | {match.player2.display_name}</p>
+					<p className="Friend">todo</p>
 				))
 			}
 			{ active_matches.length === 0 &&

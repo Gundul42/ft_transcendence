@@ -2,31 +2,27 @@ import { Controller, Get, Post, UseGuards, Res, Req, Param, Body, BadRequestExce
 import { Express, Request, Response } from 'express';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from './users.service';
 import { IUserPublic } from '../Interfaces';
 import { AppUser, Match, Session, UserRequest } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
-	constructor(
-		private userService: UsersService,
-		private prisma: PrismaService) {}
+	constructor(private userService: UsersService) {}
 
 	@Get('userinfo/:id')
 	@UseGuards(AuthGuard)
-	async getUserInfo(@Param('id') id) : Promise<null | IUserPublic & {matches_p1: Match[], matches_p2: Match[]}> {
-		const user: AppUser & { matches_p1: Match[], matches_p2: Match[] } = await this.userService.findUser(id);
+	async getUserInfo(@Param('id') id) : Promise<IUserPublic & {match_history: Match[]}> {
+		const user: AppUser & { matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] } = await this.userService.findUser(id);
 		if (user === null) {
-			return (null);
+			throw new BadRequestException("Selected user does not exist");
 		} else {
 			return ({
 				id: id,
 				display_name: user.display_name,
 				avatar: user.avatar,
 				status: user.status,
-				matches_p1: user.matches_p1,
-				matches_p2: user.matches_p2
+				match_history: this.userService.composeMatchHistory(user),
 			})
 		}
 	}
@@ -35,7 +31,7 @@ export class UsersController {
 	@UseGuards(AuthGuard, JwtAuthGuard)
 	async addAsFriend(@Param('id') id, @Req() req: Request) : Promise<void> {
 		const session: Session & { user: AppUser } = await this.userService.getReqUser(req.cookies["ft_transcendence_sessionId"]);
-		if (session === null || await this.userService.verifyFriendship(session.user.id, Number(id))) {
+		if (session === null || await this.userService.verifyFriendship(session.user.id, Number(id)) || await this.userService.verifyExistingRequest(session.user.id, Number(id))) {
 			throw new BadRequestException("Connection with user already existed");
 		} else if (await this.userService.registerRequest(session.user.id, Number(id), "friend")) {
 			return ;

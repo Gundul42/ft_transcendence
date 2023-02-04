@@ -5,7 +5,7 @@ import { AxiosResponse } from 'axios';
 import * as info from './info.json'
 import * as twofactor from 'node-2fa';
 import { PrismaService } from '../prisma/prisma.service';
-import { Session, AppUser, Achieve, Token, TwoFA, UserRequest } from '@prisma/client';
+import { Session, AppUser, Achieve, Token, TwoFA, UserRequest, Match } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { IUserPublic } from '../Interfaces';
 
@@ -258,6 +258,85 @@ export class AuthService {
       return null;
     });
   }
+
+  async composeMatchHistory(userid: number ) : Promise<(Match & { winner: IUserPublic, loser: IUserPublic})[]> {
+		let res: (Match & { winner: IUserPublic, loser: IUserPublic})[] = [];
+		let i: number = 0;
+		let j: number = 0;
+		
+    const user: AppUser & { matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] } = await this.prisma.appUser.findUnique({
+      where: { id: userid },
+      include: {
+        matches_won: {
+          orderBy: { started_at: "desc" },
+          include: {
+            winner: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            },
+            loser: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            }
+          }
+        },
+        matches_lost: {
+          orderBy: { started_at: "desc" },
+          include: {
+            winner: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            },
+            loser: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            }
+          }
+        }
+      }
+    })
+    .catch((err: any) => {
+      console.log(err);
+      return null;
+    });
+    if (user === null) {
+      return ([]);
+    }
+		while (i < (user.matches_won as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length && j < (user.matches_lost as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			if ((user.matches_won[i].started_at as Date) < (user.matches_lost[j].started_at as Date)) {
+				res.push(user.matches_won[i]);
+				i++;
+			} else {
+				res.push(user.matches_lost[j]);
+				j++;
+			}
+		}
+		while (i < (user.matches_won as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			res.push(user.matches_won[i]);
+			i++;
+		}
+		while (j < (user.matches_lost as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			res.push(user.matches_lost[j]);
+			j++;
+		}
+		return (res);
+	}
 
   //Setters
 

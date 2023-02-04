@@ -69,7 +69,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage(ClientEvents.Play)
-	joinPlayer(client: AuthenticatedSocket) : Promise<void> {
+	joinPlayer(client: AuthenticatedSocket) : void {
 		console.log("Upserting lobby");
 		try {
 			var lobby: Lobby = this.lobbyManager.upsertLobby(client);

@@ -48,13 +48,7 @@ export class LobbyManager {
 			upsertedLobby.addClient(client);
 			this.prisma.match.create({
 				data: {
-					id: lobby_id,
-					player1: {
-						connect: { id: upsertedLobby.player1.data.userid }
-					},
-					player2: {
-						connect: { id: upsertedLobby.player2.data.userid }
-					}
+					id: lobby_id
 				}
 			})
 			.catch((err: any) => {console.log(err)})
@@ -81,13 +75,27 @@ export class LobbyManager {
 	}
 
 	public async destroyLobby(lobby_id: string) : Promise<void> {
-		if (this.lobbies.get(lobby_id)?.game_instance.started) {
+		if (this.lobbies.get(lobby_id) !== undefined && this.lobbies.get(lobby_id).game_instance.started) {
+			let winnerid: number;
+			let loserid: number;
+			if (this.lobbies.get(lobby_id).game_instance.winner === 1) {
+				winnerid = this.lobbies.get(lobby_id)?.player1.data.userid;
+				loserid = this.lobbies.get(lobby_id)?.player2.data.userid;
+			} else {
+				loserid = this.lobbies.get(lobby_id)?.player1.data.userid;
+				winnerid = this.lobbies.get(lobby_id)?.player2.data.userid;
+			}
 			this.prisma.match.update({
 				where: {
 					id: lobby_id
 				},
 				data: {
-					winner: this.lobbies.get(lobby_id)?.game_instance.winner,
+					winner: {
+						connect: { id: winnerid }
+					},
+					loser: {
+						connect: { id: loserid }
+					},
 					finished_at: new Date()
 				}
 			})

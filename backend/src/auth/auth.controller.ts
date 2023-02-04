@@ -26,6 +26,8 @@ export class AuthController {
     }
     console.log(user) //See what data is available and select it
     const csrf_token: { access_token: string } = await this.authService.generateJwt(user.full_name, user.id);
+    const match_history: any = await this.authService.composeMatchHistory(user.id);
+    console.log(match_history);
     res.send({
       'type' : 'content',
       'link': null,
@@ -42,7 +44,7 @@ export class AuthController {
         ladder_level: user.ladder_level,
         friends: user.friends,
         achievements: user.achievements,
-        match_history: [],
+        match_history: match_history,
         csrf_token: csrf_token.access_token,
         requests_sent: user.requests_sent,
         requests_rec: user.requests_rec

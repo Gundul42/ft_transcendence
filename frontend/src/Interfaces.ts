@@ -42,10 +42,10 @@ export interface IMatch {
 	id:				number,
 	started_at:		Date,
 	finished_at:	Date,
-	player1:		IUser,
-	player2:		IUser,
-	winner:			number,
-	ladder:			number
+	winner_id:		number,
+	loser_id:		number,
+	winner:			IUserPublic,
+	loser:			IUserPublic
 }
 
 export interface IAPICall {

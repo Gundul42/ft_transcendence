@@ -36,14 +36,38 @@ function Achievements({achievements} : {achievements: IAchieve[]}) {
 	)
 }
 
-function MatchHistory({match_history} : {match_history: IMatch[]}) {
+function MatchHistory({match_history, userid} : {match_history: IMatch[], userid: number}) {
+	const match_list = () => {
+		return (
+			match_history.map((match) => {
+				let has_won: string;
+				if (match.winner_id === userid) {
+					has_won = "Match-won";
+				} else {
+					has_won = "Match-lost";
+				}
+				return (
+					<tr key={match.id} className={has_won}>
+						<td>{match.winner.display_name}</td>
+						<td style={{width: "45%"}}>V/S</td>
+						<td>{match.loser.display_name}</td>
+					</tr>
+				)
+			})
+		)
+	}
 	return (
 		<div id="Match-history">
 			<h2 className="Section-title">Match History</h2>
 			{match_history.length === 0 &&
 			<p>&#129335;</p>}
 			{match_history.length > 0 &&
-			match_history.map((match) => <li>{match.winner}</li>)}
+				<table style={{borderCollapse: "collapse", width: "90%", overflowY: "scroll", overflowX: "hidden"}}>
+					<tbody>
+						{match_list()}
+					</tbody>
+				</table>
+			}
 		</div>
 	)
 }
@@ -57,7 +81,7 @@ export function Dashboard({app_state} : {app_state: ISafeAppState}) {
 			</div>
 			<div className="Dashboard-row">
 				<Achievements achievements={app_state.data.achievements} />
-				<MatchHistory match_history={app_state.data.match_history} />
+				<MatchHistory userid={app_state.data.id} match_history={app_state.data.match_history} />
 			</div>
 		</div>
 	)
