@@ -84,7 +84,7 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 		<div className="Home">
 		{ app_state.status === Status.Success && app_state.data.display_name === null &&
 			<DisplayNamePrompt />}
-			<LeftColumn app_state={converter} />
+			<LeftColumn app_state={converter} set_page={set_page} />
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">
 				<h1>Welcome {app_state.data.display_name}</h1>

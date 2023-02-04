@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AppUser, Session, UserRequest, Match } from '@prisma/client';
+import { AppUser, Session, UserRequest, Match, Achieve } from '@prisma/client';
 import { IUserPublic } from '../Interfaces';
 
 @Injectable()
 export class UsersService {
 	constructor( private prisma: PrismaService ) {}
 
-	async findUser(userid: number) : Promise<AppUser & { matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] }> {
+	async findUser(userid: number) : Promise<AppUser & { achievements: Achieve[], matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] }> {
 		return await this.prisma.appUser.findUnique({
 			where: { id: userid },
 			include: {
+				achievements: true,
 				matches_won: {
 					orderBy: { started_at: "desc" },
 					include: {
@@ -121,7 +122,7 @@ export class UsersService {
 		}
 	}
 
-	async registerRequest(l_id: number, r_id: number, type: "game" | "friend") : Promise<boolean> {
+	async registerRequest(l_id: number, r_id: number, type: "game" | "friend") : Promise<UserRequest> {
 		return await this.prisma.userRequest.create({
 			data: {
 				from: {
@@ -133,27 +134,11 @@ export class UsersService {
 				type: type
 			}
 		})
-		.then(() => true)
 		.catch((err: any) => {
 			console.log(err);
-			return false;
+			return null;
 		})
 	}
-
-	// async getUserRequests(sessionid: string) : Promise<Session & {user: AppUser & {requests_rec: UserRequest}}> {
-	// 	return await this.prisma.session.findUnique({
-	// 		where: {id: sessionid},
-	// 		include: {
-	// 			user: {
-	// 				include: {requests_rec: true}
-	// 			}
-	// 		}
-	// 	})
-	// 	.catch((err: any) => {
-	// 		console.log(err);
-	// 		return null;
-	// 	})
-	// }
 
 	async getRequest(id: number) : Promise<UserRequest> {
 		return await this.prisma.userRequest.findUnique({
@@ -216,5 +201,36 @@ export class UsersService {
 			j++;
 		}
 		return (res);
+	}
+
+	async removeFriendship(uid_l: number, uid_r: number) : Promise<boolean> {
+		const res_1: boolean = await this.prisma.appUser.update({
+			where: { id: uid_l },
+			data: {
+				friends: {
+					disconnect: { id: uid_r }
+				}
+			}
+		})
+		.then(() => true)
+		.catch((err: any) => {
+			console.log(err);
+			return false;
+		})
+
+		const res_2: boolean = await this.prisma.appUser.update({
+			where: { id: uid_r },
+			data: {
+				friends: {
+					disconnect: { id: uid_l }
+				}
+			}
+		})
+		.then(() => true)
+		.catch((err: any) => {
+			console.log(err);
+			return false;
+		})
+		return (res_1 && res_2);
 	}
 }

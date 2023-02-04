@@ -48,7 +48,7 @@
   align-items: center;
 }
 
-.Home, .User {
+.Home, .User, .Visited-user {
   background-color: #282c34;
   height: 100%;
   width: 100%;
@@ -490,6 +490,12 @@
 
 .Check-button:hover, .Cancellation-button:hover {
   cursor: pointer;
+}
+
+.Avatar-visit {
+  max-width: 50%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
 }
 
 html {

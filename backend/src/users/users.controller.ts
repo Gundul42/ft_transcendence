@@ -3,8 +3,8 @@ import { Express, Request, Response } from 'express';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
-import { IUserPublic } from '../Interfaces';
-import { AppUser, Match, Session, UserRequest } from '@prisma/client';
+import { IUserPublic, IUserPublicPage } from '../Interfaces';
+import { AppUser, Match, Session, UserRequest, Achieve } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
@@ -12,16 +12,20 @@ export class UsersController {
 
 	@Get('userinfo/:id')
 	@UseGuards(AuthGuard)
-	async getUserInfo(@Param('id') id) : Promise<IUserPublic & {match_history: Match[]}> {
-		const user: AppUser & { matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] } = await this.userService.findUser(id);
+	async getUserInfo(@Param('id') id) : Promise<IUserPublicPage> {
+		const user: AppUser & { achievements: Achieve[], matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] } = await this.userService.findUser(Number(id));
 		if (user === null) {
 			throw new BadRequestException("Selected user does not exist");
 		} else {
 			return ({
-				id: id,
+				id: Number(id),
 				display_name: user.display_name,
 				avatar: user.avatar,
 				status: user.status,
+				wins: user.wins,
+				losses: user.losses,
+				ladder_level: user.ladder_level,
+				achievements: user.achievements,
 				match_history: this.userService.composeMatchHistory(user),
 			})
 		}
@@ -29,12 +33,14 @@ export class UsersController {
 
 	@Post('add-as-friend/:id')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async addAsFriend(@Param('id') id, @Req() req: Request) : Promise<void> {
+	async addAsFriend(@Param('id') id, @Req() req: Request) : Promise<{req_id: number}> {
 		const session: Session & { user: AppUser } = await this.userService.getReqUser(req.cookies["ft_transcendence_sessionId"]);
 		if (session === null || await this.userService.verifyFriendship(session.user.id, Number(id)) || await this.userService.verifyExistingRequest(session.user.id, Number(id))) {
 			throw new BadRequestException("Connection with user already existed");
-		} else if (await this.userService.registerRequest(session.user.id, Number(id), "friend")) {
-			return ;
+		}
+		const new_request: UserRequest = await this.userService.registerRequest(session.user.id, Number(id), "friend");
+		if (new_request !== null) {
+			return ({req_id: new_request.id});
 		} else {
 			throw new InternalServerErrorException();
 		}
@@ -57,5 +63,17 @@ export class UsersController {
 			await this.userService.recordFriendship(request.sender_id, request.receiver_id);
 		}
 		await this.userService.deleteRequest(Number(req_id));
+	}
+
+	@Post('remove-friend/:id')
+	@UseGuards(AuthGuard, JwtAuthGuard)
+	async removeFriend(@Param('id') id, @Req() req: Request) : Promise<void> {
+		const session: Session & { user: AppUser } = await this.userService.getReqUser(req.cookies["ft_transcendence_sessionId"]);
+		if (session === null) {
+			throw new InternalServerErrorException();
+		}
+		if (await this.userService.removeFriendship(session.user.id, Number(id)) === false) {
+			throw new BadRequestException("No relation found");
+		}
 	}
 }

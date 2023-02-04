@@ -27,6 +27,14 @@ export interface IUserPublic {
 	status:			number
 }
 
+export interface IUserPublicPage extends IUserPublic {
+	wins:			number,
+	losses:			number,
+	ladder_level:	number,
+	achievements:	IAchieve[],
+	match_history:	IMatch[]
+}
+
 export interface IAchieve {
 	id:				number,
 	type:			number,
@@ -36,7 +44,7 @@ export interface IAchieve {
 }
 
 export interface IMatch {
-	id:				number,
+	id:				string,
 	started_at:		Date,
 	finished_at:	Date,
 	winner_id:		number,

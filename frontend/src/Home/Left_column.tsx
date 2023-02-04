@@ -43,7 +43,7 @@ function Requests({requests} : {requests: (IUserRequest & {from: {display_name: 
 	)
 }
 
-function Friends({user_info, app_state} : {user_info: IUser, app_state: ISafeAppState}) {
+function Friends({user_info, app_state, set_page} : {user_info: IUser, app_state: ISafeAppState, set_page: any}) {
 	return (
 		<div className="Friends">
 			{ user_info.requests_rec.length > 0 &&
@@ -53,7 +53,7 @@ function Friends({user_info, app_state} : {user_info: IUser, app_state: ISafeApp
 				{ user_info.friends.length > 0 &&
 					user_info.friends.map((friend) => (
 						<div className="list" key={friend.id}>
-							<UserPublic user_info={friend} app_state={app_state} display_img={false} display_status={true} />
+							<UserPublic user_info={friend} app_state={app_state} display_img={false} display_status={true} set_page={set_page} />
 						</div>
 					))
 				}
@@ -81,7 +81,7 @@ function Matches({active_matches} : {active_matches: IMatch[]})
 	)
 }
 
-export function LeftColumn({app_state} : {app_state: IAppState}) {
+export function LeftColumn({app_state, set_page} : {app_state: IAppState, set_page: any}) {
 	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
 		const converter: ISafeAppState = {
 			status: app_state.status,
@@ -90,7 +90,7 @@ export function LeftColumn({app_state} : {app_state: IAppState}) {
 		}
 		return (
 			<div className="Left-column">
-				<Friends user_info={app_state.data.data} app_state={converter} />
+				<Friends user_info={app_state.data.data} app_state={converter} set_page={set_page} />
 				<Matches active_matches={[]} />
 			</div>
 		)

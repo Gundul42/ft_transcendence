@@ -1,6 +1,5 @@
 import React from 'react';
-import { ISafeAppState } from '../App';
-import { IAchieve, IMatch } from '../Interfaces';
+import { IAchieve, IMatch, IUserPublicPage } from '../Interfaces';
 
 function LadderLevel({ladder_level} : {ladder_level : number}) {
 	return (
@@ -55,7 +54,7 @@ function MatchHistory({match_history, userid} : {match_history: IMatch[], userid
 				)
 			})
 		)
-	}
+	};
 	return (
 		<div id="Match-history">
 			<h2 className="Section-title">Match History</h2>
@@ -72,16 +71,16 @@ function MatchHistory({match_history, userid} : {match_history: IMatch[], userid
 	)
 }
 
-export function Dashboard({app_state} : {app_state: ISafeAppState}) {
+export function Dashboard({user_info} : {user_info: IUserPublicPage}) {
 	return (
 		<div className="Dashboard">
 			<div className="Dashboard-row">
-				<LadderLevel ladder_level={app_state.data.ladder_level} />
-				<WinsLosses wins={app_state.data.wins} losses={app_state.data.losses} />
+				<LadderLevel ladder_level={user_info.ladder_level} />
+				<WinsLosses wins={user_info.wins} losses={user_info.losses} />
 			</div>
 			<div className="Dashboard-row">
-				<Achievements achievements={app_state.data.achievements} />
-				<MatchHistory userid={app_state.data.id} match_history={app_state.data.match_history} />
+				<Achievements achievements={user_info.achievements} />
+				<MatchHistory userid={user_info.id} match_history={user_info.match_history} />
 			</div>
 		</div>
 	)

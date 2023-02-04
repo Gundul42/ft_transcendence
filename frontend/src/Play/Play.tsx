@@ -68,7 +68,7 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 				<InfoHeader lobbyState={lobbyState} />}
 			<Canvas gameState={gameState} />
 			{lobbyState !== null &&
-				<InfoFooter app_state={app_state} lobbyState={lobbyState} />}
+				<InfoFooter app_state={app_state} lobbyState={lobbyState} set_page={set_page} />}
 		</div>
 	)
 }
@@ -80,7 +80,7 @@ function Winner({ data, app_state, lobby_state, set_page } : { data: IFinish, ap
 			<h1>{data.message}</h1>
 			<div style={{display: "flex", flexDirection: "row"}}>
 				<p>The Winner is:&nbsp;</p>
-			<UserPublic user_info={winner} app_state={app_state} display_img={true} display_status={false} />
+			<UserPublic user_info={winner} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 			</div>
 			<button type="button" className="button" onClick={() => {set_page("home")}}>Go Back</button>
 		</div>
@@ -97,12 +97,12 @@ function InfoHeader({lobbyState} : {lobbyState: ILobbyState}) {
 	)
 }
 
-function InfoFooter({lobbyState, app_state} : {lobbyState: ILobbyState, app_state: ISafeAppState}) {
+function InfoFooter({lobbyState, app_state, set_page} : {lobbyState: ILobbyState, app_state: ISafeAppState, set_page: any}) {
 	return (
 		<div className="Lobby-state">
-			<UserPublic user_info={lobbyState.player1} app_state={app_state} display_img={true} display_status={false} />
+			<UserPublic user_info={lobbyState.player1} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 			<p>Spectators: {lobbyState.spectators}</p>
-			<UserPublic user_info={lobbyState.player2} app_state={app_state} display_img={true} display_status={false} />
+			<UserPublic user_info={lobbyState.player2} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 		</div>
 	)
 }
