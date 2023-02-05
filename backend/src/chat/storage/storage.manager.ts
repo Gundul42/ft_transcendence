@@ -4,7 +4,7 @@ import { Room, Session, AppUser, Message } from '@prisma/client';
 import { IRoomAccess } from '../../Interfaces';
 
 export class StorageManager {
-	public server: Server;
+	// public server: Server;
 
 	constructor(public prisma: PrismaService)
 	{
@@ -15,15 +15,19 @@ export class StorageManager {
 	{
 		this.prisma.message;
 	}
-	async saveMessage(message: string, client: Socket)
+
+	async saveMessage(message: string, client: AppUser)
 	{
-		this.prisma.message.create(
-			{
-				data:
-				{
-					
-				}
-			}
-		)
+		// return await this.prisma.message.create(
+		// 	{
+		// 		data: {
+		// 			value: message,
+		// 			sender: 
+		// 			{
+		// 				connect: { id: client.id }
+		// 			}
+		// 		}
+		// 	}
+		// )
 	}
 }

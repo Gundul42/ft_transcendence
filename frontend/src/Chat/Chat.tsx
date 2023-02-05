@@ -151,6 +151,10 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	const [messages, setMessages] = useState<ChatMessage[]>([])
 	const lastMessageRef = useRef<HTMLDivElement>(null);
 
+	socket.on("connection", (data) => {
+		console.log("connected socket, should be getting msg data")
+		setMessages([...messages, data]);
+	});
 	socket.onAny((event, ...args) => {
 		console.log(event, args);
 	  });

@@ -5,6 +5,11 @@ import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
 
 @Module({
-  providers: [ChatGateway, ChatService, RoomsManager, StorageManager]
+  providers: [
+    ChatGateway, 
+    ChatService, 
+    RoomsManager, 
+    StorageManager
+  ]
 })
 export class ChatModule {}

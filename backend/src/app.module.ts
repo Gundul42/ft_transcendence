@@ -20,7 +20,9 @@ import { StorageManager } from './chat/storage/storage.manager';
   ], 
   providers: 
   [
-    ChatGateway, RoomsManager, StorageManager
+    ChatGateway,
+    RoomsManager,
+    StorageManager
   ]
 })
 export class AppModule {}

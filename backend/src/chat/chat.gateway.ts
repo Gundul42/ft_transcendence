@@ -19,7 +19,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	constructor (
 		private readonly prisma: PrismaService,
 		private readonly rooms: RoomsManager,
-		private readonly storage: StorageManager)
+		private readonly storage: StorageManager
+		)
 	{
 		rooms.prisma = this.prisma;
 		storage.prisma = this.prisma;
@@ -36,6 +37,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			// console.log("Query: ", query);
 			if (await this.isValid(req)) {
 				console.log("Auth successful");
+				
 				next();
 				return;
 			}
@@ -48,6 +50,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	{
 		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
 		client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
+		// this.prisma.appUser
 	}
 
 	handleDisconnect(client: Socket)
@@ -77,6 +80,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage("join")
 	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
 	{
+		console.log(client);
 		const session: Session & { user: AppUser } = await this.findUser(client);
 		// const user = await this.findUser(client);
 		// this.prisma.appUser.findUnique({
@@ -86,7 +90,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// 	include: { user: true }
 		//   })
 		// Validate if client can join room here
-		this.rooms.checkRoomStatus(room);
+		if (await this.rooms.checkRoomStatus(room) == false)
+		{
+			console.log("not allowed");
+			return ;
+		}
+		
 		console.log("joining room", room);
 		console.log(session.user);
 		const res = await this.rooms.makeRoom(client, session.user, room);
@@ -138,12 +147,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("message")
-	handleMsg(client: Socket, @MessageBody() message : string) : void
+	async handleMsg(client: Socket, message: string)
 	{
+		const session: Session & { user: AppUser } = await this.findUser(client);
 		console.log("in handling");
+		// console.log(client);
 		console.log(message);
 		this.server.emit("messageResponse", message, "hmm");
-		this.storage.saveMessage(message, client);
+		this.storage.saveMessage(message, session.user);
 		// this.server.emit("messageResponse", 
 		// 	{
 		// 		text: message, 

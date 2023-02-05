@@ -108,6 +108,7 @@ model Message {
 	sender			AppUser?	@relation("message", fields: [appUserId], references: [id])
 	roomId			Int
 	room			Room?		@relation("roomMsg", fields: [roomId], references: [id])
+	value			String
 }
 
 model Penalty {
