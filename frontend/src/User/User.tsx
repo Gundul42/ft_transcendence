@@ -5,6 +5,7 @@ import { PersonalInformation } from './PersonalInformation';
 import { QR } from './QR';
 import { Dashboard } from './Dashboard';
 import endpoint from '../endpoint.json';
+import { IUserPublicPage } from '../Interfaces';
 
 export interface IUserState {
 	avatar: string,
@@ -84,7 +85,7 @@ export class User extends React.Component <{ app_state: ISafeAppState, set_page:
 					display_name: prev_state.display_name,
 					twoFA: !prev_state.twoFA,
 					qr: data.qr
-				}))
+				}));
 			},
 			(err) => {
 				console.log("error:");
@@ -99,7 +100,7 @@ export class User extends React.Component <{ app_state: ISafeAppState, set_page:
 			display_name: prev_state.display_name,
 			twoFA: prev_state.twoFA,
 			qr: null
-		}))
+		}), () => window.location.reload());
 	}
 
 	render() {
@@ -112,13 +113,24 @@ export class User extends React.Component <{ app_state: ISafeAppState, set_page:
 			},
 			page: this.props.app_state.page
 		}
+		let user_info: IUserPublicPage = {
+			id: this.props.app_state.data.id,
+			display_name: this.props.app_state.data.display_name,
+			avatar: this.props.app_state.data.avatar,
+			status: this.props.app_state.data.status,
+			wins: this.props.app_state.data.wins,
+			losses: this.props.app_state.data.losses,
+			ladder_level: this.props.app_state.data.ladder_level,
+			match_history: this.props.app_state.data.match_history,
+			achievements: this.props.app_state.data.achievements,
+		}
 		return (
 			<div className="User">
 				{ this.state.qr !== null &&
 				<QR qr_link={this.state.qr} closeQR={this.closeQR}/>}
 				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.full_name} email={this.props.app_state.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} />
 				<Header set_page={this.props.set_page} />
-				<Dashboard app_state={this.props.app_state} />
+				<Dashboard user_info={user_info} />
 				<RightColumn app_state={converter} set_page={this.props.set_page} />
 			</div>
 		)

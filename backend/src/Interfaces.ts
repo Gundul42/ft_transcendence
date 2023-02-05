@@ -21,9 +21,18 @@ export interface IUser {
 }
 
 export interface IUserPublic {
+	id:				number,
 	display_name:	string,
 	avatar:			string,
 	status:			number
+}
+
+export interface IUserPublicPage extends IUserPublic {
+	wins:			number,
+	losses:			number,
+	ladder_level:	number,
+	achievements:	IAchieve[],
+	match_history:	IMatch[]
 }
 
 export interface IAchieve {
@@ -35,13 +44,13 @@ export interface IAchieve {
 }
 
 export interface IMatch {
-	id:				number,
+	id:				string,
 	started_at:		Date,
 	finished_at:	Date,
-	player1:		IUser,
-	player2:		IUser,
-	winner:			number,
-	ladder:			number
+	winner_id:		number,
+	loser_id:		number,
+	winner:			IUserPublic,
+	loser:			IUserPublic
 }
 
 export interface IAPICall {
@@ -69,6 +78,11 @@ export interface ILobbyState {
 	p1_points:	number,
 	p2_points:	number,
 	round:		number
+}
+
+export interface IFinish {
+	winner:		string,
+	message:	string
 }
 
 export enum IRoomAccess {

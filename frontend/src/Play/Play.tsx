@@ -63,24 +63,24 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	return (
 		<div className="Play">
 			{winner !== null && lobbyState !== null &&
-				<Winner data={winner} lobby_state={lobbyState} set_page={set_page} />}
+				<Winner data={winner} app_state={app_state} lobby_state={lobbyState} set_page={set_page} />}
 			{lobbyState !== null &&
 				<InfoHeader lobbyState={lobbyState} />}
 			<Canvas gameState={gameState} />
 			{lobbyState !== null &&
-				<InfoFooter lobbyState={lobbyState} />}
+				<InfoFooter app_state={app_state} lobbyState={lobbyState} set_page={set_page} />}
 		</div>
 	)
 }
 
-function Winner({ data, lobby_state, set_page } : { data: IFinish, lobby_state: ILobbyState, set_page: any }) {
+function Winner({ data, app_state, lobby_state, set_page } : { data: IFinish, app_state: ISafeAppState, lobby_state: ILobbyState, set_page: any }) {
 	let winner: IUserPublic = data.winner === "player1" ? lobby_state.player1 : lobby_state.player2;
 	return(
 		<div className="Wall">
 			<h1>{data.message}</h1>
 			<div style={{display: "flex", flexDirection: "row"}}>
 				<p>The Winner is:&nbsp;</p>
-			<UserPublic user_info={winner} display_img={true} display_status={false} />
+			<UserPublic user_info={winner} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 			</div>
 			<button type="button" className="button" onClick={() => {set_page("home")}}>Go Back</button>
 		</div>
@@ -97,12 +97,12 @@ function InfoHeader({lobbyState} : {lobbyState: ILobbyState}) {
 	)
 }
 
-function InfoFooter({lobbyState} : {lobbyState: ILobbyState}) {
+function InfoFooter({lobbyState, app_state, set_page} : {lobbyState: ILobbyState, app_state: ISafeAppState, set_page: any}) {
 	return (
 		<div className="Lobby-state">
-			<UserPublic user_info={lobbyState.player1} display_img={true} display_status={false} />
+			<UserPublic user_info={lobbyState.player1} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 			<p>Spectators: {lobbyState.spectators}</p>
-			<UserPublic user_info={lobbyState.player2} display_img={true} display_status={false} />
+			<UserPublic user_info={lobbyState.player2} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 		</div>
 	)
 }

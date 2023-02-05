@@ -11,5 +11,11 @@
 		"img": "https://localhost/api/content/img",
 		"display_name": "https://localhost/api/content/display_name",
 		"upload": "https://localhost/api/content/upload"
+	},
+	"users": {
+		"userinfo": "https://localhost/api/users/userinfo",
+		"add-as-friend": "https://localhost/api/users/add-as-friend",
+		"respond": "https://localhost/api/users/respond",
+		"remove-friend": "https://localhost/api/users/remove-friend"
 	}
 }

@@ -5,8 +5,9 @@ import { AxiosResponse } from 'axios';
 import * as info from './info.json'
 import * as twofactor from 'node-2fa';
 import { PrismaService } from '../prisma/prisma.service';
-import { Session, AppUser, Achieve, Token, TwoFA } from '@prisma/client';
+import { Session, AppUser, Achieve, Token, TwoFA, UserRequest, Match } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { IUserPublic } from '../Interfaces';
 
 @Injectable()
 export class AuthService {
@@ -228,13 +229,28 @@ export class AuthService {
     });
   }
 
-  async getUserSessionAchieve(sessionid: string) : Promise<AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[] }> {
+  async getUserSessionAchieve(sessionid: string) : Promise<AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] }> {
     return await this.prisma.appUser.findUnique({
       where: { sessionid: sessionid},
       include: {
         session: true,
-        friends: true,
-        achievements: true
+        friends: {
+          select: {
+            id: true,
+            display_name: true,
+            avatar: true,
+            status: true
+          }
+        },
+        achievements: true,
+        requests_sent: true,
+        requests_rec: {
+          include: {
+            from: { 
+              select: { display_name: true }
+            }
+          }
+        }
       },
     })
     .catch((err: any) => {
@@ -242,6 +258,85 @@ export class AuthService {
       return null;
     });
   }
+
+  async composeMatchHistory(userid: number ) : Promise<(Match & { winner: IUserPublic, loser: IUserPublic})[]> {
+		let res: (Match & { winner: IUserPublic, loser: IUserPublic})[] = [];
+		let i: number = 0;
+		let j: number = 0;
+		
+    const user: AppUser & { matches_won: (Match & { winner: IUserPublic, loser: IUserPublic})[], matches_lost: (Match & { winner: IUserPublic, loser: IUserPublic})[] } = await this.prisma.appUser.findUnique({
+      where: { id: userid },
+      include: {
+        matches_won: {
+          orderBy: { started_at: "desc" },
+          include: {
+            winner: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            },
+            loser: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            }
+          }
+        },
+        matches_lost: {
+          orderBy: { started_at: "desc" },
+          include: {
+            winner: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            },
+            loser: {
+              select: {
+                id: true,
+                display_name: true,
+                avatar: true,
+                status: true
+              }
+            }
+          }
+        }
+      }
+    })
+    .catch((err: any) => {
+      console.log(err);
+      return null;
+    });
+    if (user === null) {
+      return ([]);
+    }
+		while (i < (user.matches_won as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length && j < (user.matches_lost as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			if ((user.matches_won[i].started_at as Date) < (user.matches_lost[j].started_at as Date)) {
+				res.push(user.matches_won[i]);
+				i++;
+			} else {
+				res.push(user.matches_lost[j]);
+				j++;
+			}
+		}
+		while (i < (user.matches_won as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			res.push(user.matches_won[i]);
+			i++;
+		}
+		while (j < (user.matches_lost as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			res.push(user.matches_lost[j]);
+			j++;
+		}
+		return (res);
+	}
 
   //Setters
 

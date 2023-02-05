@@ -7,6 +7,7 @@ import { Chat } from './Chat/Chat';
 import { Play } from './Play/Play';
 import { OTP } from './OTP';
 import endpoint from './endpoint.json';
+import { Visit } from './Visit/Visit';
 
 export enum Status {
   Starting,
@@ -19,13 +20,19 @@ export enum Status {
 export interface IAppState {
   status: Status,
   data: IAPICall | null,
-  page: "home" | "user" | "chat" | "play"
+  page: {
+    location: "home" | "user" | "chat" | "play" | "visit",
+    visited_id: number
+  }
 }
 
 export interface ISafeAppState {
   status: Status,
   data: IUser,
-  page: "home" | "user" | "chat" | "play"
+  page: {
+    location: "home" | "user" | "chat" | "play" | "visit",
+    visited_id: number
+  }
 }
 
 export function Header({set_page} : {set_page: any}) {
@@ -50,9 +57,6 @@ function Link({link} : {link: string}) {
 
 function Dispatch({app_state, set_page, set_data} : {app_state: IAppState, set_page: any, set_data: any}) {
   let to_render: any;
-  //let myBall: Ballpos = { posx:100, posy:200, velx:3, vely:5};
-  //myBall.posx = 800;
-
 
   if (app_state.data === null) {
     to_render = <p>*Sad backend noises*</p>;
@@ -67,13 +71,15 @@ function Dispatch({app_state, set_page, set_data} : {app_state: IAppState, set_p
       data: app_state.data.data,
       page: app_state.page
     }
-    switch (app_state.page) {
+    switch (app_state.page.location) {
       case "user":
         return (<User app_state={safe_app_state} set_page={set_page} />);
       case "chat":
         return (<Chat app_state={safe_app_state} set_page={set_page} />);
       case "play" :
-        return (<Play app_state={safe_app_state} set_page={set_page} /*ballz={myBall}*/ />);
+        return (<Play app_state={safe_app_state} set_page={set_page} />);
+      case "visit" :
+        return (<Visit app_state={safe_app_state} set_page={set_page} />)
       default:
         return (<Home app_state={safe_app_state} set_page={set_page} />);
     }
@@ -94,7 +100,10 @@ class App extends React.Component<{}, IAppState> {
     this.state = {
       status: Status.Starting,
       data: null,
-      page: "home",
+      page: {
+        location: "home",
+        visited_id: 0
+      },
     };
 
     this.setPage = this.setPage.bind(this);
@@ -147,11 +156,14 @@ class App extends React.Component<{}, IAppState> {
     }))
   }
 
-  setPage(new_page: "home" |"user" | "chat" | "play") {
+  setPage(new_location: "home" |"user" | "chat" | "play", visited_id: number = 0) {
     this.setState((prev_state: IAppState) => ({
       status: prev_state.status,
       data: prev_state.data,
-      page: new_page
+      page: {
+        location: new_location,
+        visited_id: visited_id
+      }
     }), () => { window.history.pushState(this.state, "");})
   }
 

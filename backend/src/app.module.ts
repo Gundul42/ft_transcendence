@@ -5,6 +5,7 @@ import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { GameModule } from './game/game.module';
+import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
 import { RoomsManager } from './chat/rooms/rooms.manager';
 import { StorageManager } from './chat/storage/storage.manager';
@@ -15,6 +16,7 @@ import { StorageManager } from './chat/storage/storage.manager';
     ContentModule,
     PrismaModule,
     GameModule,
+    UsersModule,
     ConfigModule.forRoot(),
     ChatModule
   ], 

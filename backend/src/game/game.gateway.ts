@@ -46,7 +46,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return ;
 		}
 		this.lobbyManager.initializeSocket(client as AuthenticatedSocket, session_user.user);
-		this.prisma.appUser.update({
+		await this.prisma.appUser.update({
 			where: { id: session_user.user.id },
 			data: {
 				status: 1
@@ -58,8 +58,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
 			this.lobbyManager.destroyLobby(client.data.lobby.id);
 		}
+		if (client.data.userid === undefined) return;
 		this.lobbyManager.terminateSocket(client);
-		this.prisma.appUser.update({
+		await this.prisma.appUser.update({
 			where: { id: client.data.userid },
 			data: {
 				status: 0

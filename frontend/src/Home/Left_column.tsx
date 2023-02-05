@@ -1,21 +1,65 @@
 import React from 'react';
-import { IAppState } from '../App';
-import '../App.css';
-import { IMatch, IUser } from '../Interfaces';
+import { IAppState, ISafeAppState } from '../App';
+import { UserPublic } from '../UserPublic';
+import { IMatch, IUser, IUserRequest } from '../Interfaces';
+import endpoint from '../endpoint.json'
 
-function Friends({friends_list} : {friends_list: IUser[]}) {
-	return (
-		<div className="Friends">
-			<h2>Friends</h2>
-			{ friends_list.length > 0 &&
-				friends_list.map((friend) => (
-					<React.Fragment>
-					<p className="Friend">{friend.display_name}</p><div className={"circle" + friend.status.toString()}></div>
-					</React.Fragment>
+function Requests({requests} : {requests: (IUserRequest & {from: {display_name: string}})[] }) {
+	const respond = (accept: boolean, req_id: number) => {
+		let form_body: string[] = [];
+		form_body.push(encodeURIComponent("res") + "=" + encodeURIComponent(accept));
+		form_body.push(encodeURIComponent("req_id") + "=" + encodeURIComponent(req_id));
+		fetch(endpoint.users.respond, {
+			method: "POST",
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'accept-encoding': 'gzip, deflate, br',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
+			},
+			body: form_body.join("&")
+		})
+		.then(
+			() => { window.location.reload() },
+			(err) => { console.log(err) }
+		)
+	};
+
+	return(
+		<div className="Requests">
+			<h2>Requests</h2>
+			<table style={{width: "100%"}}>
+			{ requests.map((req: IUserRequest & {from: {display_name: string}}) => (
+					<tr className="record" key={req.id}>
+						<td className="record-name">{req.from.display_name}</td>
+						<td className="record-buttons">
+							<button className="Check-button" onClick={()=>{respond(true, req.id)}}>&#10003;</button>
+							<button className="Cancellation-button" onClick={()=>{respond(false, req.id)}}>&#10006;</button>
+						</td>
+					</tr>
 				))
 			}
-			{ friends_list.length === 0 &&
-				<p className="filler">Devastating loneliness</p>}
+			</table>
+		</div>
+	)
+}
+
+function Friends({user_info, app_state, set_page} : {user_info: IUser, app_state: ISafeAppState, set_page: any}) {
+	return (
+		<div className="Friends">
+			{ user_info.requests_rec.length > 0 &&
+				<Requests requests={user_info.requests_rec} />}
+			<div className="Friends-list">
+				<h2>Friends</h2>
+				{ user_info.friends.length > 0 &&
+					user_info.friends.map((friend) => (
+						<div className="list" key={friend.id}>
+							<UserPublic user_info={friend} app_state={app_state} display_img={false} display_status={true} set_page={set_page} />
+						</div>
+					))
+				}
+				{ user_info.friends.length === 0 &&
+					<p className="filler">Devastating loneliness</p>}
+			</div>
 		</div>
 	)
 }
@@ -28,7 +72,7 @@ function Matches({active_matches} : {active_matches: IMatch[]})
 			<h2>Ongoing Matches</h2>
 			{ active_matches.length > 0 &&
 				active_matches.map((match) => (
-					<p className="Friend">{match.player1.display_name} | {match.player2.display_name}</p>
+					<p className="Friend">todo</p>
 				))
 			}
 			{ active_matches.length === 0 &&
@@ -37,11 +81,16 @@ function Matches({active_matches} : {active_matches: IMatch[]})
 	)
 }
 
-export function LeftColumn({app_state} : {app_state: IAppState}) {
+export function LeftColumn({app_state, set_page} : {app_state: IAppState, set_page: any}) {
 	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
+		const converter: ISafeAppState = {
+			status: app_state.status,
+			data: app_state.data.data,
+			page: app_state.page
+		}
 		return (
 			<div className="Left-column">
-				<Friends friends_list={app_state.data.data.friends}/>
+				<Friends user_info={app_state.data.data} app_state={converter} set_page={set_page} />
 				<Matches active_matches={[]} />
 			</div>
 		)

@@ -46,14 +46,15 @@ model AppUser {
 	wins			Int			@default(0)
 	losses			Int			@default(0)
 	ladder_level	Int			@default(0)
-	queue			Queue?
-	matches_p1		Match[]		@relation("player1")
-	matches_p2		Match[]		@relation("player2")
+	matches_won		Match[]		@relation("won")
+	matches_lost	Match[]		@relation("lost")
 	achievements	Achieve[]
 	rooms			Room[]		@relation("participate")
 	adminOf			Room[]		@relation("administrate")
 	penalties		Penalty[]
 	messages		Message[]	@relation("message")
+	requests_sent	UserRequest[]	@relation("requests sender")
+	requests_rec	UserRequest[]	@relation("requests receiver")
 }
 
 model Achieve {
@@ -66,13 +67,6 @@ model Achieve {
 	user			AppUser		@relation(fields: [userid], references: [id])
 }
 
-model Queue {
-	id				Int			@id @default(autoincrement())
-	created_at		DateTime	@default(now())
-	userid			Int			@unique
-	user			AppUser?	@relation(fields: [userid], references: [id])
-}
-
 model TwoFA {
 	id				String		@id
 	userid			Int			@unique
@@ -83,12 +77,10 @@ model Match {
 	id				String		@id
 	started_at		DateTime	@default(now())
 	finished_at		DateTime?
-	player1id		Int
-	player2id		Int
-	player1			AppUser		@relation("player1", fields: [player1id], references: [id])
-	player2			AppUser		@relation("player2", fields: [player2id], references: [id])
-	winner			Int?
-	//ladder			Int
+	winner_id		Int?
+	loser_id		Int?
+	winner			AppUser?		@relation("won", fields: [winner_id], references: [id])
+	loser			AppUser?		@relation("lost", fields: [loser_id], references: [id])
 }
 
 model Room {
@@ -122,6 +114,11 @@ model Penalty {
 	duration		Int			@default(10)
 }
 
-// Research:
-// 2fa
-// pinging / active users
+model UserRequest {
+	id				Int			@id @default(autoincrement())
+	sender_id		Int
+	receiver_id		Int
+	from			AppUser		@relation("requests sender", fields: [sender_id], references: [id])
+	to				AppUser		@relation("requests receiver", fields: [receiver_id], references: [id])
+	type			String
+}

@@ -6,7 +6,7 @@ import { AuthGuard } from './auth.guard';
 import { AuthFilter, TwoFAFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';
 import { PrismaService } from '../prisma/prisma.service';
-import { Session, AppUser, Achieve, Token } from '@prisma/client';
+import { Session, AppUser, Achieve, Token, UserRequest } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import * as twofactor from 'node-2fa';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -20,16 +20,19 @@ export class AuthController {
   @UseFilters(AuthFilter, TwoFAFilter)
   async login(@Req() req: Request, @Res() res: Response, @RealIP() ip: string): Promise<void> {
     this.authService.deleteNullSessions();
-    var user: AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[] } = await this.authService.getUserSessionAchieve(req.cookies['ft_transcendence_sessionId']);
+    var user: AppUser & { session: Session, friends: AppUser[], achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] } = await this.authService.getUserSessionAchieve(req.cookies['ft_transcendence_sessionId']);
     if (user === null) {
       throw new Error("Session not found")
     }
     console.log(user) //See what data is available and select it
     const csrf_token: { access_token: string } = await this.authService.generateJwt(user.full_name, user.id);
+    const match_history: any = await this.authService.composeMatchHistory(user.id);
+    console.log(match_history);
     res.send({
       'type' : 'content',
       'link': null,
       'data' : {
+        id: user.id,
         full_name: user.full_name,
         email: user.email,
         display_name: user.display_name,
@@ -41,8 +44,10 @@ export class AuthController {
         ladder_level: user.ladder_level,
         friends: user.friends,
         achievements: user.achievements,
-        match_history: [],
-        csrf_token: csrf_token.access_token
+        match_history: match_history,
+        csrf_token: csrf_token.access_token,
+        requests_sent: user.requests_sent,
+        requests_rec: user.requests_rec
       }
     });
   }
