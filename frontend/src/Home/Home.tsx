@@ -5,6 +5,7 @@ import { RightColumn } from '../Right_column';
 import { Status, Header, ISafeAppState, IAppState } from '../App';
 import endpoint from '../endpoint.json'
 import { ClientEvents, ServerEvents } from '../events';
+import { IAchieve } from '../Interfaces';
 
 function DisplayNamePrompt() {
 	const [name, setName] : [name: string, setName: any] = useState("");
@@ -34,6 +35,32 @@ function DisplayNamePrompt() {
 				<input type="text" name="uname" id="uname" placeholder="LivingLegend42" value={name} onChange={(e) => {setName(e.target.value)}} required />
 				<input type="submit" value="Submit"/>
 			</form>
+		</div>
+	)
+}
+
+function DisplayAchievement({achievement} : {achievement: IAchieve}) {
+	const handleClick = () => {
+		fetch(endpoint.achievement.aknowledge + "/" + achievement.id.toString(), {
+			method: "POST",
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'accept-encoding': 'gzip, deflate, br',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
+			},
+		})
+		.then(
+			() => { window.location.reload() },
+			(err) => { console.log(err) }
+		)
+	};
+
+	return(
+		<div className="Wall">
+			<h1>{achievement.name}</h1>
+			<img src={endpoint.content.img + achievement.logo} alt={achievement.logo} style={{height: "20%", aspectRatio: "1 / 1", borderRadius: "50%", border: "5px solid black"}} />
+			<p>{achievement.description}</p>
+			<button className="button" onClick={handleClick}>Nice</button>
 		</div>
 	)
 }
@@ -82,8 +109,10 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 	}
 	return(
 		<div className="Home">
-		{ app_state.status === Status.Success && app_state.data.display_name === null &&
-			<DisplayNamePrompt />}
+			{ app_state.status === Status.Success && app_state.data.display_name === null &&
+				<DisplayNamePrompt />}
+			{ app_state.data.achievements.length > 0 && !app_state.data.achievements[0].aknowledged &&
+				<DisplayAchievement achievement={app_state.data.achievements[0]} /> }
 			<LeftColumn app_state={converter} set_page={set_page} />
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">

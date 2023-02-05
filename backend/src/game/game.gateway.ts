@@ -2,8 +2,6 @@ import {
 	OnGatewayConnection,
 	OnGatewayDisconnect,
 	OnGatewayInit,
-	WsResponse,
-	WebSocketServer,
 	SubscribeMessage,
 	WebSocketGateway,
   } from '@nestjs/websockets';
@@ -11,6 +9,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { AuthenticatedSocket } from './AuthenticatedSocket';
+import { AchievementService } from '../Achievement/achievement.service';
 import { ServerEvents, ClientEvents } from './events';
 import { LobbyManager } from './lobby/lobby.manager';
 import { Lobby } from './lobby/lobby';
@@ -20,11 +19,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	
 	constructor(
 		private readonly lobbyManager: LobbyManager,
-		private readonly prisma: PrismaService) {}
+		private achievementService: AchievementService,
+		private prisma: PrismaService) {}
 
 	afterInit(server: Server) {
 		this.lobbyManager.server = server;
 		this.lobbyManager.prisma = this.prisma;
+		this.lobbyManager.achievementService = this.achievementService;
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void> {

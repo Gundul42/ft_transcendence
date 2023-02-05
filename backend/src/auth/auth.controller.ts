@@ -2,6 +2,7 @@ import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Param } 
 import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
+import { AchievementService } from '../Achievement/achievement.service';
 import { AuthGuard } from './auth.guard';
 import { AuthFilter, TwoFAFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';
@@ -9,11 +10,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser, Achieve, Token, UserRequest } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import * as twofactor from 'node-2fa';
+import * as achievements from '../achievements.json';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService, private prisma: PrismaService/*private sessionService: SessionService, private userService: Service*/) {}
+  constructor(
+    private authService: AuthService,
+    private achievementService: AchievementService,
+    private prisma: PrismaService) {}
 
   @Get("login")
   @UseGuards(AuthGuard)
@@ -27,7 +32,6 @@ export class AuthController {
     console.log(user) //See what data is available and select it
     const csrf_token: { access_token: string } = await this.authService.generateJwt(user.full_name, user.id);
     const match_history: any = await this.authService.composeMatchHistory(user.id);
-    console.log(match_history);
     res.send({
       'type' : 'content',
       'link': null,
@@ -108,6 +112,7 @@ export class AuthController {
       this.authService.deactivate2FA(session.user.id);
       return ({ qr: null });
     } else {
+      this.achievementService.grantAchievement(session.user.id, achievements.snowden);
       const secret = twofactor.generateSecret({name: "ft_transcendence", account: session.user.full_name });
       await this.authService.record2FA(session.user.id, secret.secret);
       return ({ qr: secret.qr });

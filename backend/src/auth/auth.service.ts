@@ -7,7 +7,7 @@ import * as twofactor from 'node-2fa';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser, Achieve, Token, TwoFA, UserRequest, Match } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
-import { IUserPublic } from '../Interfaces';
+import { IUserPublic, IAchieve } from '../Interfaces';
 
 @Injectable()
 export class AuthService {
@@ -242,7 +242,9 @@ export class AuthService {
             status: true
           }
         },
-        achievements: true,
+        achievements: {
+          orderBy: { aknowledged: "asc" }
+        },
         requests_sent: true,
         requests_rec: {
           include: {

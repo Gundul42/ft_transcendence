@@ -164,7 +164,11 @@ class App extends React.Component<{}, IAppState> {
         location: new_location,
         visited_id: visited_id
       }
-    }), () => { window.history.pushState(this.state, "");})
+    }), () => {
+      if (this.state.page.location !== "play") {
+        window.history.pushState(this.state, "");
+      }
+    })
   }
 
   render() {

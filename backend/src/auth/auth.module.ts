@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
+import { AchievementService } from '../Achievement/achievement.service';
 import * as info from './info.json'
 
 @Module({
@@ -17,6 +18,6 @@ import * as info from './info.json'
     })
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, AchievementService],
 })
 export class AuthModule {}

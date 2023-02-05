@@ -4,9 +4,13 @@ import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { ServerEvents } from '../events';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppUser } from '@prisma/client';
+import { AchievementService } from '../../Achievement/achievement.service';
+import * as achievements from '../../achievements.json';
 
 export class LobbyManager {
-	constructor(public prisma: PrismaService) {}
+	constructor(
+		public prisma: PrismaService,
+		public achievementService: AchievementService) {}
 
 	public server: Server;
 	private readonly lobbies: Map<Lobby['id'], Lobby> = new Map<Lobby['id'], Lobby>();
@@ -101,6 +105,11 @@ export class LobbyManager {
 			})
 			.catch((err: any) => { console.log(err) });
 			if (this.lobbies.get(lobby_id) !== undefined) {
+				this.achievementService.grantAchievement(this.lobbies.get(lobby_id)?.player1.data.userid, achievements.noob);
+				this.achievementService.grantAchievement(this.lobbies.get(lobby_id)?.player2.data.userid, achievements.noob);
+				this.lobbies.get(lobby_id)?.spectators.forEach((value: AuthenticatedSocket, key: string, map: Map<string, AuthenticatedSocket>) => {
+					this.achievementService.grantAchievement(value.data.userid, achievements.popcorn);
+				})
 				this.updateUserStatus(this.lobbies.get(lobby_id), 1);
 				await this.updateStats(this.lobbies.get(lobby_id));
 				this.updateLadder();
@@ -179,6 +188,7 @@ export class LobbyManager {
 			return ([]);
 		});
 		let ladder_level: number = 1;
+		this.achievementService.grantAchievement(all_users[0].id, achievements.top);
 		for (let i = 0; i < all_users.length; i++) {
 			if (i === (ladder_level * (ladder_level + 1)) / 2) {
 				ladder_level++;

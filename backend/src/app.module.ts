@@ -5,7 +5,7 @@ import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { GameModule } from './game/game.module';
 import { UsersModule } from './users/users.module';
-
+import { AchievementModule } from './Achievement/achievement.module';
 
 @Module({
   imports: [
@@ -14,6 +14,7 @@ import { UsersModule } from './users/users.module';
     PrismaModule,
     GameModule,
     UsersModule,
+    AchievementModule,
     ConfigModule.forRoot()
   ], 
 })
