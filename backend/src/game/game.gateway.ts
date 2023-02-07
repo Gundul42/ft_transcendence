@@ -154,8 +154,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let data: any = Array.from(this.lobbyManager.getLobbies(), (entry) => {
 			return ({
 				id: entry[0],
-				player1: entry[1].player1.data.info,
-				player2: entry[1].player2.data.info
+				player1: entry[1]?.player1.data.info,
+				player2: entry[1]?.player2.data.info
 			});
 		})
 		console.log(data);

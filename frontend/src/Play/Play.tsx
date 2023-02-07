@@ -7,6 +7,23 @@ import { IFinish, IGameState, ILobbyState, IUserPublic } from '../Interfaces';
 import { UserPublic } from '../UserPublic';
 import { Canvas } from './Canvas';
 
+const emptyUser: IUserPublic = {
+	id: 0,
+	display_name: "",
+	avatar: "",
+	status: 0
+}
+
+const emptyLobby: ILobbyState = {
+	player1: emptyUser,
+	player2: emptyUser,
+	id: 0,
+	spectators: 0,
+	p1_points: 0,
+	p2_points: 0,
+	round: 0
+}
+
 export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
 	const [isKeyDown, setKeyDown] : [boolean, any] = useState(false);
 	const [gameState, setGameState] : [IGameState, any] = useState({
@@ -18,11 +35,11 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 		paddle2: { y: ((playFieldYMaxSize / 2) - (paddleHeight / 2))}
 	})
 
-	const [lobbyState, setLobbyState] : [ILobbyState | null, any] = useState(null);
+	const [lobbyState, setLobbyState] : [ILobbyState, any] = useState(emptyLobby);
 	const [winner, SetWinner] : [IFinish | null, any] = useState(null);
 
 	const keydown = (keyEvent: KeyboardEvent) => {
-		if (!isKeyDown) {
+		if (!isKeyDown && [lobbyState.player1?.id, lobbyState.player2?.id].includes(app_state.data.id) === false) {
 			if (keyEvent.key === "w" || keyEvent.key === "ArrowUp") {
 				setKeyDown(true);
 				socket.emit(ClientEvents.Up);
@@ -34,9 +51,11 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	}
 
 	const keyup = (keyEvent: KeyboardEvent) => {
-		if (keyEvent.key === "w" || keyEvent.key === "ArrowUp" || keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
-			socket.emit(ClientEvents.Stop);
-			setKeyDown(false);
+		if ([lobbyState.player1?.id, lobbyState.player2?.id].includes(app_state.data.id) === false) {
+			if (keyEvent.key === "w" || keyEvent.key === "ArrowUp" || keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
+				socket.emit(ClientEvents.Stop);
+				setKeyDown(false);
+			}
 		}
 	}
 
