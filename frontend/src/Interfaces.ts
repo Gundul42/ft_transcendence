@@ -94,3 +94,9 @@ export interface IUserRequest {
 	receiver_id:	number,
 	type:			string
 }
+
+export interface IcurrentMatch {
+	id:				string,
+	player1:		IUserPublic,
+	player2:		IUserPublic
+}
