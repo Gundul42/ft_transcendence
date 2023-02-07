@@ -70,10 +70,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage(ClientEvents.Play)
-	joinPlayer(client: AuthenticatedSocket) : void {
+	joinPlayer(client: AuthenticatedSocket, data: { mode: "classic" | "special" }) : void {
 		console.log("Upserting lobby");
 		try {
-			var lobby: Lobby = this.lobbyManager.upsertLobby(client);
+			var lobby: Lobby = this.lobbyManager.upsertLobby(client, data.mode);
 		} catch (err: any) {
 			console.log(err);
 			return ;
@@ -118,7 +118,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		} else {
 			return ;
 		}
-		client.data.lobby?.game_instance.state.movePaddle(id, -1);
+		client.data.lobby?.game_instance.state.setPaddleDirection(id, -1);
 	}
 
 	@SubscribeMessage(ClientEvents.Down)
@@ -131,7 +131,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		} else {
 			return ;
 		}
-		client.data.lobby?.game_instance.state.movePaddle(id, 1);
+		client.data.lobby?.game_instance.state.setPaddleDirection(id, 1);
+	}
+
+	@SubscribeMessage(ClientEvents.Stop)
+	stopPaddle(client: AuthenticatedSocket) : void {
+		let id: number;
+		if (client.data.role === "player1") {
+			id = 1;
+		} else if (client.data.role === "player2") {
+			id = 2;
+		} else {
+			return ;
+		}
+		client.data.lobby?.game_instance.state.setPaddleDirection(id, 0);
 	}
 
 	@SubscribeMessage(ClientEvents.Leave)

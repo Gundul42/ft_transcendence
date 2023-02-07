@@ -30,16 +30,16 @@ export class LobbyManager {
 		client.data.lobby?.removeClient(client);
 	}
 
-	public upsertLobby(client: AuthenticatedSocket) : Lobby {
+	public upsertLobby(client: AuthenticatedSocket, mode: "classic" | "special") : Lobby {
 		let lobby_id: string = "";
 		var upsertedLobby: Lobby | undefined;
 		this.lobbies.forEach((value: Lobby, key: string, map: Map<string, Lobby>) => {
-			if (!value.game_instance.started) {
+			if (!value.game_instance.started && value.mode === mode) {
 				lobby_id = value.id;
 			}
 		});
 		if (lobby_id.length === 0) {
-			upsertedLobby = new Lobby(this.server, this);
+			upsertedLobby = new Lobby(this.server, this, mode);
 			this.lobbies.set(upsertedLobby.id, upsertedLobby);
 			client.data.role = "player1";
 			upsertedLobby.addClient(client);

@@ -8,6 +8,7 @@ import { UserPublic } from '../UserPublic';
 import { Canvas } from './Canvas';
 
 export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
+	const [isKeyDown, setKeyDown] : [boolean, any] = useState(false);
 	const [gameState, setGameState] : [IGameState, any] = useState({
 		ball: {
 			x: playFieldXMaxSize / 2,
@@ -21,10 +22,21 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 	const [winner, SetWinner] : [IFinish | null, any] = useState(null);
 
 	const keydown = (keyEvent: KeyboardEvent) => {
-		if (keyEvent.key === "w" || keyEvent.key === "ArrowUp") {
-			socket.emit(ClientEvents.Up);
-		} else if (keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
-			socket.emit(ClientEvents.Down);
+		if (!isKeyDown) {
+			if (keyEvent.key === "w" || keyEvent.key === "ArrowUp") {
+				setKeyDown(true);
+				socket.emit(ClientEvents.Up);
+			} else if (keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
+				socket.emit(ClientEvents.Down);
+				setKeyDown(true);
+			}
+		}
+	}
+
+	const keyup = (keyEvent: KeyboardEvent) => {
+		if (keyEvent.key === "w" || keyEvent.key === "ArrowUp" || keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
+			socket.emit(ClientEvents.Stop);
+			setKeyDown(false);
 		}
 	}
 
@@ -34,10 +46,12 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 
 	useEffect(() => {
 		window.addEventListener("keydown", keydown);
+		window.addEventListener("keyup", keyup);
 		window.addEventListener("beforeunload", leave);
 
 		return () => {
 			window.removeEventListener("keydown", keydown);
+			window.removeEventListener("keyup", keyup);
 			window.removeEventListener("beforeunload", leave);
 		};
 	}, [])
@@ -82,7 +96,7 @@ function Winner({ data, app_state, lobby_state, set_page } : { data: IFinish, ap
 				<p>The Winner is:&nbsp;</p>
 			<UserPublic user_info={winner} app_state={app_state} display_img={true} display_status={false} set_page={set_page} />
 			</div>
-			<button type="button" className="button" onClick={() => {set_page("home")}}>Go Back</button>
+			<button type="button" className="button" onClick={() => {set_page("home"); window.location.reload()}}>Go Back</button>
 		</div>
 	)
 }

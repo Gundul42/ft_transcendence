@@ -9,6 +9,7 @@ export class Coordinate {
 }
 
 export class Paddle {
+	public direction: number = 0;
 	constructor(
 		public position: Coordinate,
 		public height: number
@@ -18,10 +19,13 @@ export class Paddle {
 export class Ball {
 	public position: Coordinate = new Coordinate(constants.game_canvas.width / 2, constants.game_canvas.height / 2);
 	public radius: number = constants.ball.radius;
+	public velocity: number;
 	constructor(
 		public direction: Coordinate,
-		public readonly velocity: number
-	) {}
+		public readonly start_velocity: number
+	) {
+		this.velocity = start_velocity;
+	}
 }
 
 export class GameState {
@@ -46,6 +50,12 @@ export class GameState {
 	}
 
 	public calcNewPosition() : void {
+		this.calcBallPosition();
+		this.calcPaddlePosition(this.paddle1);
+		this.calcPaddlePosition(this.paddle2);
+	}
+
+	public calcBallPosition() : void {
 		let ball_new_x: number = this.ball.position.x + Math.round(this.ball.velocity * this.ball.direction.x);
 		let ball_new_y: number = this.ball.position.y + Math.round(this.ball.velocity * this.ball.direction.y);
 
@@ -79,26 +89,31 @@ export class GameState {
 		this.ball.position.y = ball_new_y;
 	}
 
-	public movePaddle(id: number, direction: number) : void {
+	public calcPaddlePosition(paddle: Paddle) : void {
+		if (paddle.position.y + (paddle.direction * constants.paddle.velocity) <= 0) {
+			paddle.position.y = 0;
+		} else if ((paddle.position.y + paddle.height + (paddle.direction * constants.paddle.velocity)) >= constants.game_canvas.height) {
+			paddle.position.y = constants.game_canvas.height - paddle.height;
+		} else {
+			paddle.position.y += paddle.direction * constants.paddle.velocity;
+		}
+	}
+
+	public setPaddleDirection(id: number, direction: number) : void {
 		let paddle: Paddle;
 		if (id === 1) {
 			paddle = this.paddle1;
 		} else {
 			paddle = this.paddle2;
 		}
-		if (paddle.position.y + direction < 0) {
-			paddle.position.y = 0;
-		} else if ((paddle.position.y + paddle.height + direction) > constants.game_canvas.height) {
-			paddle.position.y = constants.game_canvas.height - paddle.height;
-		} else {
-			paddle.position.y += direction * constants.paddle.velocity;
-		}
+		paddle.direction = direction;
 	}
 
 	public resetGameState() : void {
 		this.ball.position.x = constants.game_canvas.width / 2;
 		this.ball.position.y = constants.game_canvas.height / 2;
 		this.ball.direction = this.calcRandomDirection(this.instance.round);
+		this.ball.velocity = constants.ball.velocity + (this.instance.mode_factor * this.instance.round);
 
 		this.paddle1.position.y = (constants.game_canvas.height - this.paddle1.height) / 2;
 		this.paddle2.position.y = (constants.game_canvas.height - this.paddle2.height) / 2;

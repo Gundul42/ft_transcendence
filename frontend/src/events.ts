@@ -4,7 +4,8 @@ export enum ClientEvents {
 	Leave = "Leave",
 	Cancel = "Cancel",
 	Up = "Up",
-	Down = "Down"
+	Down = "Down",
+	Stop = "Stop"
 }
 
 export enum ServerEvents {

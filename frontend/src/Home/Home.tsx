@@ -65,10 +65,10 @@ function DisplayAchievement({achievement} : {achievement: IAchieve}) {
 	)
 }
 
-function PlayButton({setClicked} : {setClicked: any}) {
+function PlayButton({setClicked, mode} : {setClicked: any, mode: string}) {
 	return (
-		<button className="button" onClick={() => {setClicked(true); socket.emit(ClientEvents.Play)}}>
-			Play
+		<button className="button" onClick={() => {setClicked(true); socket.emit(ClientEvents.Play, { mode: mode })}}>
+			{mode[0].toUpperCase() + mode.slice(1)}
 		</button>
 	)
 }
@@ -117,10 +117,17 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">
 				<h1>Welcome {app_state.data.display_name}</h1>
-				{!isClicked &&
-					<PlayButton setClicked={setClicked}/>}
-				{isClicked &&
-					<Loading setClicked={setClicked} />}
+				<h2>Choose a mode and play</h2>
+				<div style={{display: "flex", gap: "20px"}}>
+					{!isClicked &&
+						<PlayButton setClicked={setClicked} mode="classic"/>}
+					{!isClicked &&
+						<PlayButton setClicked={setClicked} mode="special"/>}
+					{isClicked &&
+						<Loading setClicked={setClicked} />}
+				</div>
+				<div className="break"></div>
+				<p>In the special mode the ball is going to get faster every round</p>
 			</div>
 			<RightColumn app_state={converter} set_page={set_page} />
 		</div>
