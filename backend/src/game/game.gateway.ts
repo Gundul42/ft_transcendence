@@ -9,7 +9,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { AuthenticatedSocket } from './AuthenticatedSocket';
-import { AchievementService } from '../Achievement/achievement.service';
+import { AchievementService } from '../achievement/achievement.service';
 import { ServerEvents, ClientEvents } from './events';
 import { LobbyManager } from './lobby/lobby.manager';
 import { Lobby } from './lobby/lobby';
@@ -53,6 +53,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				status: 1
 			}
 		})
+		this.dispatchGlobalState();
 	}
 
 	async handleDisconnect(client: AuthenticatedSocket): Promise<void> {
@@ -79,15 +80,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return ;
 		}
 		if (lobby.game_instance.started) {
-			this.lobbyManager.server.emit(ServerEvents.GlobalState, {
-				ongoing_matches: Array.from(this.lobbyManager.getLobbies(), (entry) => {
-					return ({
-						lobbyId: entry[0],
-						player1: entry[1].player1.data.info,
-						player2: entry[1].player2.data.info
-					});
-				})
-			})
+			this.dispatchGlobalState();
 		}
 	}
 
@@ -154,5 +147,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.lobbyManager.destroyLobby(client.data.lobby.id);
 		}
 		this.lobbyManager.terminateSocket(client);
+	}
+
+	dispatchGlobalState() : void {
+		if (this.lobbyManager.getLobbies().size === 0) return ;
+		let data: any = Array.from(this.lobbyManager.getLobbies(), (entry) => {
+			return ({
+				id: entry[0],
+				player1: entry[1].player1.data.info,
+				player2: entry[1].player2.data.info
+			});
+		})
+		console.log(data);
+		this.lobbyManager.server.emit(ServerEvents.GlobalState, data)
 	}
 }

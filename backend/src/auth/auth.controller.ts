@@ -2,7 +2,7 @@ import { Controller, Get, Post, UseGuards, Res, Req, UseFilters, Query, Param } 
 import { RealIP } from 'nestjs-real-ip';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { AchievementService } from '../Achievement/achievement.service';
+import { AchievementService } from '../achievement/achievement.service';
 import { AuthGuard } from './auth.guard';
 import { AuthFilter, TwoFAFilter } from './auth.filter';
 import { ConfirmGuard } from './confirm.guard';

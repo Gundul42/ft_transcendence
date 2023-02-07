@@ -9,7 +9,7 @@ import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
 import { RoomsManager } from './chat/rooms/rooms.manager';
 import { StorageManager } from './chat/storage/storage.manager';
-import { AchievementModule } from './Achievement/achievement.module';
+import { AchievementModule } from './achievement/achievement.module';
 
 @Module({
   imports: [

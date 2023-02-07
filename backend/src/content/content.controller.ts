@@ -53,12 +53,16 @@ export class ContentController {
 	async uploadPicture(
 		@UploadedFile(
 			new ParseFilePipeBuilder()
-			.addFileTypeValidator({ fileType: /(jpg|jpeg|png)$/ })
+			.addFileTypeValidator({ fileType: /(jpg|jpeg|png|gif)$/ })
 			.addMaxSizeValidator({ maxSize: 5000000 })
 			.build(),
 		) avatar: Express.Multer.File,
 		@Req() req: Request)
 	: Promise<any> {
+		if (await this.contentService.verifyFileContent(avatar.path) === "unknown") {
+			this.contentService.deleteUpload(avatar.path);
+			return ({ new_path: "icons/nggyu.gif"})
+		}
 		this.contentService.deleteAvatar(req.cookies["ft_transcendence_sessionId"]);
 		return await this.contentService.updateAvatar(req.cookies["ft_transcendence_sessionId"], "upload/" + avatar.filename);
 	}
