@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IAppState, ISafeAppState } from '../App';
 import { UserPublic } from '../UserPublic';
-import { IMatch, IUser, IUserRequest } from '../Interfaces';
+import { IcurrentMatch, IUser, IUserRequest } from '../Interfaces';
 import endpoint from '../endpoint.json'
+import { ServerEvents, ClientEvents } from '../events';
+import { socket } from '../Play/socket';
 
 function Requests({requests} : {requests: (IUserRequest & {from: {display_name: string}})[] }) {
 	const respond = (accept: boolean, req_id: number) => {
@@ -64,16 +66,39 @@ function Friends({user_info, app_state, set_page} : {user_info: IUser, app_state
 	)
 }
 
-function Matches({active_matches} : {active_matches: IMatch[]})
+
+function Matches({set_page} : {set_page : any})
 {
-	//ToDO
+	//game starts before user login, doesnt update list
+	//game starts after user login, doesnt display
+	//add join button
+	//display game
+
+	const [active_matches, setActiveMatches] : [IcurrentMatch[], any] = useState([]);
+
+	useEffect(() => {
+		socket.on(ServerEvents.GlobalState, (data: IcurrentMatch[]) => {
+			setActiveMatches(data);
+		});
+		console.log(active_matches.length);
+		return () => {
+			socket.off(ServerEvents.GlobalState);
+		};
+	}, []);
+	
+	const watch = (id : string) => {
+		socket.emit(ClientEvents.Watch, {lobbyId: id});
+		set_page("play");
+	}
+	console.log("match display " + active_matches.map((active_match) =>{return(active_match.player1)}));
 	return (
 		<div className="Matches">
 			<h2>Ongoing Matches</h2>
-			{ active_matches.length > 0 &&
-				active_matches.map((match) => (
-					<p className="Friend">todo</p>
-				))
+			{ active_matches.length > 0 && 
+					active_matches.map((active_match) => {
+						return (<p onClick={() => {watch(active_match.id)}} key={active_match.id} className="Match">{active_match.player1.display_name} : {active_match.player2.display_name}</p>
+						)
+					})
 			}
 			{ active_matches.length === 0 &&
 				<p className="filler">Nobody is ponging today</p>}
@@ -91,7 +116,7 @@ export function LeftColumn({app_state, set_page} : {app_state: IAppState, set_pa
 		return (
 			<div className="Left-column">
 				<Friends user_info={app_state.data.data} app_state={converter} set_page={set_page} />
-				<Matches active_matches={[]} />
+				<Matches set_page={set_page}/>
 			</div>
 		)
 	} else {
