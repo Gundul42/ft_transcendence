@@ -1,0 +1,26 @@
+{
+	"noob": {
+		"id": 1,
+		"name": "Noob",
+		"description": "You finished your first match",
+		"logo": "/icons/noob.png"
+	},
+	"popcorn": {
+		"id": 2,
+		"name": "Bring the popcorn!",
+		"description": "You watched a match until the end",
+		"logo": "/icons/popcorn.png"
+	},
+	"top": {
+		"id": 3,
+		"name": "Top of the ladder",
+		"description": "You climbed your way to the top of the ladder (or you won the first match recorded on the database)",
+		"logo": "/icons/trophy.png"
+	},
+	"snowden": {
+		"id": 4,
+		"name": "Edward Snowden",
+		"description": "You took the time and effort of scanning a QR code in the name of security, chapeau",
+		"logo": "/icons/hacker.png"
+	}
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { IAchieve, IMatch, IUserPublicPage } from '../Interfaces';
+import endpoint from '../endpoint.json';
 
 function LadderLevel({ladder_level} : {ladder_level : number}) {
 	return (
@@ -25,12 +26,21 @@ function WinsLosses({wins, losses} : {wins: number, losses: number}) {
 
 function Achievements({achievements} : {achievements: IAchieve[]}) {
 	return (
-		<div id="Achievements">
+		<div>
 			<h2 className="Section-title">Achievements</h2>
+			<div className="Achievements">
 			{achievements.length === 0 &&
-			<p>Congrats you achieved NOTHING</p>}
+				<p>Congrats you achieved NOTHING</p>}
 			{achievements.length > 0 &&
-			achievements.map(achievement => <li>{achievement.description}</li>)}
+				achievements.map((achievement) => {
+					return (
+						<div key={achievement.id} style={{width: "90%", maxHeight:"80%", display: "flex", flexDirection: "column", alignItems: "center"}}>
+							<h3>{achievement.name}</h3>
+							<img src={endpoint.content.img + achievement.logo} alt={achievement.name} style={{maxWidth: "30%", aspectRatio: "1 / 1", borderRadius: "50%", border: "2px solid black"}} />
+						</div>
+					)
+				})}
+			</div>
 		</div>
 	)
 }

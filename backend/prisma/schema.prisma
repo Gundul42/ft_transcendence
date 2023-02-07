@@ -59,10 +59,10 @@ model AppUser {
 
 model Achieve {
 	id				Int			@id @default(autoincrement())
-	type			Int
 	name			String
 	description		String
 	logo			String
+	aknowledged		Boolean		@default(false)
 	userid			Int
 	user			AppUser		@relation(fields: [userid], references: [id])
 }

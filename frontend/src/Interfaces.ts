@@ -40,10 +40,10 @@ export interface IUserPublicPage extends IUserPublic {
 
 export interface IAchieve {
 	id:				number,
-	type:			number,
 	name:			string,
 	description:	string,
-	logo:			string
+	logo:			string,
+	aknowledged:	boolean
 }
 
 export interface IMatch {

@@ -25,12 +25,19 @@ export class GameInstance {
 	public max_points: number = 11;
 	public round: number = 1;
 	public intervalId: any = 0;
+	public mode_factor: number;
 
 	public state: GameState = new GameState(this, this.difficulty);
 	constructor(
 		private readonly lobby: Lobby,
 		public readonly difficulty: number
-	) {}
+	) {
+		if (lobby.mode === "classic") {
+			this.mode_factor = 0;
+		} else {
+			this.mode_factor = 1;
+		}
+	}
 
 	public async start() : Promise<void> {
 		this.state.resetGameState();
