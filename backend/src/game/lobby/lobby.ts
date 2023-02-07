@@ -76,6 +76,7 @@ export class Lobby {
 
 	public dispatchToLobby<T>(event: ServerEvents, payload: T) : void {
 		this.server.to(this.id).emit(event, payload);
+		this.lobbyManager.dispatchGlobalState();
 	}
 
 	public expelAll() : void {

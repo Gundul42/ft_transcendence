@@ -53,7 +53,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				status: 1
 			}
 		})
-		this.dispatchGlobalState();
+		this.lobbyManager.dispatchGlobalState();
 	}
 
 	async handleDisconnect(client: AuthenticatedSocket): Promise<void> {
@@ -80,7 +80,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return ;
 		}
 		if (lobby.game_instance.started) {
-			this.dispatchGlobalState();
+			this.lobbyManager.dispatchGlobalState();
 		}
 	}
 
@@ -147,18 +147,5 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.lobbyManager.destroyLobby(client.data.lobby.id);
 		}
 		this.lobbyManager.terminateSocket(client);
-	}
-
-	dispatchGlobalState() : void {
-		if (this.lobbyManager.getLobbies().size === 0) return ;
-		let data: any = Array.from(this.lobbyManager.getLobbies(), (entry) => {
-			return ({
-				id: entry[0],
-				player1: entry[1]?.player1.data.info,
-				player2: entry[1]?.player2.data.info
-			});
-		})
-		console.log(data);
-		this.lobbyManager.server.emit(ServerEvents.GlobalState, data)
 	}
 }

@@ -205,4 +205,18 @@ export class LobbyManager {
 		}
 	}
 
+	public async dispatchGlobalState() : Promise<void> {
+		if (this.getLobbies().size === 0) return ;
+		let data: any = Array.from(this.getLobbies(), (entry) => {
+			return ({
+				id: entry[0],
+				player1: entry[1]?.player1.data.info,
+				player2: entry[1]?.player2.data.info
+			});
+		});
+		await this.sleep(50);
+		this.server.emit(ServerEvents.GlobalState, data);
+	}
+
+	sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 }
