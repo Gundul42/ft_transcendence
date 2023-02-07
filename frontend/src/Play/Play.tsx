@@ -102,6 +102,7 @@ export function Play({app_state, set_page} : {app_state: ISafeAppState, set_page
 			<Canvas gameState={gameState} />
 			{lobbyState !== null &&
 				<InfoFooter app_state={app_state} lobbyState={lobbyState} set_page={set_page} />}
+			<button type="button" className="button" onClick={() => {set_page("home"); window.location.reload()}}>Exit</button>
 		</div>
 	)
 }
