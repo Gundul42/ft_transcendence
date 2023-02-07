@@ -4,7 +4,7 @@ import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { ServerEvents } from '../events';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AppUser } from '@prisma/client';
-import { AchievementService } from '../../Achievement/achievement.service';
+import { AchievementService } from '../../achievement/achievement.service';
 import * as achievements from '../../achievements.json';
 
 export class LobbyManager {

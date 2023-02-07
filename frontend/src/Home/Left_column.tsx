@@ -80,7 +80,7 @@ function Matches({set_page} : {set_page : any})
 		socket.on(ServerEvents.GlobalState, (data: IcurrentMatch[]) => {
 			setActiveMatches(data);
 		});
-		console.log(active_matches.length);
+
 		return () => {
 			socket.off(ServerEvents.GlobalState);
 		};
@@ -89,14 +89,15 @@ function Matches({set_page} : {set_page : any})
 	const watch = (id : string) => {
 		socket.emit(ClientEvents.Watch, {lobbyId: id});
 		set_page("play");
-	}
-	console.log("match display " + active_matches.map((active_match) =>{return(active_match.player1)}));
+	};
+
 	return (
 		<div className="Matches">
 			<h2>Ongoing Matches</h2>
 			{ active_matches.length > 0 && 
-					active_matches.map((active_match) => {
-						return (<p onClick={() => {watch(active_match.id)}} key={active_match.id} className="Match">{active_match.player1.display_name} : {active_match.player2.display_name}</p>
+					active_matches.map((active_match, i, arr) => {
+						return (
+							<p onClick={() => {watch(active_match.id)}} key={active_match.id}>{active_match.player1.display_name} : {active_match.player2.display_name}</p>
 						)
 					})
 			}

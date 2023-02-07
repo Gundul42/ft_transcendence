@@ -5,7 +5,7 @@ import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { GameModule } from './game/game.module';
 import { UsersModule } from './users/users.module';
-import { AchievementModule } from './Achievement/achievement.module';
+import { AchievementModule } from './achievement/achievement.module';
 
 @Module({
   imports: [

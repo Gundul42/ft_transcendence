@@ -5,7 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
-import { AchievementService } from '../Achievement/achievement.service';
+import { AchievementService } from '../achievement/achievement.service';
 import * as info from './info.json'
 
 @Module({
