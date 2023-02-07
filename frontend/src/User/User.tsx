@@ -41,7 +41,7 @@ export class User extends React.Component <{ app_state: ISafeAppState, set_page:
 				let files = (e.target as HTMLInputElement).files;
 				if (files !== null) {
 					newAvatar = files[0];
-					if (!newAvatar.name.endsWith(".png") && !newAvatar.name.endsWith(".jpeg") && !newAvatar.name.endsWith(".jpg")) {
+					if (!newAvatar.name.toLowerCase().endsWith(".png") && !newAvatar.name.toLowerCase().endsWith(".jpeg") && !newAvatar.name.toLowerCase().endsWith(".jpg") && !newAvatar.name.toLowerCase().endsWith(".gif")) {
 						alert("Format not valid: upload either a '.png', '.jpg' or a 'jpeg'");
 						return ;
 					}
