@@ -69,11 +69,6 @@ function Friends({user_info, app_state, set_page} : {user_info: IUser, app_state
 
 function Matches({set_page} : {set_page : any})
 {
-	//game starts before user login, doesnt update list
-	//game starts after user login, doesnt display
-	//add join button
-	//display game
-
 	const [active_matches, setActiveMatches] : [IcurrentMatch[], any] = useState([]);
 
 	useEffect(() => {
