@@ -24,7 +24,23 @@ export class RoomsManager {
 			return false;
 		//  check if doesn't exist
 		//	check if pass protected, if yes, check pass
-		return (true);
+		return (false);
+	}
+
+	async findRoom(client: Socket, user: AppUser, name: string) : Promise<Room | null>
+	{
+		return await this.prisma.room.findFirst(
+			{
+				where:
+				{
+					participants:{
+						some: { id: user.id }
+					},
+					name: name
+					// need to check if the user belongs or not
+				}
+			}
+		)
 	}
 
 	async makeRoom(client: Socket, user: AppUser, name: string) : Promise<Room | null>

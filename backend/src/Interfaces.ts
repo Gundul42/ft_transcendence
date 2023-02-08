@@ -42,6 +42,14 @@ export interface IAchieve {
 	logo:			string
 }
 
+export interface IMessage {
+	text:			string,
+	uname:			string,
+	id:				number,
+	socketID:		number,
+	room:			string
+}
+
 export interface IMatch {
 	id:				string,
 	started_at:		Date,

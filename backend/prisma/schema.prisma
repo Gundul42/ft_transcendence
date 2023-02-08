@@ -95,12 +95,13 @@ model Room {
 }
 
 model Message {
-	id				Int			@id
+	id				Int			@id @default(autoincrement())
 	appUserId		Int
-	sender			AppUser?	@relation("message", fields: [appUserId], references: [id])
+	sender			AppUser		@relation("message", fields: [appUserId], references: [id])
 	roomId			Int
 	room			Room?		@relation("roomMsg", fields: [roomId], references: [id])
 	value			String
+	created_at		DateTime	@default(now())
 }
 
 model Penalty {

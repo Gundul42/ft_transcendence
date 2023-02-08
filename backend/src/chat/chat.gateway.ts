@@ -1,18 +1,15 @@
-import { UseGuards, Res, Req, Param } from '@nestjs/common';
-import { WebSocketGateway, 
-	WebSocketServer, 
+import { WebSocketGateway,
 	MessageBody, 
 	SubscribeMessage, 
 	OnGatewayInit, 
 	OnGatewayConnection, 
-	OnGatewayDisconnect, 
-	WsException} from '@nestjs/websockets';
+	OnGatewayDisconnect} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ParsedUrlQuery } from 'querystring';
 import { PrismaService } from '../prisma/prisma.service';
-import { Room, Session, AppUser } from '@prisma/client';
+import { Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
+import { IMessage } from '../Interfaces';
 
 @WebSocketGateway(3030, { namespace: 'chat' })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -45,12 +42,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return next(new Error("401"));
 		});
 	}
+	async sendLog(client: Socket, callback: (val: string) => void)
+	{
+		const session = await this.findUser(client);
+		const	backlog = await this.storage.loadMessages(session?.user);
+		console.log("about to emit");
+		this.rooms.server.emit("connection",
+			backlog
+		);
+	}
 
-	handleConnection(client: Socket)
+	async handleConnection(client: Socket)
 	{
 		console.log("chat gateway", client.id);
 		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
 		client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
+		client.on('message', (message: IMessage, callback) => this.handleMsg(client, message, callback));
+		client.on('connection', (callback) => this.sendLog(client, callback));
+		
 		// this.prisma.appUser
 	}
 
@@ -78,7 +87,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			});
 	}
 
-	@SubscribeMessage("join")
+	// @SubscribeMessage("join")
 	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
 	{
 		console.log(client);
@@ -148,14 +157,29 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("message")
-	async handleMsg(client: Socket, data: {text: string, name: string, id: string, socketID: string})
+	async handleMsg(client: Socket, message: IMessage, callback: (val: string) => void)
 	{
-		const session: Session & { user: AppUser } = await this.findUser(client);
 		console.log("in handling");
+		if (message.room === undefined)
+		{
+			console.log("no roomless msg allowed");
+			if (callback)
+				callback("Join a room first!");
+			return ;
+		}
+		const session: Session & { user: AppUser } = await this.findUser(client);
+		const toRoom = await this.rooms.findRoom(client, session.user, message.room)
+		if (toRoom === null)
+		{
+			if (callback)
+				callback("You don't belong in the specified room");
+			return ;
+		}
+		// if (this.storage.)
 		// console.log(client);
-		console.log(data);
-		this.rooms.server.emit("messageResponse", data, "hmm");
-		this.storage.saveMessage(data.text, session.user);
+		console.log(message.text, " to ", toRoom?.name);
+		const msg = await this.storage.saveMessage(message.text, session.user, toRoom);
+		this.rooms.server.emit("messageResponse", this.storage.toIMessage(msg));
 		// this.server.emit("messageResponse", 
 		// 	{
 		// 		text: message, 
