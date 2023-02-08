@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { Header, ISafeAppState } from '../App';
 import { io } from 'socket.io-client';
-import { IUser } from '../Interfaces';
+import { IUser, IUserPublic } from '../Interfaces';
+import { ClientEvents } from '../events';
 // import Box from '@mui/material/Box'
 
 // const socket = io("https://localhost/api/chat");
@@ -20,6 +21,28 @@ type ChatUser = {
 	socketID : Number
 }
 
+function Participants({app_state, participants, set_page} : {app_state: ISafeAppState, participants: IUserPublic[], set_page: any}) {
+	const challenge = (player2_id: number, mode: "classic" | "special") => {
+		socket.emit(ClientEvents.Invite, { player2_id: player2_id, mode: mode})
+	}
+	return (
+		<table>
+			{participants.map((participant) => {
+				return (
+					<td>
+						<tr>{participant.display_name}</tr>
+						{ participant.id !== app_state.data.id &&
+							<tr>
+								<button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button>
+								<button onClick={()=>{challenge(participant.id, "classic")}}>&#65039;</button>
+								<button onClick={()=>{challenge(participant.id, "classic")}}>&#9876;</button>
+							</tr>}
+					</td>
+				)
+			})}
+		</table>
+	)
+}
 
 //TODO: Instead, fetch from server, both friends and rooms that the user's in
 const ChatBar = ({socket} : {socket: Socket}) => {
@@ -73,56 +96,51 @@ const ChatBody = ({app_state, messages, lastMsg} : {app_state : ISafeAppState, m
 			</div>
 		</>
 	);
-	}
+}
 
-	const ChatFooter = ({data_state} : {data_state : IUser}) => {
-		const [message, setMessage] = useState("");
+const ChatFooter = ({data_state} : {data_state : IUser}) => {
+	const [message, setMessage] : [string, any] = useState("");
 
-		const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => 
-		{
-			e.preventDefault()
-			if (message.trim() && (data_state.display_name as string).split(' ')[0]) 
-			{
+	const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => 
+	{
+		e.preventDefault()
+		if (message.trim() && (data_state.display_name as string).split(' ')[0]) {
 			console.log(message);
-			if (message[0] === '/')
-			{
+			if (message[0] === '/') {
 				const elements = message.substring(1, message.length).split(" ");
 				console.log(elements);
-				socket.emit(elements[0], 
-					{
-						text: elements.slice(1), 
-						name: (data_state.display_name as string).split(' ')[0], 
-						id: `${socket.id}${Math.random()}`,
-						socketID: socket.id,
-						// auth: data_state
-					}, handleCallback);
-			}
-			else
-			{
-				socket.emit("message", 
-					{
+				socket.emit(elements[0], {
+					text: elements.slice(1), 
+					name: (data_state.display_name as string).split(' ')[0], 
+					id: `${socket.id}${Math.random()}`,
+					socketID: socket.id,
+					// auth: data_state
+				}, handleCallback);
+			} else {
+				socket.emit("message", {
 					text: message, 
 					name: (data_state.display_name as string).split(' ')[0], 
 					id: `${socket.id}${Math.random()}`,
 					socketID: socket.id
-					});
+				});
 			}
 			console.log("msg sent");
-			}
-			setMessage("");
 		}
+		setMessage("");
+	};
+
 	return (
 		<div className='Chat-Input'>
-				<form className='form' onSubmit={handleSendMessage}>
-					<input 
-						type="text" 
-						placeholder='Write message' 
-						className='message' 
-						value={message} 
-						onChange={e => setMessage(e.target.value)}
-						/>
-						<button className="sendBtn">SEND</button>
-				</form>
+			<form className='form' onSubmit={handleSendMessage}>
+				<input 
+					type="text" 
+					placeholder='Write message' 
+					className='message' 
+					value={message} 
+					onChange={e => setMessage(e.target.value)}
+					/>
+					<button className="sendBtn">SEND</button>
+			</form>
 		 </div>
 	)
 }
@@ -148,20 +166,26 @@ const joinAll = () =>
 
 //Updating last message https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
 export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) => {
-	const [messages, setMessages] = useState<ChatMessage[]>([])
+	const [messages, setMessages] : [ChatMessage[], any] = useState<ChatMessage[]>([])
 	const lastMessageRef = useRef<HTMLDivElement>(null);
 
-	socket.on("connection", (data) => {
-		console.log("connected socket, should be getting msg data")
-		setMessages([...messages, data]);
-	});
-	socket.onAny((event, ...args) => {
-		console.log(event, args);
-	  });
-
 	useEffect(()=> {
-		socket.on("messageResponse", (data: any) => setMessages([...messages, data]))
-	}, [messages])
+		socket.on("messageResponse", (data: any) => setMessages((prev_messages: ChatMessage[]) => ([...prev_messages, data])));
+		socket.on("connection", (data) => {
+			console.log("connected socket, should be getting msg data")
+			setMessages((prev_messages: ChatMessage[]) => ([...prev_messages, data]));
+		});
+		const events_listener = (event: any, ...args: any) => {
+			console.log(event, args);
+		};
+		socket.onAny(events_listener);
+
+		return () => {
+			socket.off("messageResponse");
+			socket.off("connection");
+			socket.offAny(events_listener);
+		}
+	}, [])
 	
 	useEffect(() => {
 		lastMessageRef.current?.scrollIntoView({behavior: 'smooth'});

@@ -22,14 +22,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private readonly storage: StorageManager
 		)
 	{
+		console.log("gateway constructor")
 		rooms.prisma = this.prisma;
 		storage.prisma = this.prisma;
 	}
 
-	@WebSocketServer() server: Server;
-
 	afterInit(server: Server)
 	{
+		this.rooms.server = server;
 		server.use(async (socket: Socket, next) => {
 			const req = socket.request.headers.cookie;
 			console.log('Req: ', req);
@@ -48,6 +48,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleConnection(client: Socket)
 	{
+		console.log("chat gateway", client.id);
 		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
 		client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
 		// this.prisma.appUser
@@ -104,7 +105,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// client.join(room);
 		if (callback)
 			callback(`joined: ${room}`);
-		this.server.emit("newRecipientResponse", room);
+		this.rooms.server.emit("newRecipientResponse", room);
 	}
 
 	async handleLeaveEvent(client: Socket, room: string, callback)
@@ -147,14 +148,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("message")
-	async handleMsg(client: Socket, message: string)
+	async handleMsg(client: Socket, data: {text: string, name: string, id: string, socketID: string})
 	{
 		const session: Session & { user: AppUser } = await this.findUser(client);
 		console.log("in handling");
 		// console.log(client);
-		console.log(message);
-		this.server.emit("messageResponse", message, "hmm");
-		this.storage.saveMessage(message, session.user);
+		console.log(data);
+		this.rooms.server.emit("messageResponse", data, "hmm");
+		this.storage.saveMessage(data.text, session.user);
 		// this.server.emit("messageResponse", 
 		// 	{
 		// 		text: message, 
@@ -168,7 +169,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	pong(@MessageBody() message : string) : void
 	{
 		console.log("pong ", message);
-		this.server.emit("pong");
+		this.rooms.server.emit("pong");
 	}
 	// Add methods for handling events here
 }
