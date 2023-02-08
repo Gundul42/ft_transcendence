@@ -83,3 +83,9 @@ export interface IFinish {
 	winner:		string,
 	message:	string
 }
+
+export enum IRoomAccess {
+	Public,
+	Private,
+	PassProtected
+}
