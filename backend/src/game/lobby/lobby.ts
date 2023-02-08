@@ -17,7 +17,8 @@ export class Lobby {
 	constructor(
 		private readonly server: Server,
 		private readonly lobbyManager: LobbyManager,
-		public readonly mode: "classic" | "special"
+		public readonly mode: "classic" | "special",
+		public readonly isInvite: boolean = false
 	) {}
 
 	public addClient(client: AuthenticatedSocket) : void {

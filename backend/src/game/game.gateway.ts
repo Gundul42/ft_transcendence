@@ -148,4 +148,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		this.lobbyManager.terminateSocket(client);
 	}
+
+	@SubscribeMessage(ClientEvents.Invite)
+	invitePlayer(client: AuthenticatedSocket, data: { player2_id: number, mode: "classic" | "special" }) : void {
+		try {
+			this.lobbyManager.createLobby(client, data.player2_id, data.mode);
+		} catch (err: any) {
+			console.log(err);
+		}
+	}
+
+	@SubscribeMessage(ClientEvents.AcceptInvitation)
+	respondInvitation(client: AuthenticatedSocket, data: { lobbyId: string, accept: boolean }) : void {
+		try {
+			this.lobbyManager.handleRespond(client, data.lobbyId, data.accept);
+		} catch (err: any) {
+			console.log(err);
+		}
+	}
 }

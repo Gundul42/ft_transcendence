@@ -30,11 +30,45 @@ export class LobbyManager {
 		client.data.lobby?.removeClient(client);
 	}
 
+	public createLobby(client1: AuthenticatedSocket, client2_id: number, mode: "classic" | "special") : Lobby {
+		const clients: AuthenticatedSocket[] = Array.from((this.server.sockets.sockets as Map<string, AuthenticatedSocket>), socket => socket[1]) as AuthenticatedSocket[];
+		if (clients.filter(client => client.data.userid === client2_id && client.data.lobby === null).length === 0) {
+			throw new Error("Other client is unavailable");
+		}
+		const client2: AuthenticatedSocket = clients.filter(client => client.data.userid === client2_id && client.data.lobby === null)[0];
+		const new_lobby: Lobby = new Lobby(this.server, this, mode, true);
+		this.lobbies.set(new_lobby.id, new_lobby);
+		client1.data.role = "player1";
+		new_lobby.addClient(client1);
+		this.server.to(client2.id).emit(ServerEvents.ForwardInvitation, { lobbyId: new_lobby.id });
+		return (new_lobby);
+	}
+
+	public handleRespond(client: AuthenticatedSocket, lobbyId: string, accept: boolean) : void {
+		const target_lobby: Lobby | undefined = this.getLobbies().get(lobbyId);
+		if (target_lobby === undefined || target_lobby.game_instance.started) {
+			throw new Error("Lobby unavailable");
+		} else if (!accept) {
+			this.server.to(target_lobby.player1.id).emit(ServerEvents.ForwardDecline);
+			this.destroyLobby(lobbyId);
+		} else {
+			client.data.role = "player2";
+			target_lobby.addClient(client);
+			this.prisma.match.create({
+				data: {
+					id: lobbyId
+				}
+			})
+			.catch((err: any) => {console.log(err)})
+			this.updateUserStatus(target_lobby, 2);
+		}
+	}
+
 	public upsertLobby(client: AuthenticatedSocket, mode: "classic" | "special") : Lobby {
 		let lobby_id: string = "";
 		var upsertedLobby: Lobby | undefined;
 		this.lobbies.forEach((value: Lobby, key: string, map: Map<string, Lobby>) => {
-			if (!value.game_instance.started && value.mode === mode) {
+			if (!value.game_instance.started && value.mode === mode && !value.isInvite) {
 				lobby_id = value.id;
 			}
 		});
