@@ -21,12 +21,6 @@ import { AchievementModule } from './achievement/achievement.module';
     AchievementModule,
     ConfigModule.forRoot(),
     ChatModule
-  ], 
-  providers: 
-  [
-    ChatGateway,
-    RoomsManager,
-    StorageManager
   ]
 })
 export class AppModule {}
