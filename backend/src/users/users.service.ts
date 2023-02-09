@@ -233,4 +233,22 @@ export class UsersService {
 		})
 		return (res_1 && res_2);
 	}
+
+	async getAllUsers(partial_name: string) : Promise<IUserPublic[]> {
+		return await this.prisma.appUser.findMany({
+			where: {
+				display_name: { contains: partial_name }
+			},
+			select: {
+				id: true,
+				display_name: true,
+				avatar: true,
+				status: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return ([]);
+		})
+	}
 }

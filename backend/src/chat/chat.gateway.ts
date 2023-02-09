@@ -212,6 +212,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// 	});
 	}
 
+	@SubscribeMessage("dm")
+	directMessage(client: AuthenticatedSocketChat, data: {other_id: number}) : void {
+		//ToDo
+	}
+
 	@SubscribeMessage("ping")
 	pong(@MessageBody() message : string) : void
 	{

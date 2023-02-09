@@ -6,6 +6,7 @@ import { IRoom, IUser, IUserPublic, IMessage } from '../Interfaces';
 import { ClientEvents, ServerEvents } from '../events';
 import endpoint from '../endpoint.json';
 import { socket as game_socket } from '../Play/socket';
+import { SearchBar } from './SearchBar';
 
 const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
 
@@ -80,7 +81,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 }
 
 //TODO: Instead, fetch from server, both friends and rooms that the user's in
-const ChatBar = ({socket, app_state, rooms, set_room, setIsInfoView} : {socket: Socket, app_state: ISafeAppState, rooms: IRoom[], set_room: any, setIsInfoView: any}) => {
+const ChatBar = ({socket, app_state, rooms, set_room, setIsInfoView, set_page} : {socket: Socket, app_state: ISafeAppState, rooms: IRoom[], set_room: any, setIsInfoView: any, set_page: any}) => {
 	// const [users, setUsers] = useState<Array<ChatUser>>(Array<ChatUser>());
 
 	// socket.on("connection", (data) => {
@@ -102,8 +103,9 @@ const ChatBar = ({socket, app_state, rooms, set_room, setIsInfoView} : {socket: 
 	return (
 		<div className='Chat-Contacts'>
 			<h2>Rooms and friends</h2>
+			<SearchBar set_page={set_page}/>
 			<div>
-				<div	className='Text-field'>Users and Rooms</div>
+				<div className='Text-field'>Users and Rooms</div>
 				<table>
 					<tbody>
 						{/* {users.map(user => <p key={user.socketID.toString()}>{user.uname}</p>)} */}
@@ -305,7 +307,7 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	
 	return (
 		<div className="Chat">
-			<ChatBar socket={socket} app_state={app_state} rooms={rooms} set_room={setCurrentRoom} setIsInfoView={setIsInfoView} />
+			<ChatBar socket={socket} app_state={app_state} rooms={rooms} set_room={setCurrentRoom} setIsInfoView={setIsInfoView} set_page={set_page} />
 			<div className='Chat-Body'>
 				<Header set_page={set_page} />
 				<ViewRoom app_state={app_state} isInfoView={isInfoView} set_page={set_page} setIsInfoView={setIsInfoView} rooms={rooms} currentRoom={currentRoom} />

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Res, Req, Param, Body, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Query, Req, Param, Body, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { Express, Request, Response } from 'express';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -29,6 +29,12 @@ export class UsersController {
 				match_history: this.userService.composeMatchHistory(user),
 			})
 		}
+	}
+
+	@Get('search-all')
+	@UseGuards(AuthGuard)
+	async searchAll(@Query('start') start: string) : Promise<IUserPublic[]> {
+		return await this.userService.getAllUsers(start);
 	}
 
 	@Post('add-as-friend/:id')
