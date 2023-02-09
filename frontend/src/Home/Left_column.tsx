@@ -105,7 +105,6 @@ function Matches({set_page} : {set_page : any})
 export function LeftColumn({app_state, set_page} : {app_state: IAppState, set_page: any}) {
 	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
 		const converter: ISafeAppState = {
-			status: app_state.status,
 			data: app_state.data.data,
 			page: app_state.page
 		}

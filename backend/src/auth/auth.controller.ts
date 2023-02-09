@@ -29,7 +29,6 @@ export class AuthController {
     if (user === null) {
       throw new Error("Session not found")
     }
-    console.log(user) //See what data is available and select it
     const csrf_token: { access_token: string } = await this.authService.generateJwt(user.full_name, user.id);
     const match_history: any = await this.authService.composeMatchHistory(user.id);
     res.send({

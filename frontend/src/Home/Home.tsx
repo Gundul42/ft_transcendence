@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { socket } from '../Play/socket';
 import { LeftColumn } from './Left_column';
 import { RightColumn } from '../Right_column';
-import { Status, Header, ISafeAppState, IAppState } from '../App';
+import { Header, ISafeAppState, IAppState } from '../App';
 import endpoint from '../endpoint.json'
 import { ClientEvents, ServerEvents } from '../events';
 import { IAchieve } from '../Interfaces';
@@ -99,7 +99,6 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 	}, []);
 
 	let converter: IAppState = {
-		status: app_state.status,
 		data: {
 			type: "content",
 			link: null,
@@ -109,7 +108,7 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 	}
 	return(
 		<div className="Home">
-			{ app_state.status === Status.Success && app_state.data.display_name === null &&
+			{app_state.data.display_name === null &&
 				<DisplayNamePrompt />}
 			{ app_state.data.achievements.length > 0 && !app_state.data.achievements[0].aknowledged &&
 				<DisplayAchievement achievement={app_state.data.achievements[0]} /> }

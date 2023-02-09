@@ -43,11 +43,22 @@ export interface IAchieve {
 }
 
 export interface IMessage {
-	text:			string,
+	value:			string,
 	uname:			string,
 	id:				number,
-	socketID:		number,
+	appUserId:		number,
+	// socketID:		number,
 	room:			string
+}
+
+export interface IRoom {
+	id:				number,
+	participants:	IUserPublic[],
+	administrators:	IUserPublic[],
+	penalties:		any[],
+	accessibility:	IRoomAccess,
+	name:			string,
+	messages:		IMessage[]
 }
 
 export interface IMatch {

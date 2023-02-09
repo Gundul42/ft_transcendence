@@ -2,7 +2,8 @@
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Room, Session, AppUser } from '@prisma/client';
-import { IRoomAccess } from '../../Interfaces';
+import { IRoomAccess, IUserPublic } from '../../Interfaces';
+import { AuthenticatedSocketChat } from '../AuthenticatedSocketChat';
 
 export class RoomsManager {
 	public server: Server;
@@ -13,21 +14,26 @@ export class RoomsManager {
 		
 	}
 
-	async checkRoomStatus(room: string) : Promise<boolean>
+	async checkRoomStatus(room: string, client: AuthenticatedSocketChat) : Promise<boolean>
 	{
 		const exists = await this.prisma.room.findFirst({
 			where: { name: room	},
 			});
-		if (exists === null)
+		if (exists === null) {
+			await this.makeRoom(client, room)
 			return true;
-		if (exists.accessibility == IRoomAccess.Private)
+		} else if(exists.accessibility === IRoomAccess.Public) {
+			await this.joinRoom(client, room);
+			return true;
+		} else if (exists.accessibility == IRoomAccess.Private) {
 			return false;
+		}
 		//  check if doesn't exist
 		//	check if pass protected, if yes, check pass
 		return (false);
 	}
 
-	async findRoom(client: Socket, user: AppUser, name: string) : Promise<Room | null>
+	async findRoom(client: Socket, user: IUserPublic, name: string) : Promise<Room | null>
 	{
 		return await this.prisma.room.findFirst(
 			{
@@ -43,12 +49,12 @@ export class RoomsManager {
 		)
 	}
 
-	async makeRoom(client: Socket, user: AppUser, name: string) : Promise<Room | null>
+	async makeRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
 	{
-		const result = await this.prisma.room.create({
+		const result: Room = await this.prisma.room.create({
 		  data: {
 			participants: {
-				connect: { id: user.id }
+				connect: { id: client.data.id }
 			},
 			name: name,
 			accessibility: IRoomAccess.Public
@@ -61,7 +67,7 @@ export class RoomsManager {
 		if (result === null)
 			return (null)
 		client.join(name);
-		await this.prisma.appUser.update(
+		/*await this.prisma.appUser.update(
 			{
 				where: {
 					id: user.id,
@@ -71,7 +77,36 @@ export class RoomsManager {
 					rooms: {connect: { id: result.id }},
 				}
 			}
-		)
+		)*/
 		return result;
+	}
+
+	async joinRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
+	{
+		const result: Room = await this.prisma.room.update({
+			where: { name: name },
+			data: {
+				participants: {
+					connect: { id: client.data.id }
+			}
+		  }
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		if (result !== null) {
+			client.join(name);
+		}
+		return result;
+	}
+
+	public initialiseSocket(client: AuthenticatedSocketChat, user: AppUser) : void {
+		client.data = {
+			id: user.id,
+			display_name: user.display_name,
+			avatar: user.avatar,
+			status: user.status
+		}
 	}
 }

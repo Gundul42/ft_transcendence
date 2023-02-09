@@ -20,5 +20,8 @@
 	},
 	"achievement" : {
 		"aknowledge": "https://localhost/api/achievement/aknowledge"
+	},
+	"chat": {
+		"retrieve": "https://localhost/api/chat/retrieve"
 	}
 }

@@ -89,7 +89,7 @@ model Room {
 	administrators	AppUser[]	@relation("administrate")
 	penalties		Penalty[]
 	accessibility	Int			@default(0)
-	name			String
+	name			String		@unique
 	password		String		@default("")
 	messages		Message[]	@relation("roomMsg")
 }

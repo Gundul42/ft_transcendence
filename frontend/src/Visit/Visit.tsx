@@ -23,7 +23,6 @@ export function Visit({ app_state, set_page } : { app_state : ISafeAppState, set
 	}, []);
 
 	let converter: IAppState = {
-		status: app_state.status,
 		data: {
 			type: "content",
 			link: null,

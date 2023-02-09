@@ -105,7 +105,6 @@ export class User extends React.Component <{ app_state: ISafeAppState, set_page:
 
 	render() {
 		let converter: IAppState = {
-			status: this.props.app_state.status,
 			data: {
 				type: "content",
 				link: null,

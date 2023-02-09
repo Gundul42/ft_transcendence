@@ -7,7 +7,7 @@ export enum ClientEvents {
 	Down = "Down",
 	Stop = "Stop",
 	Invite = "Invite",
-	AcceptInvitation = "AcceptInvitation"
+	RespondInvitation = "RespondInvitation"
 }
 
 export enum ServerEvents {
@@ -18,5 +18,6 @@ export enum ServerEvents {
 	Finish = "Finish",
 	Ready = "Ready",
 	ForwardInvitation = "ForwardInvitation",
-	ForwardDecline = "ForwardDecline"
+	ForwardDecline = "ForwardDecline",
+	AbortInvite = "AbortInvite"
 }

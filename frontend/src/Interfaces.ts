@@ -62,6 +62,11 @@ export interface IAPICall {
 	data:			IUser | null
 }
 
+export interface IPage {
+	location:		"home" | "play" | "chat" | "visit" | "user",
+	visited_id:		number
+}
+
 export interface ICoordinate {
 	x: number;
 	y: number;
@@ -99,4 +104,34 @@ export interface IcurrentMatch {
 	id:				string,
 	player1:		IUserPublic,
 	player2:		IUserPublic
+}
+
+export interface IChallengeInvite {
+	player1:		IUserPublic,
+	lobbyId:		string
+}
+
+export interface IMessage {
+	value:			string,
+	uname:			string,
+	id:				number,
+	appUserId:		number,
+	// socketID:		number,
+	room:			string
+}
+
+export interface IRoom {
+	id:				number,
+	participants:	IUserPublic[],
+	administrators:	IUserPublic[],
+	penalties:		any[],
+	accessibility:	IRoomAccess,
+	name:			string,
+	messages:		IMessage[]
+}
+
+export enum IRoomAccess {
+	Public,
+	Private,
+	PassProtected
 }

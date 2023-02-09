@@ -42,7 +42,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log(err);
 			return null;
 		});
-		if (session_user === null) {
+		if (session_user === null || session_user.user === null) {
 			client.disconnect(true);
 			return ;
 		}
@@ -85,9 +85,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage(ClientEvents.Cancel)
-	cancelLobbyCreation(client: AuthenticatedSocket) : void {
+	cancelLobbyCreation(client: AuthenticatedSocket, data: { player2_id: number }) : void {
 		console.log("purging lobby");
 		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
+			if (client.data.lobby.isInvite && data !== undefined) {
+				this.lobbyManager.abortInvite(data.player2_id);
+			}
 			this.lobbyManager.destroyLobby(client.data.lobby.id);
 		}
 	}
@@ -151,6 +154,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage(ClientEvents.Invite)
 	invitePlayer(client: AuthenticatedSocket, data: { player2_id: number, mode: "classic" | "special" }) : void {
+		console.log("Invitation has been sent");
 		try {
 			this.lobbyManager.createLobby(client, data.player2_id, data.mode);
 		} catch (err: any) {
@@ -158,7 +162,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
-	@SubscribeMessage(ClientEvents.AcceptInvitation)
+	@SubscribeMessage(ClientEvents.RespondInvitation)
 	respondInvitation(client: AuthenticatedSocket, data: { lobbyId: string, accept: boolean }) : void {
 		try {
 			this.lobbyManager.handleRespond(client, data.lobbyId, data.accept);

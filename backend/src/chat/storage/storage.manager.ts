@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Room, Session, AppUser, Message } from '@prisma/client';
-import { IRoomAccess, IMessage } from '../../Interfaces';
+import { IRoomAccess, IMessage, IUserPublic } from '../../Interfaces';
 
 export class StorageManager {
 	// public server: Server;
@@ -14,11 +14,12 @@ export class StorageManager {
 	toIMessage(message: (Message & { sender: AppUser | null; room: Room | null; })) : IMessage
 	{
 		var ret: IMessage = {
-			text: message.value,
+			value: message.value,
 			uname: message.sender?.display_name,
 			id: message.id,
-			socketID: message.sender?.id,
-			room: message.room?.name
+			// socketID: message.sender?.id,
+			room: message.room?.name,
+			appUserId: message.appUserId
 		};
 		return ret;
 	}
@@ -27,11 +28,12 @@ export class StorageManager {
 	{
 		const ret: IMessage[] = message.map((x) => {
 			return {
-				text: x.value,
+				value: x.value,
 				uname: x.sender?.display_name,
 				id: x.id,
-				socketID: x.sender?.id,
-				room: x.room?.name
+				//socketID: x.sender?.id,
+				room: x.room?.name,
+				appUserId: x.appUserId
 			};
 		  });
 		return (ret);
@@ -57,7 +59,7 @@ export class StorageManager {
 		return (this.toIMessages(dbret));
 	}
 
-	async saveMessage(message: string, client: AppUser, room: Room)
+	async saveMessage(message: string, client: IUserPublic, room: Room)
 	{
 		if (client === undefined)
 			return null;

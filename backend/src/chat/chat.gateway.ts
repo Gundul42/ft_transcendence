@@ -10,8 +10,9 @@ import { Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
 import { IMessage } from '../Interfaces';
+import { AuthenticatedSocketChat } from './AuthenticatedSocketChat';
 
-@WebSocketGateway(3030, { namespace: 'chat' })
+@WebSocketGateway(3030, { namespace: 'chat' , transports: ['polling', 'websocket']})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor (
 		private readonly prisma: PrismaService,
@@ -19,7 +20,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		private readonly storage: StorageManager
 		)
 	{
-		console.log("gateway constructor")
 		rooms.prisma = this.prisma;
 		storage.prisma = this.prisma;
 	}
@@ -27,6 +27,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	afterInit(server: Server)
 	{
 		this.rooms.server = server;
+		/*
 		server.use(async (socket: Socket, next) => {
 			const req = socket.request.headers.cookie;
 			console.log('Req: ', req);
@@ -41,26 +42,49 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log("Auth failed");
 			return next(new Error("401"));
 		});
+		*/
 	}
+
 	async sendLog(client: Socket, callback: (val: string) => void)
 	{
 		const session = await this.findUser(client);
-		const	backlog = await this.storage.loadMessages(session?.user);
+		const backlog = await this.storage.loadMessages(session?.user);
 		console.log("about to emit");
 		this.rooms.server.emit("connection",
 			backlog
 		);
 	}
 
-	async handleConnection(client: Socket)
+	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
 	{
+		console.log("connection is being handled")
+		if (!client.handshake.headers || !client.handshake.headers.cookie) {
+			client.disconnect(true);
+			return ;
+		}
+		const sessionid: string = (client.handshake.headers.cookie as string).slice((client.handshake.headers.cookie as string).indexOf("ft_transcendence_sessionId=") + "ft_transcendence_sessionId=".length);
+		const session_user: Session & { user: AppUser} = await this.prisma.session.findUnique({
+			where: { id: sessionid },
+			include: { user: true }
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		if (session_user === null || session_user.user === null) {
+			client.disconnect(true);
+			return ;
+		}
+		this.rooms.initialiseSocket(client as AuthenticatedSocketChat, session_user.user);
+		console.log(session_user.user.display_name, " just connected");
+		/*
 		console.log("chat gateway", client.id);
 		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
 		client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
 		client.on('message', (message: IMessage, callback) => this.handleMsg(client, message, callback));
 		client.on('connection', (callback) => this.sendLog(client, callback));
 		
-		// this.prisma.appUser
+		// this.prisma.appUser*/
 	}
 
 	handleDisconnect(client: Socket)
@@ -87,10 +111,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			});
 	}
 
-	// @SubscribeMessage("join")
-	async handleJoinEvent(client: Socket, room: string, callback: (val: string) => void)
+	@SubscribeMessage("join")
+	async handleJoinEvent(client: AuthenticatedSocketChat, data: {text: string[]}, callback: (val: string) => void)
 	{
-		console.log(client);
+		/*
 		const session: Session & { user: AppUser } = await this.findUser(client);
 		// const user = await this.findUser(client);
 		// this.prisma.appUser.findUnique({
@@ -99,22 +123,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// 	},
 		// 	include: { user: true }
 		//   })
-		// Validate if client can join room here
-		if (await this.rooms.checkRoomStatus(room) == false)
+		// Validate if client can join room here*/
+		if (await this.rooms.checkRoomStatus(data.text[0], client) == false)
 		{
 			console.log("not allowed");
 			return ;
 		}
 		
-		console.log("joining room", room);
-		console.log(session.user);
-		const res = await this.rooms.makeRoom(client, session.user, room);
-		if (res != null)
-			console.log("room creation succesful");
+		console.log("joining room", data.text[0]);
+		// const res = await this.rooms.makeRoom(client, client.data, data.text[0]);
+		// if (res != null)
+		// 	console.log("room creation succesful");
 		// client.join(room);
 		if (callback)
-			callback(`joined: ${room}`);
-		this.rooms.server.emit("newRecipientResponse", room);
+			callback(`joined: ${data.text[0]}`);
+		this.rooms.server.emit("newRecipientResponse", data.text[0]);
 	}
 
 	async handleLeaveEvent(client: Socket, room: string, callback)
@@ -124,7 +147,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		callback(`left: ${room}`);
 	}
 
-	// @UseGuards(AuthGuard)
 	async isValid(query : string | undefined): Promise<boolean>
 	{
 		if (query == undefined)
@@ -157,18 +179,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("message")
-	async handleMsg(client: Socket, message: IMessage, callback: (val: string) => void)
+	async handleMsg(client: AuthenticatedSocketChat, data: {text: string, room: string}, callback: (val: string) => void)
 	{
 		console.log("in handling");
-		if (message.room === undefined)
+		console.log(client.data, data)
+		if (data.room === undefined)
 		{
 			console.log("no roomless msg allowed");
 			if (callback)
 				callback("Join a room first!");
 			return ;
 		}
-		const session: Session & { user: AppUser } = await this.findUser(client);
-		const toRoom = await this.rooms.findRoom(client, session.user, message.room)
+		//const session: Session & { user: AppUser } = await this.findUser(client);
+		const toRoom = await this.rooms.findRoom(client, client.data, data.room)
 		if (toRoom === null)
 		{
 			if (callback)
@@ -177,8 +200,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		// if (this.storage.)
 		// console.log(client);
-		console.log(message.text, " to ", toRoom?.name);
-		const msg = await this.storage.saveMessage(message.text, session.user, toRoom);
+		console.log(data.text, " to ", toRoom?.name);
+		const msg = await this.storage.saveMessage(data.text, client.data, toRoom);
 		this.rooms.server.emit("messageResponse", this.storage.toIMessage(msg));
 		// this.server.emit("messageResponse", 
 		// 	{

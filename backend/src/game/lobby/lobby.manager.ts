@@ -1,5 +1,5 @@
 import { Lobby } from './lobby';
-import { Server } from 'socket.io';
+import { Server, Namespace } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { ServerEvents } from '../events';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -31,7 +31,7 @@ export class LobbyManager {
 	}
 
 	public createLobby(client1: AuthenticatedSocket, client2_id: number, mode: "classic" | "special") : Lobby {
-		const clients: AuthenticatedSocket[] = Array.from((this.server.sockets.sockets as Map<string, AuthenticatedSocket>), socket => socket[1]) as AuthenticatedSocket[];
+		const clients: AuthenticatedSocket[] = Array.from((this.server.sockets as any), socket => socket[1]) as AuthenticatedSocket[];
 		if (clients.filter(client => client.data.userid === client2_id && client.data.lobby === null).length === 0) {
 			throw new Error("Other client is unavailable");
 		}
@@ -40,7 +40,7 @@ export class LobbyManager {
 		this.lobbies.set(new_lobby.id, new_lobby);
 		client1.data.role = "player1";
 		new_lobby.addClient(client1);
-		this.server.to(client2.id).emit(ServerEvents.ForwardInvitation, { lobbyId: new_lobby.id });
+		this.server.to(client2.id).emit(ServerEvents.ForwardInvitation, { player1: client1.data.info, lobbyId: new_lobby.id });
 		return (new_lobby);
 	}
 
@@ -62,6 +62,16 @@ export class LobbyManager {
 			.catch((err: any) => {console.log(err)})
 			this.updateUserStatus(target_lobby, 2);
 		}
+	}
+
+	public abortInvite(clientId: number) {
+		console.log("recalling invite")
+		const clients: AuthenticatedSocket[] = Array.from((this.server.sockets as any), socket => socket[1]) as AuthenticatedSocket[];
+		if (clients.filter(client => client.data.userid === clientId && client.data.lobby === null).length === 0) {
+			throw new Error("Other client is unavailable");
+		}
+		const client2: AuthenticatedSocket = clients.filter(client => client.data.userid === clientId && client.data.lobby === null)[0];
+		this.server.to(client2.id).emit(ServerEvents.AbortInvite);
 	}
 
 	public upsertLobby(client: AuthenticatedSocket, mode: "classic" | "special") : Lobby {
@@ -241,13 +251,16 @@ export class LobbyManager {
 
 	public async dispatchGlobalState() : Promise<void> {
 		if (this.getLobbies().size === 0) return ;
-		let data: any = Array.from(this.getLobbies(), (entry) => {
-			return ({
-				id: entry[0],
-				player1: entry[1]?.player1.data.info,
-				player2: entry[1]?.player2.data.info
-			});
+		let data: any[] = Array.from(this.getLobbies(), (entry) => {
+			if (entry[1].game_instance.started) {
+				return ({
+					id: entry[0],
+					player1: entry[1]?.player1.data.info,
+					player2: entry[1]?.player2.data.info
+				});
+			}
 		});
+		if (data.length === 0) return;
 		await this.sleep(50);
 		this.server.emit(ServerEvents.GlobalState, data);
 	}
