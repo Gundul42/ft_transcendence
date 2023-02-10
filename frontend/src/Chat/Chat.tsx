@@ -25,6 +25,8 @@ type ChatMessage = {
 
 function Participants({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
 	const [idChallenged, setIdChallenged] : [number, any] = useState(0);
+	const [admin, setAdmin] : [boolean, any] = useState(false);
+
 	const challenge = (player2_id: number, mode: "classic" | "special") => {
 		console.log("invitation is being sent")
 		game_socket.emit(ClientEvents.Invite, { player2_id: player2_id, mode: mode})
@@ -45,6 +47,45 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		}
 	})
 
+	useEffect(() => {
+		console.log("checking if admin")
+		room.administrators.map((admin) =>
+		{
+			if (admin.id === app_state.data.id)
+				setAdmin(true);
+		})
+	}, [room.administrators, app_state.data.id])
+
+	const promoteAdmin = (user_id: number) => {
+		let form_data: string[] = [];
+		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
+		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
+		fetch(endpoint.chat['admin-promotion'], {
+			method: "POST",
+			body: form_data.join('&'),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+		})
+	};
+
+	const kickUser = (user_id: number) => {
+		const reason = prompt("Reason for kicking this user?")
+		if (!reason)
+			return (alert("Please don't use it for no reason"))
+		let form_data: string[] = [];
+		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
+		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
+		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
+		fetch(endpoint.chat['user-kick'], {
+			method: "POST",
+			body: form_data.join('&'),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+		})
+	};
+
 	if (idChallenged !== 0) {
 		return (
 			<div>
@@ -60,15 +101,25 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		<div>
 			<table>
 				<tbody>
-				{room.participants.map((participant) => {
+				{room.participants.map((participant, id) => {
 					return (
-						<tr>
+						<tr key={id}>
 							<td>{participant.display_name}</td>
 							{ participant.id !== app_state.data.id &&
 								<td>
 									<button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button>
 									<button onClick={()=>{challenge(participant.id, "classic")}}>Challenge | Classic</button>
 									<button onClick={()=>{challenge(participant.id, "special")}}>Challenge | Special</button>
+									{ admin === true &&
+										<>
+										<button onClick={()=>{kickUser(participant.id)}}>Kick from room</button>
+										<button>fancyAdminButton</button>
+										</>
+									}
+									{ room.administrators[0].id === app_state.data.id && room.administrators.includes(participant) === false && 
+									<button onClick={()=>{promoteAdmin(participant.id)}}>Promote to admin</button>
+									}
+
 								</td>}
 						</tr>
 					)
@@ -82,23 +133,6 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 
 //TODO: Instead, fetch from server, both friends and rooms that the user's in
 const ChatBar = ({socket, app_state, rooms, set_room, setIsInfoView, set_page} : {socket: Socket, app_state: ISafeAppState, rooms: IRoom[], set_room: any, setIsInfoView: any, set_page: any}) => {
-	// const [users, setUsers] = useState<Array<ChatUser>>(Array<ChatUser>());
-
-	// socket.on("connection", (data) => {
-	// 	console.log("connected socket, should be getting socket data")
-	// 	setUsers([...users, data]);
-	// });
-	// const room_map: Map<number, ChatUser> = new Map(app_state.data.friends.map((friend) => [friend.id, friend]));
-
-	// useEffect(()=> {
-	// 		socket.on("newRecipientResponse", (data: any) => setUsers(data))
-	// }, [socket, users])
-	// if (users instanceof Array<ChatUser>)
-	// {
-	// 	console.log("as intended")
-	// }
-	// else
-	// 	console.log("not intended");
 	const room_access: string[] = ["Public", "Private", "PW required"];
 	return (
 		<div className='Chat-Contacts'>
@@ -241,17 +275,16 @@ const joinAll = (socket: Socket) =>
 	socket.emit("join", "all");
 }
 
-function AdminCommands({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
-	const [admin, setAdmin] : [boolean, any] = useState(false);
+function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
+	const [owner, setOwner] : [boolean, any] = useState(false);
 
 	useEffect(() => {
 		console.log(room.administrators);
-		room.administrators.map((admin) => {
-			if (admin.id === app_state.data.id)
-				setAdmin(true);
-		})
-	}, [])
-	if (admin === false) {
+		if (room.administrators[0].id === app_state.data.id)
+			setOwner(true);
+	}, [room.administrators, app_state.data.id])
+
+	if (owner === false) {
 		return (
 			<div>
 			</div>
@@ -272,31 +305,30 @@ function AdminCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
 		})
-		// .then(
-		// 	async (res) => {
-		// 		const res_json: any = await res.json(); 
-		// 		// this.setState((prev_state: IUserState) => ({
-		// 		// 	avatar: res_json.new_path,
-		// 		// 	display_name: prev_state.display_name,
-		// 		// 	twoFA: prev_state.twoFA,
-		// 		// 	qr: null
-		// 		// }))
-		// 	},
-		// 	(err) => {
-		// 		console.log(err);
-		// 	})
-	};
+	}
+
+	const removePassword = () => {
+		fetch(endpoint.chat['password-removal'], {
+			method: "POST",
+			body: encodeURIComponent("room") + "=" + encodeURIComponent(room.name),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
+			}
+		})
+	}
 
 	return (
 		<div>
 			<table>
 				<tbody>
 						<tr>
-							<td>You're an admin here!</td>
+							<td>You're the owner here!</td>
 							{/* { participant.id !== app_state.data.id && */}
 								<td>
 									{/* <button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button> */}
-									<button onClick={()=>{password()}}>Change Password</button>
+									<button onClick={()=>{password()}}>Set/Change Password</button>
+									<button onClick={()=>{removePassword()}}>Remove Password</button>
 									{/* <button onClick={()=>{mode(participant.id, "special")}}>Change Mode</button> */}
 								</td>
 						</tr>
@@ -313,7 +345,7 @@ const ViewRoom = ({app_state, rooms, currentRoom, isInfoView, setIsInfoView, set
 	if (isInfoView && rooms.length > 0) {
 		return (
 			<>
-			<AdminCommands setIsInfoView={setIsInfoView} app_state={app_state} room={rooms[currentRoom]} set_page={set_page} />
+			<OwnerCommands setIsInfoView={setIsInfoView} app_state={app_state} room={rooms[currentRoom]} set_page={set_page}/>
 			<Participants setIsInfoView={setIsInfoView} app_state={app_state} room={rooms[currentRoom]} set_page={set_page} />
 			</>
 		)

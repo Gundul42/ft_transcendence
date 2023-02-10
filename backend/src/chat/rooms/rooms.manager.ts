@@ -16,8 +16,10 @@ export class RoomsManager {
 
 	async checkRoomStatus(room: string[], client: AuthenticatedSocketChat) : Promise<boolean>
 	{
+		if (room === undefined)
+			return false;
 		const exists = await this.prisma.room.findFirst({
-			where: { name: room[0]	},
+			where: { name: room[0] },
 			});
 		if (exists === null) {
 			await this.makeRoom(client, room[0])
@@ -132,10 +134,6 @@ export class RoomsManager {
 
 	async changePassword(room: IRoom, password: string)
 	{
-		console.log("in changingPass roomManager");
-		// if (room.accessibility !== IRoomAccess.PassProtected)
-		// 	room.accessibility = IRoomAccess.PassProtected;
-		// room.
 		await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
@@ -149,4 +147,38 @@ export class RoomsManager {
 		});
 		console.log("Password changed!")
 	}
+
+	async removePassword(room: IRoom)
+	{
+		await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				password: "",
+				accessibility: IRoomAccess.Public
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		console.log("Password removed!")
+	}
+
+	async promoteToAdmin(room: IRoom, user: IUserPublic)
+	{
+		await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				administrators: {
+					connect: { id: user.id }
+				},
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		console.log("User promoted to admin!")
+	}
+
 }

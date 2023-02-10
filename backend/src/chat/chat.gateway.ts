@@ -114,16 +114,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage("join")
 	async handleJoinEvent(client: AuthenticatedSocketChat, data: {text: string[]}, callback: (val: string) => void)
 	{
-		/*
-		const session: Session & { user: AppUser } = await this.findUser(client);
-		// const user = await this.findUser(client);
-		// this.prisma.appUser.findUnique({
-		// 	where: {
-		// 	  id: client.request.
-		// 	},
-		// 	include: { user: true }
-		//   })
-		// Validate if client can join room here*/
 		console.log(data.text);
 		if (await this.rooms.checkRoomStatus(data.text, client) == false)
 		{

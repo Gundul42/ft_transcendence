@@ -38,8 +38,56 @@ export class ChatController {
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
+				if (aRoom.administrators[0].id === user_rooms.user.id)
 					return (this.roomMg.changePassword(aRoom, password));
 		})
-		console.log("No matching room found");
+		console.log("No matching room found/They aren't an owner");
 	  }
+
+	@Post('password-remove')
+	@UseGuards(AuthGuard)
+	async removePasswordValidation(@Body('room') room: string, @Req() req: Request): Promise<void> {
+		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		user_rooms.user.rooms.map((aRoom) =>
+		{
+			if (aRoom.name === room)
+			{ 
+				if (aRoom.administrators[0].id === user_rooms.user.id)
+					return (this.roomMg.removePassword(aRoom));
+			}
+		})
+		console.log("No matching room found/They aren't an owner");
+	}
+
+	@Post('admin-promotion')
+	@UseGuards(AuthGuard)
+	async promoteToAdminValidation(@Body('room') room: string, @Body('user') userId: number, @Req() req: Request): Promise<void>
+	{
+		console.log(userId);
+		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		user_rooms.user.rooms.map((aRoom) =>
+		{
+			if (aRoom.name === room)
+			{
+				aRoom.participants.map(user =>
+				{
+					if (user.id == userId)
+					{
+						console.log("user match: ", user.id)
+						if (aRoom.administrators[0].id === user_rooms.user.id)
+							return (this.roomMg.promoteToAdmin(aRoom, user));
+					}
+				})
+			}
+		})
+		console.log("No matching room found/They aren't an owner");
+	}
+
+	@Post('user-kick')
+	@UseGuards(AuthGuard)
+	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	{
+		console.log("Here to kick ", userId, " because of ", reason);
+	}
+
 }
