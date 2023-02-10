@@ -14,26 +14,45 @@ export class RoomsManager {
 	{
 	}
 
-	async checkRoomStatus(room: string, client: AuthenticatedSocketChat) : Promise<boolean>
+	async checkRoomStatus(room: string[], client: AuthenticatedSocketChat) : Promise<boolean>
 	{
+		if (room === undefined)
+			return false;
 		const exists = await this.prisma.room.findFirst({
-			where: { name: room	},
+			where: { name: room[0] },
 			});
 		if (exists === null) {
-			await this.makeRoom(client, room)
+			await this.makeRoom(client, room[0])
 			return true;
 		} else if(exists.accessibility === IRoomAccess.Public) {
-			await this.joinRoom(client, room);
+			await this.joinRoom(client, room[0]);
 			return true;
-		} else if (exists.accessibility == IRoomAccess.Private) {
-			return false;
 		}
+		else if (exists.accessibility == IRoomAccess.Private)
+			return false;
+		else if (exists.accessibility == IRoomAccess.PassProtected)
+		{
+			if (room.length === 1)
+				return false;
+			var passprot = await this.prisma.room.findFirst(
+				{
+					where:
+					{
+						name: room[0]
+					}
+				})
+			if (passprot?.password !== room[1])
+				return (false);
+			await this.joinRoom(client, room[0]);
+			return true;
+		}
+		console.log("Joining not permitted");
 		//  check if doesn't exist
 		//	check if pass protected, if yes, check pass
 		return (false);
 	}
 
-	async findRoom(client: Socket, user: IUserPublic, name: string) : Promise<Room | null>
+	async findRoom(user: IUserPublic, name: string) : Promise<Room | null>
 	{
 		return await this.prisma.room.findFirst(
 			{
@@ -71,6 +90,9 @@ export class RoomsManager {
 		const result: Room = await this.prisma.room.create({
 		  data: {
 			participants: {
+				connect: { id: client.data.id }
+			},
+			administrators: {
 				connect: { id: client.data.id }
 			},
 			name: name,
@@ -229,4 +251,54 @@ export class RoomsManager {
 			});
 		}
 	}
+
+	async changePassword(room: IRoom, password: string)
+	{
+		await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				password: password,
+				accessibility: IRoomAccess.PassProtected
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		console.log("Password changed!")
+	}
+
+	async removePassword(room: IRoom)
+	{
+		await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				password: "",
+				accessibility: IRoomAccess.Public
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		console.log("Password removed!")
+	}
+
+	async promoteToAdmin(room: IRoom, user: IUserPublic)
+	{
+		await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				administrators: {
+					connect: { id: user.id }
+				},
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+		console.log("User promoted to admin!")
+	}
+
 }

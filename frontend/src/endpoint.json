@@ -23,6 +23,12 @@
 		"aknowledge": "https://localhost/api/achievement/aknowledge"
 	},
 	"chat": {
-		"retrieve": "https://localhost/api/chat/retrieve"
+		"retrieve": "https://localhost/api/chat/retrieve",
+		"password-change": "https://localhost/api/chat/password-change",
+		"password-removal": "https://localhost/api/chat/password-remove",
+		"admin-promotion": "https://localhost/api/chat/admin-promotion",
+		"user-kick": "https://localhost/api/chat/user-kick",
+		"user-ban": "https://localhost/api/chat/user-ban",
+		"user-mute": "https://localhost/api/chat/user-mute"
 	}
 }
