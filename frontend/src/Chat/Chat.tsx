@@ -8,7 +8,7 @@ import endpoint from '../endpoint.json';
 import { socket as game_socket } from '../Play/socket';
 import { SearchBar } from './SearchBar';
 
-const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
+export const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
 
 type ChatMessage = {
 	text:			String,
@@ -81,44 +81,29 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 }
 
 //TODO: Instead, fetch from server, both friends and rooms that the user's in
-const ChatBar = ({socket, app_state, rooms, set_room, setIsInfoView, set_page} : {socket: Socket, app_state: ISafeAppState, rooms: IRoom[], set_room: any, setIsInfoView: any, set_page: any}) => {
-	// const [users, setUsers] = useState<Array<ChatUser>>(Array<ChatUser>());
-
-	// socket.on("connection", (data) => {
-	// 	console.log("connected socket, should be getting socket data")
-	// 	setUsers([...users, data]);
-	// });
-	// const room_map: Map<number, ChatUser> = new Map(app_state.data.friends.map((friend) => [friend.id, friend]));
-
-	// useEffect(()=> {
-	// 		socket.on("newRecipientResponse", (data: any) => setUsers(data))
-	// }, [socket, users])
-	// if (users instanceof Array<ChatUser>)
-	// {
-	// 	console.log("as intended")
-	// }
-	// else
-	// 	console.log("not intended");
-	const room_access: string[] = ["Public", "Private", "PW required"];
+const ChatBar = ({app_state, rooms, setCurrentRoom, setRooms, setIsInfoView, set_page} : {app_state: ISafeAppState, rooms: Map<string, IRoom>, setCurrentRoom: any, setRooms: any, setIsInfoView: any, set_page: any}) => {
+	const room_access: string[] = ["Public", "Private", "PW required", "DM"];
+	const room_arr: IRoom[] = Array.from(rooms.values());
 	return (
 		<div className='Chat-Contacts'>
 			<h2>Rooms and friends</h2>
-			<SearchBar set_page={set_page}/>
+			<SearchBar set_page={set_page} app_state={app_state} setRooms={setRooms} setCurrentRoom={setCurrentRoom} rooms={rooms} />
 			<div>
 				<div className='Text-field'>Users and Rooms</div>
 				<table>
 					<tbody>
-						{/* {users.map(user => <p key={user.socketID.toString()}>{user.uname}</p>)} */}
-						{ rooms.length > 0 && 
-							rooms.map((room, i) => {
-								return (
-									<tr key={i} onClick={()=>{set_room(i); console.log("loading room n ", i)}}>
-										<td>{room.name}</td>
-										<td>{room_access[room.accessibility]}</td>
-										<td><button onClick={()=> {setIsInfoView(true)}}>&#x2139;</button></td>
-									</tr>
-								)
-							})}
+						{ room_arr.map((room) => {
+							return (
+								<tr key={room.id} onClick={()=>{setCurrentRoom(room.name)}}>
+									{ room.accessibility !== 3 &&
+										<td>{room.name}</td> }
+									{ room.accessibility === 3 &&
+										<td>{room.participants.find((user) => user.id !== app_state.data.id)?.display_name}</td> }
+									<td>{room_access[room.accessibility]}</td>
+									<td><button onClick={()=> {setIsInfoView(true)}}>&#x2139;</button></td>
+								</tr>
+							)
+						})}
 					</tbody>
 				</table>
 			</div>
@@ -132,28 +117,9 @@ const handleCallback = (reply : string) =>
 	alert(reply);
 }
 
-const ChatBody = ({app_state, room/*, lastMsg*/} : {app_state : ISafeAppState, room: IRoom/*, lastMsg : React.RefObject<HTMLDivElement>*/}) => { 
+const ChatBody = ({app_state, room, messages} : {app_state : ISafeAppState, room: IRoom, messages: IMessage[]}) => { 
 	const participants_map = new Map(room.participants.map((value) => [value.id, value]));
-	const [messages, setMessages] : [IMessage[], any] = useState([...room.messages]);
 	const lastMessageRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		socket.on("messageResponse", (data: ChatMessage[]) =>
-		{
-			setMessages((prev_messages: ChatMessage[]) => ([
-				...prev_messages,
-				data
-			]));
-		});
-
-		return () => {
-			socket.off('messageResponse');
-		}
-	})
-
-	useEffect(() => {
-		setMessages([...room.messages]);
-	}, [room])
 	
 	useEffect(() => {
 		lastMessageRef.current?.scrollIntoView({behavior: 'smooth'});
@@ -243,17 +209,20 @@ const joinAll = (socket: Socket) =>
 
 //(app_state.data.data.full_name as string).split(' ')[0]
 
-const ViewRoom = ({app_state, rooms, currentRoom, isInfoView, setIsInfoView, set_page} : {app_state : ISafeAppState, rooms: IRoom[], currentRoom: number, isInfoView: boolean, setIsInfoView: any, set_page: any}) => {
-	if (isInfoView && rooms.length > 0) {
+const ViewRoom = ({app_state, messages, setMessages, rooms, currentRoom, isInfoView, setIsInfoView, set_page} : {app_state : ISafeAppState, messages: Map<string, IMessage[]>, setMessages: any, rooms: Map<string, IRoom>, currentRoom: string, isInfoView: boolean, setIsInfoView: any, set_page: any}) => {
+	let room: IRoom = rooms.get(currentRoom) as IRoom;
+	let safe_messages: IMessage[] = messages.get(currentRoom) === undefined ? [] : (messages.get(currentRoom) as IMessage[]);
+
+	if (isInfoView && rooms.get(currentRoom) !== undefined) {
 		return (
-			<Participants setIsInfoView={setIsInfoView} app_state={app_state} room={rooms[currentRoom]} set_page={set_page} />
+			<Participants setIsInfoView={setIsInfoView} app_state={app_state} room={room} set_page={set_page} />
 		)
 	} else {
 		return (
 			<>
-				{rooms.length > 0 &&
-					<ChatBody app_state={app_state} room={rooms[currentRoom]} /> }
-				<ChatFooter data_state={app_state.data} room={rooms[currentRoom]} />
+				{rooms.size > 0 && rooms.get(currentRoom) !== undefined &&
+					<ChatBody app_state={app_state} room={room} messages={safe_messages} /> }
+				<ChatFooter data_state={app_state.data} room={room} />
 			</>
 		)
 	}
@@ -262,8 +231,9 @@ const ViewRoom = ({app_state, rooms, currentRoom, isInfoView, setIsInfoView, set
 //Updating last message https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
 export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) => {
 	//const socket = io("https://localhost/chat");
-	const [rooms, setRooms] : [IRoom[], any] = useState([]);
-	const [currentRoom, setCurrentRoom] : [number, any] = useState(0);
+	const [rooms, setRooms] : [Map<string, IRoom>, any] = useState(new Map<string, IRoom>);
+	const [messages, setMessages] : [Map<string, IMessage[]>, any] = useState(new Map(Array.from(rooms, (room) => [room[1].name ,room[1].messages])));
+	const [currentRoom, setCurrentRoom] : [string, any] = useState("");
 	const [isInfoView, setIsInfoView] : [boolean, any] = useState(false);
 
 	useEffect(() => {
@@ -271,13 +241,37 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 			try {
 				const response = await fetch(endpoint.chat.retrieve);
 				const data: IRoom[] = await response.json();
-				setRooms(data);
-				console.log(data);
+				setRooms(new Map(data.map((room) => [room.name, room])));
 			} catch (err) {
 				console.log(err);
 			}
 		}
 		fetchData();
+	}, [])
+
+	useEffect(() => {
+		setMessages(new Map(Array.from(rooms, (room) => [room[1].name ,room[1].messages])));
+	}, [rooms])
+
+	useEffect(() => {
+		socket.on("messageResponse", (data: IMessage) =>
+		{
+			console.log("just received ", data)
+			setMessages((prev_messages: Map<string, IMessage[]>) => {
+				let safe_messages: IMessage[];
+				if (prev_messages.get(data.room) === undefined) {
+					safe_messages = [];
+				} else {
+					safe_messages = prev_messages.get(data.room) as IMessage[];
+				}
+				console.log(safe_messages)
+				return new Map(messages.set(data.room, [...safe_messages, data]));
+			});
+		});
+
+		return () => {
+			socket.off('messageResponse');
+		}
 	}, [])
 
 	useEffect(() => {
@@ -296,21 +290,26 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 			console.log(event, args)
 		}
 
+		socket.on("roomUpdate", ( data: {roomid: number, room: IRoom}) => {
+			console.log("setting up new rooms")
+			setRooms(new Map(rooms.set(data.room.name, data.room)));
+		})
 		socket.onAny(eventListener);
 
 		return () => {
 			//socket.off('connection');
 			//socket.off('disconnect');
 			socket.offAny(eventListener);
+			socket.off("roomUpdate");
 		};
-    }, []);
+    }, [rooms]);
 	
 	return (
 		<div className="Chat">
-			<ChatBar socket={socket} app_state={app_state} rooms={rooms} set_room={setCurrentRoom} setIsInfoView={setIsInfoView} set_page={set_page} />
+			<ChatBar app_state={app_state} rooms={rooms} setCurrentRoom={setCurrentRoom} setIsInfoView={setIsInfoView} set_page={set_page} setRooms={setRooms} />
 			<div className='Chat-Body'>
 				<Header set_page={set_page} />
-				<ViewRoom app_state={app_state} isInfoView={isInfoView} set_page={set_page} setIsInfoView={setIsInfoView} rooms={rooms} currentRoom={currentRoom} />
+				<ViewRoom app_state={app_state} messages={messages} setMessages={setMessages} isInfoView={isInfoView} set_page={set_page} setIsInfoView={setIsInfoView} rooms={rooms} currentRoom={currentRoom} />
 				<button onClick={() => pingFunc(socket)}>Ping</button>
 				<button onClick={() => joinAll(socket)}>Join Room</button>
 			</div>

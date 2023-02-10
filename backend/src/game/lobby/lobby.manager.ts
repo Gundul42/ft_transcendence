@@ -204,14 +204,14 @@ export class LobbyManager {
 			winner = player2;
 			loser = player1;
 		}
-		this.prisma.appUser.update({
+		await this.prisma.appUser.update({
 			where: { id: winner.id },
 			data: {
 				wins: winner.wins + 1,
 			}
 		})
 		.catch((err: any) => {console.log(err)});
-		this.prisma.appUser.update({
+		await this.prisma.appUser.update({
 			where: { id: loser.id },
 			data: {
 				losses: loser.losses + 1,
@@ -222,6 +222,16 @@ export class LobbyManager {
 
 	private async updateLadder() : Promise<void> {
 		const all_users: AppUser[] = await this.prisma.appUser.findMany({
+			where: {
+				OR: [
+					{
+						wins: { gt: 0 }
+					},
+					{
+						losses: { gt: 0 }
+					}
+				]
+			},
 			orderBy: [
 				{ wins: "desc" },
 				{ losses: "asc" }
@@ -231,6 +241,7 @@ export class LobbyManager {
 			console.log(err);
 			return ([]);
 		});
+		console.log(all_users)
 		let ladder_level: number = 1;
 		this.achievementService.grantAchievement(all_users[0].id, achievements.top);
 		for (let i = 0; i < all_users.length; i++) {

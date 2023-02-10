@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { ISafeAppState } from '../App';
 import endpoint from '../endpoint.json';
-import { IUserPublic } from '../Interfaces';
+import { IRoom, IUserPublic } from '../Interfaces';
+import { socket as chat_socket } from './Chat';
 
-export const SearchBar = ({set_page} : {set_page: any}) => {
+export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state} : {rooms: Map<string, IRoom>, app_state: ISafeAppState, set_page: any, setRooms: any, setCurrentRoom: any}) => {
 	const [textField, setTextField] : [string, any] = useState("");
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
 
@@ -23,6 +25,14 @@ export const SearchBar = ({set_page} : {set_page: any}) => {
 		}
 	}, [textField])
 
+	const sendDirectMessage = (userid: number) => {
+		chat_socket.emit("dm", { other_id: userid }, (room_name: string) => {
+			if (room_name.length > 0) {
+				setCurrentRoom(room_name);
+			}
+		});
+	}
+
 	return (
 		<div>
 			<input style={{backgroundColor: "white", borderRadius: "30px", border: "1px solid black", height: "30px", width: "95%"}} type="text" placeholder="Search..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
@@ -33,10 +43,11 @@ export const SearchBar = ({set_page} : {set_page: any}) => {
 						return (
 							<tr key={user.id}>
 								<td>{user.display_name}</td>
-								<td>
-									<button onClick={()=>{set_page("visit", user.id)}}>&#x1f464;</button>
-									<button onClick={()=>{console.log("direct message")}}>&#128172;</button>
-								</td>
+								{user.id !== app_state.data.id &&
+									<td>
+										<button onClick={()=>{set_page("visit", user.id)}}>&#x1f464;</button>
+										<button onClick={()=>{sendDirectMessage(user.id)}}>&#128172;</button>
+									</td>}
 							</tr>
 						)
 					}) }

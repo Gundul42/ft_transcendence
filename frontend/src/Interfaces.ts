@@ -133,5 +133,6 @@ export interface IRoom {
 export enum IRoomAccess {
 	Public,
 	Private,
-	PassProtected
+	PassProtected,
+	DirectMessage
 }

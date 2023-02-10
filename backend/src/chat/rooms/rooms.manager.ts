@@ -2,7 +2,8 @@
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Room, Session, AppUser } from '@prisma/client';
-import { IRoomAccess, IUserPublic } from '../../Interfaces';
+import { v4 as uuidv4 } from 'uuid';
+import { IRoom, IRoomAccess, IUserPublic } from '../../Interfaces';
 import { AuthenticatedSocketChat } from '../AuthenticatedSocketChat';
 
 export class RoomsManager {
@@ -11,7 +12,6 @@ export class RoomsManager {
 
 	constructor(public prisma: PrismaService)
 	{
-		
 	}
 
 	async checkRoomStatus(room: string, client: AuthenticatedSocketChat) : Promise<boolean>
@@ -47,6 +47,23 @@ export class RoomsManager {
 				}
 			}
 		)
+	}
+
+	async findUserRooms(userid: number) : Promise<IRoom[]> {
+		return await this.prisma.appUser.findUnique({
+			where: { id: userid },
+			include: {
+				rooms: {
+					select: {
+						name: true
+					}
+				}
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		})
 	}
 
 	async makeRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
@@ -107,6 +124,109 @@ export class RoomsManager {
 			display_name: user.display_name,
 			avatar: user.avatar,
 			status: user.status
+		}
+	}
+
+	public getSocketFromNamespace(userid: number) : AuthenticatedSocketChat {
+		const clients: AuthenticatedSocketChat[] = Array.from((this.server.sockets as any), socket => socket[1]) as AuthenticatedSocketChat[];
+		if (clients.filter(client => client.data.id === userid).length === 0) {
+			return null;
+		} else {
+			return clients.filter(client => client.data.id === userid)[0];
+		}
+	}
+
+	public async upsertDMRoom(client: AuthenticatedSocketChat, other_id: number) : Promise<IRoom> {
+		const room: IRoom = await this.prisma.room.findFirst({
+			where: {
+				AND: [
+					{
+						administrators: {
+							some: { id: client.data.id }
+						}
+					},
+					{
+						administrators: {
+							some: { id: other_id }
+						}
+					},
+					{
+						accessibility: 3
+					}
+				]
+			},
+			select: {
+				id: true,
+				participants: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				administrators: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				penalties: true,
+				accessibility: true,
+				name: true,
+				messages: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+
+		if (room !== null) {
+			return (room);
+		} else {
+			return await this.prisma.room.create({
+				data: {
+					participants: {
+						connect: [{ id: client.data.id }, { id: other_id }]
+					},
+					administrators: {
+						connect: [{ id: client.data.id }, { id: other_id }]
+					},
+					accessibility: 3,
+					name: uuidv4(),
+					password: "",
+				},
+				select: {
+					id: true,
+					participants: {
+						select: {
+							id: true,
+							display_name: true,
+							avatar: true,
+							status: true
+						}
+					},
+					administrators: {
+						select: {
+							id: true,
+							display_name: true,
+							avatar: true,
+							status: true
+						}
+					},
+					penalties: true,
+					accessibility: true,
+					name: true,
+					messages: true
+				}
+			})
+			.catch((err: any) => {
+				console.log(err);
+				return null;
+			});
 		}
 	}
 }

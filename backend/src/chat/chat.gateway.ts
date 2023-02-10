@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
-import { IMessage } from '../Interfaces';
+import { IMessage, IRoom } from '../Interfaces';
 import { AuthenticatedSocketChat } from './AuthenticatedSocketChat';
 
 @WebSocketGateway(3030, { namespace: 'chat' , transports: ['polling', 'websocket']})
@@ -76,6 +76,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return ;
 		}
 		this.rooms.initialiseSocket(client as AuthenticatedSocketChat, session_user.user);
+		const user_rooms: IRoom[] = await this.rooms.findUserRooms(client.data.id);
+		if (user_rooms !== null && user_rooms.length > 0) {
+			user_rooms.forEach((value) => {
+				client.join(value.name)
+			})
+		}
 		console.log(session_user.user.display_name, " just connected");
 		/*
 		console.log("chat gateway", client.id);
@@ -87,8 +93,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// this.prisma.appUser*/
 	}
 
-	handleDisconnect(client: Socket)
+	handleDisconnect(client: AuthenticatedSocketChat)
 	{
+		console.log(client.data.display_name, " is leaving")
 		this.leaveAllRooms(client);
 	}
 
@@ -208,13 +215,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// 		text: message, 
 		// 		name: "Server", 
 		// 		id: 124234,
-		// 		socketID: 425669384756
+		// 		socketID: 425669384756client
 		// 	});
 	}
 
 	@SubscribeMessage("dm")
-	directMessage(client: AuthenticatedSocketChat, data: {other_id: number}) : void {
-		//ToDo
+	async directMessage(client: AuthenticatedSocketChat, data: {other_id: number}) : Promise<string> {
+		const room: IRoom = await this.rooms.upsertDMRoom(client, data.other_id);
+		if (room === null) {
+			return ("");
+		}
+		client.join(room.name);
+		const client2: AuthenticatedSocketChat = this.rooms.getSocketFromNamespace(data.other_id);
+		if (client2 !== null) {
+			client2.join(room.name);
+		}
+		this.rooms.server.to(room.name).emit("roomUpdate", { roomid: room.id, room: room });
+		return (room.name);
 	}
 
 	@SubscribeMessage("ping")
