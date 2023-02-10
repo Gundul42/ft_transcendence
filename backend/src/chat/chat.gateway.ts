@@ -124,9 +124,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// 	include: { user: true }
 		//   })
 		// Validate if client can join room here*/
-		if (await this.rooms.checkRoomStatus(data.text[0], client) == false)
+		console.log(data.text);
+		if (await this.rooms.checkRoomStatus(data.text, client) == false)
 		{
 			console.log("not allowed");
+			if (callback)
+				callback("You can't join this room; provide pass if required")
 			return ;
 		}
 		
@@ -191,7 +194,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			return ;
 		}
 		//const session: Session & { user: AppUser } = await this.findUser(client);
-		const toRoom = await this.rooms.findRoom(client, client.data, data.room)
+		const toRoom = await this.rooms.findRoom(client.data, data.room)
 		if (toRoom === null)
 		{
 			if (callback)

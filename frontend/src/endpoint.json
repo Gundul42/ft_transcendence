@@ -23,6 +23,7 @@
 		"aknowledge": "https://localhost/api/achievement/aknowledge"
 	},
 	"chat": {
-		"retrieve": "https://localhost/api/chat/retrieve"
+		"retrieve": "https://localhost/api/chat/retrieve",
+		"password-change": "https://localhost/api/chat/password-change"
 	}
 }

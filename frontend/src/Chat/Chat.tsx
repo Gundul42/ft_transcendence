@@ -241,12 +241,81 @@ const joinAll = (socket: Socket) =>
 	socket.emit("join", "all");
 }
 
-//(app_state.data.data.full_name as string).split(' ')[0]
+function AdminCommands({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
+	const [admin, setAdmin] : [boolean, any] = useState(false);
 
+	useEffect(() => {
+		console.log(room.administrators);
+		room.administrators.map((admin) => {
+			if (admin.id === app_state.data.id)
+				setAdmin(true);
+		})
+	}, [])
+	if (admin === false) {
+		return (
+			<div>
+			</div>
+		)
+	}
+	const password = () => {
+		const newPassword = prompt('Please enter the new password');
+		if (newPassword === null)
+			return ;
+		let form_data: string[] = [];
+		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
+		form_data.push(encodeURIComponent("password") + "=" + encodeURIComponent(newPassword));
+		console.log(form_data);
+		fetch(endpoint.chat['password-change'], {
+			method: "POST",
+			body: form_data.join("&"),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+		})
+		// .then(
+		// 	async (res) => {
+		// 		const res_json: any = await res.json(); 
+		// 		// this.setState((prev_state: IUserState) => ({
+		// 		// 	avatar: res_json.new_path,
+		// 		// 	display_name: prev_state.display_name,
+		// 		// 	twoFA: prev_state.twoFA,
+		// 		// 	qr: null
+		// 		// }))
+		// 	},
+		// 	(err) => {
+		// 		console.log(err);
+		// 	})
+	};
+
+	return (
+		<div>
+			<table>
+				<tbody>
+						<tr>
+							<td>You're an admin here!</td>
+							{/* { participant.id !== app_state.data.id && */}
+								<td>
+									{/* <button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button> */}
+									<button onClick={()=>{password()}}>Change Password</button>
+									{/* <button onClick={()=>{mode(participant.id, "special")}}>Change Mode</button> */}
+								</td>
+						</tr>
+					{/* )
+				})} */}
+				</tbody>
+			</table>
+		</div>
+	)
+}
+
+//(app_state.data.data.full_name as string).split(' ')[0]
 const ViewRoom = ({app_state, rooms, currentRoom, isInfoView, setIsInfoView, set_page} : {app_state : ISafeAppState, rooms: IRoom[], currentRoom: number, isInfoView: boolean, setIsInfoView: any, set_page: any}) => {
 	if (isInfoView && rooms.length > 0) {
 		return (
+			<>
+			<AdminCommands setIsInfoView={setIsInfoView} app_state={app_state} room={rooms[currentRoom]} set_page={set_page} />
 			<Participants setIsInfoView={setIsInfoView} app_state={app_state} room={rooms[currentRoom]} set_page={set_page} />
+			</>
 		)
 	} else {
 		return (
