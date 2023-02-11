@@ -29,8 +29,13 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 
 	const challenge = (player2_id: number, mode: "classic" | "special") => {
 		console.log("invitation is being sent")
-		game_socket.emit(ClientEvents.Invite, { player2_id: player2_id, mode: mode})
-		setIdChallenged(player2_id);
+		game_socket.emit(ClientEvents.Invite, { player2_id: player2_id, mode: mode}, (response: boolean) => {
+			if (response) {
+				setIdChallenged(player2_id);
+			} else {
+				alert("The other user is already ponging :(")
+			}
+		})
 	};
 
 	useEffect(() => {
@@ -132,9 +137,18 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 }
 
 //TODO: Instead, fetch from server, both friends and rooms that the user's in
-const ChatBar = ({app_state, rooms, setCurrentRoom, setRooms, setIsInfoView, set_page} : {app_state: ISafeAppState, rooms: Map<string, IRoom>, setCurrentRoom: any, setRooms: any, setIsInfoView: any, set_page: any}) => {
+const ChatBar = ({app_state, rooms, messages, setCurrentRoom, setRooms, setIsInfoView, set_page, setUnreadRooms} : {app_state: ISafeAppState, rooms: Map<string, IRoom>, messages: Map<string, IMessage[]>, setCurrentRoom: any, setRooms: any, setIsInfoView: any, set_page: any, setUnreadRooms: any}) => {
 	const room_access: string[] = ["Public", "Private", "PW required", "DM"];
 	const room_arr: IRoom[] = Array.from(rooms.values());
+
+	const changeCurrentRoom = (room: IRoom, className: string) => {
+		setCurrentRoom(room.name);
+		if (className === "unread" && messages.get(room.name) !== undefined) {
+			window.localStorage.setItem(room.name, (messages.get(room.name) as IMessage[]).length.toString());
+			setUnreadRooms((prev_unreadRooms: number) => (prev_unreadRooms - 1))
+		}
+	}
+
 	return (
 		<div className='Chat-Contacts'>
 			<h2>Rooms and friends</h2>
@@ -144,8 +158,14 @@ const ChatBar = ({app_state, rooms, setCurrentRoom, setRooms, setIsInfoView, set
 				<table>
 					<tbody>
 						{ room_arr.map((room) => {
+							let className: string;
+							if (messages.get(room.name) !== undefined && (messages.get(room.name) as IMessage[]).length > (Number(window.localStorage.getItem(room.name)))) {
+								className = "unread";
+							} else {
+								className = "read";
+							}
 							return (
-								<tr key={room.id} onClick={()=>{setCurrentRoom(room.name)}}>
+								<tr key={room.id} className={className} onClick={()=>{changeCurrentRoom(room, className)}}>
 									{ room.accessibility !== 3 &&
 										<td>{room.name}</td> }
 									{ room.accessibility === 3 &&
@@ -226,6 +246,7 @@ const ChatFooter = ({data_state, room} : {data_state : IUser, room: IRoom}) => {
 					// socketID: socket.id,
 					room: room.name
 					}, handleCallback);
+					window.localStorage.setItem(room.name, (Number(window.localStorage.getItem(room.name)) + 1).toString())
 			}
 			console.log("msg sent");
 		}
@@ -330,8 +351,7 @@ const ViewRoom = ({app_state, messages, setMessages, rooms, currentRoom, isInfoV
 	if (isInfoView && rooms.get(currentRoom) !== undefined) {
 		return (
 			<>
-			{rooms.get(currentRoom) !== undefined &&
-				<OwnerCommands setIsInfoView={setIsInfoView} app_state={app_state} room={room} set_page={set_page}/>}
+				<OwnerCommands setIsInfoView={setIsInfoView} app_state={app_state} room={room} set_page={set_page}/>
 				<Participants setIsInfoView={setIsInfoView} app_state={app_state} room={room} set_page={set_page} />
 			</>
 		)
@@ -347,8 +367,7 @@ const ViewRoom = ({app_state, messages, setMessages, rooms, currentRoom, isInfoV
 }
 
 //Updating last message https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
-export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) => {
-	//const socket = io("https://localhost/chat");
+export const Chat = ({app_state, set_page, unreadRooms, setUnreadRooms} : {app_state: ISafeAppState, set_page: any, unreadRooms: number, setUnreadRooms: any}) => {
 	const [rooms, setRooms] : [Map<string, IRoom>, any] = useState(new Map<string, IRoom>);
 	const [messages, setMessages] : [Map<string, IMessage[]>, any] = useState(new Map(Array.from(rooms, (room) => [room[1].name ,room[1].messages])));
 	const [currentRoom, setCurrentRoom] : [string, any] = useState("");
@@ -360,7 +379,16 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 			try {
 				const response = await fetch(endpoint.chat.retrieve);
 				const data: IRoom[] = await response.json();
+				let n_unreadRooms: number = 0;
 				setRooms(new Map(data.map((room) => [room.name, room])));
+				data.forEach((room) => {
+					if (room.messages.length > (Number(window.localStorage.getItem(room.name)))) {
+						n_unreadRooms++;
+					} else if (room.messages.length < (Number(window.localStorage.getItem(room.name)))) {
+						window.localStorage.setItem(room.name, room.messages.length.toString());
+					}
+					setUnreadRooms(n_unreadRooms)
+				})
 			} catch (err) {
 				console.log(err);
 			}
@@ -426,7 +454,7 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	
 	return (
 		<div className="Chat">
-			<ChatBar app_state={app_state} rooms={rooms} setCurrentRoom={setCurrentRoom} setIsInfoView={setIsInfoView} set_page={set_page} setRooms={setRooms} />
+			<ChatBar app_state={app_state} rooms={rooms} messages={messages} setCurrentRoom={setCurrentRoom} setIsInfoView={setIsInfoView} set_page={set_page} setRooms={setRooms} setUnreadRooms={setUnreadRooms} />
 			<div className='Chat-Body'>
 				<Header set_page={set_page} />
 				<ViewRoom app_state={app_state} messages={messages} setMessages={setMessages} isInfoView={isInfoView} set_page={set_page} setIsInfoView={setIsInfoView} rooms={rooms} currentRoom={currentRoom} />

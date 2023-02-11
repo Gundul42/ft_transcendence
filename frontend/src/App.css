@@ -222,7 +222,7 @@
   overflow-y: scroll;
 }
 
-.Menu-icon, .Avatar-container {
+.Menu-icon, .Menu-icon-alert, .Avatar-container {
   background-color: #a6a8ac;
   height: 25vh;
   aspect-ratio: 1/1;
@@ -233,12 +233,16 @@
   align-items: center;
 }
 
-.Menu-icon:hover {
+.Menu-icon-alert {
+  background-color: rgb(231, 133, 133);
+}
+
+.Menu-icon:hover, .Menu-icon-alert:hover {
   background-color: white;
   height: 27vh;
 }
 
-.Menu-icon>* {
+.Menu-icon>*, .Menu-icon-alert>* {
   max-width: 50%;
   max-height: 50%;
   width: auto;
@@ -600,6 +604,10 @@
 .Search-bar tr:hover {
   background-color: #282c34;
   color: white;
+}
+
+.unread {
+  background-color: rgb(245, 146, 146);
 }
 
 html {

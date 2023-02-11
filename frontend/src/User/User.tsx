@@ -14,8 +14,8 @@ export interface IUserState {
 	qr: any
 }
 
-export class User extends React.Component <{ app_state: ISafeAppState, set_page: any}, IUserState> {
-	constructor(props: { app_state: ISafeAppState, set_page: any}) {
+export class User extends React.Component <{ app_state: ISafeAppState, set_page: any, unreadRooms: number}, IUserState> {
+	constructor(props: { app_state: ISafeAppState, set_page: any, unreadRooms: number}) {
 		super(props);
 		this.state = {
 			avatar: props.app_state.data.avatar,
@@ -130,7 +130,7 @@ export class User extends React.Component <{ app_state: ISafeAppState, set_page:
 				<PersonalInformation user_state={this.state} full_name={this.props.app_state.data.full_name} email={this.props.app_state.data.email} uploadAvatar={this.uploadAvatar} setTwoFA={this.setTwoFA} />
 				<Header set_page={this.props.set_page} />
 				<Dashboard user_info={user_info} />
-				<RightColumn app_state={converter} set_page={this.props.set_page} />
+				<RightColumn app_state={converter} set_page={this.props.set_page} unreadRooms={this.props.unreadRooms} />
 			</div>
 		)
 	}

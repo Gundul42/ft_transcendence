@@ -153,13 +153,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage(ClientEvents.Invite)
-	invitePlayer(client: AuthenticatedSocket, data: { player2_id: number, mode: "classic" | "special" }) : void {
+	invitePlayer(client: AuthenticatedSocket, data: { player2_id: number, mode: "classic" | "special" }) : boolean {
 		console.log("Invitation has been sent");
 		try {
 			this.lobbyManager.createLobby(client, data.player2_id, data.mode);
 		} catch (err: any) {
 			console.log(err);
+			return false;
 		}
+		return true;
 	}
 
 	@SubscribeMessage(ClientEvents.RespondInvitation)

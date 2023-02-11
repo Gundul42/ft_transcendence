@@ -85,7 +85,7 @@ function Loading({setClicked} : {setClicked: any}) {
 	)
 }
 
-export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) {
+export function Home({app_state, set_page, unreadRooms} : {app_state: ISafeAppState, set_page: any, unreadRooms: number}) {
 	const [isClicked, setClicked] : [boolean, any] = useState(false);
 
 	useEffect(() => {
@@ -128,7 +128,7 @@ export function Home({app_state, set_page} : {app_state: ISafeAppState, set_page
 				<div className="break"></div>
 				<p>In the special mode the ball is going to get faster every round</p>
 			</div>
-			<RightColumn app_state={converter} set_page={set_page} />
+			<RightColumn app_state={converter} set_page={set_page} unreadRooms={unreadRooms} />
 		</div>
 	)
 }

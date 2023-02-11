@@ -6,7 +6,7 @@ import { PublicInfo } from './PublicInfo';
 import { Dashboard } from '../User/Dashboard';
 import { RightColumn } from '../Right_column';
 
-export function Visit({ app_state, set_page } : { app_state : ISafeAppState, set_page: any }) {
+export function Visit({ app_state, set_page, unreadRooms } : { app_state : ISafeAppState, set_page: any, unreadRooms: number }) {
 	const [userStats, setUserStats] : [IUserPublicPage | null, any] = useState(null);
 
 	useEffect(() => {
@@ -39,7 +39,7 @@ export function Visit({ app_state, set_page } : { app_state : ISafeAppState, set
 			<PublicInfo user_info={userStats} app_state={app_state} />
 			<Header set_page={set_page} />
 			<Dashboard user_info={userStats} />
-			<RightColumn set_page={set_page} app_state={converter} />
+			<RightColumn set_page={set_page} app_state={converter} unreadRooms={unreadRooms} />
 		</div>
 	)
 }
