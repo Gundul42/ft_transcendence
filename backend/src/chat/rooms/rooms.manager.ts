@@ -1,9 +1,9 @@
 // import { Rooms } from './rooms';
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Room, Session, AppUser } from '@prisma/client';
+import { Room, Session, AppUser, Penalty } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
-import { IRoom, IRoomAccess, IUserPublic } from '../../Interfaces';
+import { IRoom, IRoomAccess, IUserPublic, IPenaltyType } from '../../Interfaces';
 import { AuthenticatedSocketChat } from '../AuthenticatedSocketChat';
 
 export class RoomsManager {
@@ -20,11 +20,17 @@ export class RoomsManager {
 			return false;
 		const exists = await this.prisma.room.findFirst({
 			where: { name: room[0] },
+			include: {
+				penalties: true
+			}
 			});
 		if (exists === null) {
 			await this.makeRoom(client, room[0])
 			return true;
-		} else if(exists.accessibility === IRoomAccess.Public) {
+		}
+		if (this.bannedFromRoom(exists, client) === true)
+			return false;
+		if (exists.accessibility === IRoomAccess.Public) {
 			await this.joinRoom(client, room[0]);
 			return true;
 		}
@@ -52,7 +58,18 @@ export class RoomsManager {
 		return (false);
 	}
 
-	async findRoom(user: IUserPublic, name: string) : Promise<Room | null>
+	bannedFromRoom(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean
+	{
+		if (room.penalties.map((penalty) => {
+			if (penalty.userid === user.data.id && penalty.type === IPenaltyType.Ban)
+				return (true);
+			return (false);
+		}).includes(true))
+			return (true);
+		return (false);
+	}
+
+	async findRoom(user: IUserPublic, name: string) : Promise<Room & { penalties: Penalty[];} | null>
 	{
 		return await this.prisma.room.findFirst(
 			{
@@ -63,6 +80,10 @@ export class RoomsManager {
 					},
 					name: name
 					// need to check if the user belongs or not
+				},
+				include:
+				{
+					penalties: true
 				}
 			}
 		)
@@ -301,4 +322,99 @@ export class RoomsManager {
 		console.log("User promoted to admin!")
 	}
 
+	async makePenalty(userId: number, room: IRoom, type: IPenaltyType)
+	{
+		return await this.prisma.penalty.create({
+			data: {
+			  user: {
+				  connect: { id: userId }
+			  },
+			  room: {
+				  connect: { id: room.id }
+			  },
+			  type: type,
+			}
+		  })
+		  .catch((err: any) => {
+			console.log(err);
+			return null;
+		  });
+	}
+	
+	// Connects the penalty to the room, disconnects the user from it
+	async addDcPenaltyToUser(penalty: Penalty, userId: number, room: IRoom)
+	{
+		return await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				participants: {
+					disconnect: {id: userId}
+				},
+				administrators: {
+					disconnect: {id: userId}
+				},
+				penalties: {
+					connect: {id: penalty.id}
+				}
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+	}
+
+	async addPenaltyToUser(penalty: Penalty, userId: number, room: IRoom)
+	{
+		return await this.prisma.room.update({
+			where: { name: room.name },
+			data: {
+				penalties: {
+					connect: {id: penalty.id}
+				}
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
+	}
+
+	async kickUser(userId: number, room: IRoom)
+	{
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Kick);
+		if (penalty === null)
+			return null;
+		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
+			console.log(userId, " has been kicked!");
+	}
+
+	async banUser(userId: number, room: IRoom)
+	{
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Ban);
+		if (penalty === null)
+			return null;
+		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
+			console.log(userId, " has been banned!");
+	}
+
+	async muteUser(userId: number, room: IRoom)
+	{
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Mute);
+		if (penalty === null)
+			return null;
+		if (await this.addPenaltyToUser(penalty, userId, room) !== null)
+			console.log(userId, " has been muted!");
+	}
+
+	isMuted(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean
+	{
+		if (room.penalties.map((penalty) =>
+		{
+			if (penalty.userid === user.data.id && penalty.type === IPenaltyType.Mute)
+				return (true);
+		}).includes(true))
+			return (true)
+		return (false);
+	}
 }

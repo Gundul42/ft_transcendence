@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser, Room } from '@prisma/client';
-import { IRoom } from '../Interfaces';
+import { IRoom, IUser } from '../Interfaces';
 
 @Injectable()
 export class ChatService {
@@ -66,4 +66,17 @@ export class ChatService {
 			return null;
 		})
 	}
+
+	isAdmin(aRoom: IRoom, user: AppUser & { rooms: IRoom[]; }): boolean
+	{
+		const res = aRoom.administrators.map((admin) => {
+			if (admin.id == user.id)
+				return (true);
+			return (false);
+		})
+		if (res.includes(true))
+			return (true);
+		return (false);
+	}
+
 }

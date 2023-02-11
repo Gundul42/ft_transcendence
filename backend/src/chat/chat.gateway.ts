@@ -198,6 +198,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				callback("You don't belong in the specified room");
 			return ;
 		}
+		if (this.rooms.isMuted(toRoom, client))
+			return ("You're muted!");
+		if (callback)
+			callback("Message sent");
+		else
+			console.log("no callback detected");
 		// if (this.storage.)
 		// console.log(client);
 		console.log(data.text, " to ", toRoom?.name);

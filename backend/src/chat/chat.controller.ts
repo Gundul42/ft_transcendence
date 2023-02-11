@@ -85,9 +85,58 @@ export class ChatController {
 
 	@Post('user-kick')
 	@UseGuards(AuthGuard)
-	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	async userKickValidation(@Body('room') room: string, @Body('user') userId: string, @Body('reason') reason: string, @Req() req: Request): Promise<void>
 	{
-		console.log("Here to kick ", userId, " because of ", reason);
+		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		user_rooms.user.rooms.map((aRoom) =>
+		{
+			if (aRoom.name === room)
+			{
+				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
+					return ("Not an admin in this room")
+				if (aRoom.administrators[0].id === Number(userId))
+					return ("You can't kick the owner!");
+				this.roomMg.kickUser(Number(userId), aRoom);
+				return ("User " + userId + " was kicked because of: " + reason);
+			}
+		})
 	}
 
+	@Post('user-ban')
+	@UseGuards(AuthGuard)
+	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	{
+		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		user_rooms.user.rooms.map((aRoom) =>
+		{
+			if (aRoom.name === room)
+			{
+				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
+					return ("Not an admin in this room")
+				if (aRoom.administrators[0].id === Number(userId))
+					return ("You can't ban the owner!");
+				this.roomMg.banUser(Number(userId), aRoom);
+				return ("User " + userId + " was banned because of: " + reason);
+			}
+		})
+	}
+	
+	@Post('user-mute')
+	@UseGuards(AuthGuard)
+	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	{
+		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		user_rooms.user.rooms.map((aRoom) =>
+		{
+			if (aRoom.name === room)
+			{
+				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
+					return ("Not an admin in this room")
+				if (aRoom.administrators[0].id === Number(userId))
+					return ("You can't mute the owner!");
+				this.roomMg.muteUser(Number(userId), aRoom);
+				return ("User " + userId + " was muted because of: " + reason);
+			}
+		})
+	}
 }
