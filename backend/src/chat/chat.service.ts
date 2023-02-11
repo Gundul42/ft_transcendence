@@ -8,6 +8,21 @@ export class ChatService {
 	constructor(private prisma: PrismaService) {}
 
 	async getRooms(sessionid: string) : Promise<Session & { user: AppUser & { rooms: IRoom[] } }> {
+		const blocked_list: number[] = [];
+		await this.prisma.session.findUnique({
+			where: { id: sessionid },
+			include: {
+				user: {
+					include: { blocked: true }
+				}
+			}
+		})
+		.then((session: Session & { user: AppUser & { blocked: AppUser[] } }) => {
+			(session.user.blocked as AppUser[]).map((blocked_user) => {
+				blocked_list.push(blocked_user.id);
+			})
+		})
+		.catch((err: any) => {console.log(err)});
 		return await this.prisma.session.findUnique({
 			where: { id: sessionid },
 			include: {
@@ -35,7 +50,11 @@ export class ChatService {
 								penalties: true,
 								accessibility: true,
 								name: true,
-								messages: true
+								messages: {
+									where: {
+										appUserId: { notIn: blocked_list }
+									}
+								}
 							}
 						}
 					}

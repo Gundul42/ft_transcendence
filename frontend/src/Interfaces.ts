@@ -16,6 +16,7 @@ export interface IUser {
 	losses:			number,
 	ladder_level:	number,
 	friends:		IUserPublic[],
+	blocked:		IUserPublic[],
 	achievements:	IAchieve[],
 	match_history:	IMatch[],
 	csrf_token:		string,
@@ -116,7 +117,6 @@ export interface IMessage {
 	uname:			string,
 	id:				number,
 	appUserId:		number,
-	// socketID:		number,
 	room:			string
 }
 

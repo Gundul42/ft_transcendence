@@ -353,6 +353,7 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	const [messages, setMessages] : [Map<string, IMessage[]>, any] = useState(new Map(Array.from(rooms, (room) => [room[1].name ,room[1].messages])));
 	const [currentRoom, setCurrentRoom] : [string, any] = useState("");
 	const [isInfoView, setIsInfoView] : [boolean, any] = useState(false);
+	const blockedMap: Map<number, IUserPublic> = new Map(app_state.data.blocked.map((user) => [user.id, user]));
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -374,6 +375,7 @@ export const Chat = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	useEffect(() => {
 		socket.on("messageResponse", (data: IMessage) =>
 		{
+			if (blockedMap.get(data.appUserId) !== undefined) return;
 			console.log("just received ", data)
 			setMessages((prev_messages: Map<string, IMessage[]>) => {
 				let safe_messages: IMessage[];

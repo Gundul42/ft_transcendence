@@ -7,6 +7,7 @@ import { socket as chat_socket } from './Chat';
 export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state} : {rooms: Map<string, IRoom>, app_state: ISafeAppState, set_page: any, setRooms: any, setCurrentRoom: any}) => {
 	const [textField, setTextField] : [string, any] = useState("");
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
+	const blockedMap: Map<number, IUserPublic> = new Map(app_state.data.blocked.map((user) => [user.id, user]));
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -33,6 +34,39 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 		});
 	}
 
+	const blockUser = (userid: number) => {
+		fetch(endpoint.users.block, {
+			method: "POST",
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'accept-encoding': 'gzip, deflate, br',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
+			},
+			body: encodeURIComponent("uid") + "=" + encodeURIComponent(userid)
+		})
+		.then(
+			() => {window.location.reload()},
+			(err) => { console.log(err) }
+		)
+	}
+
+	const unblockUser = (userid: number) => {
+		fetch(endpoint.users.unblock, {
+			method: "POST",
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'accept-encoding': 'gzip, deflate, br',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
+			},
+			body: encodeURIComponent("uid") + "=" + encodeURIComponent(userid)
+		})
+		.then(
+			() => {window.location.reload()},
+			(err) => { console.log(err) }
+		)
+	}
+
+
 	return (
 		<div>
 			<input style={{backgroundColor: "white", borderRadius: "30px", border: "1px solid black", height: "30px", width: "95%"}} type="text" placeholder="Search..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
@@ -47,6 +81,10 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 									<td>
 										<button onClick={()=>{set_page("visit", user.id)}}>&#x1f464;</button>
 										<button onClick={()=>{sendDirectMessage(user.id)}}>&#128172;</button>
+										{ blockedMap.get(user.id) === undefined &&
+										<button onClick={()=>{blockUser(user.id)}}>&#128683;</button>}
+										{ blockedMap.get(user.id) !== undefined &&
+										<button onClick={()=>{unblockUser(user.id)}}>&#x2705;</button>}
 									</td>}
 							</tr>
 						)

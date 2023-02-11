@@ -15,6 +15,7 @@ export interface IUser {
 	losses:			number,
 	ladder_level:	number,
 	friends:		IUser[],
+	blocked:		IUserPublic[],
 	achievements:	IAchieve[],
 	match_history:	IMatch[],
 	csrf_token:		string

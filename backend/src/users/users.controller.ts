@@ -82,4 +82,32 @@ export class UsersController {
 			throw new BadRequestException("No relation found");
 		}
 	}
+
+	@Post('block')
+	@UseGuards(AuthGuard, JwtAuthGuard)
+	async blockUser(@Body('uid') uid: string, @Req() req: Request) : Promise<void> {
+		const blocked_id:  number = Number(uid);
+		const session: Session & { user: AppUser } = await this.userService.getReqUser(req.cookies["ft_transcendence_sessionId"]);
+		if (session === null) {
+			throw new InternalServerErrorException();
+		} else if (session.user.id === blocked_id) {
+			throw new BadRequestException("You cannot block yourself");
+		} else if (await this.userService.recordBlockUser(session.user.id, blocked_id) === false) {
+			throw new InternalServerErrorException();
+		}
+	}
+
+	@Post('unblock')
+	@UseGuards(AuthGuard, JwtAuthGuard)
+	async unblockUser(@Body('uid') uid: string, @Req() req: Request) : Promise<void> {
+		const blocked_id:  number = Number(uid);
+		const session: Session & { user: AppUser } = await this.userService.getReqUser(req.cookies["ft_transcendence_sessionId"]);
+		if (session === null) {
+			throw new InternalServerErrorException();
+		} else if (session.user.id === blocked_id) {
+			throw new BadRequestException();
+		} else if (await this.userService.cancelBlockUser(session.user.id, blocked_id) === false) {
+			throw new InternalServerErrorException();
+		}
+	}
 }

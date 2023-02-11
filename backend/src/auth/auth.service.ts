@@ -229,12 +229,20 @@ export class AuthService {
     });
   }
 
-  async getUserSessionAchieve(sessionid: string) : Promise<AppUser & { session: Session; friends: AppUser[]; achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] }> {
+  async getUserSessionAchieve(sessionid: string) : Promise<AppUser & { session: Session; friends: AppUser[]; blocked: AppUser[]; achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] }> {
     return await this.prisma.appUser.findUnique({
       where: { sessionid: sessionid},
       include: {
         session: true,
         friends: {
+          select: {
+            id: true,
+            display_name: true,
+            avatar: true,
+            status: true
+          }
+        },
+        blocked: {
           select: {
             id: true,
             display_name: true,

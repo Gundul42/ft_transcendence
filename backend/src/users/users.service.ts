@@ -251,4 +251,36 @@ export class UsersService {
 			return ([]);
 		})
 	}
+
+	async recordBlockUser(user_id: number, blocked_id: number) : Promise<boolean> {
+		return await this.prisma.appUser.update({
+			where: { id: user_id },
+			data: {
+				blocked: {
+					connect: { id: blocked_id }
+				}
+			}
+		})
+		.then(() => true)
+		.catch((err: any) => {
+			console.log(err);
+			return false;
+		});
+	}
+
+	async cancelBlockUser(user_id: number, blocked_id: number) : Promise<boolean> {
+		return await this.prisma.appUser.update({
+			where: { id: user_id },
+			data: {
+				blocked: {
+					disconnect: { id: blocked_id }
+				}
+			}
+		})
+		.then(() => true)
+		.catch((err: any) => {
+			console.log(err);
+			return false;
+		});
+	}
 }

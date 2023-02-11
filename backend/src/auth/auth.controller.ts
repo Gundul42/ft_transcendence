@@ -25,7 +25,7 @@ export class AuthController {
   @UseFilters(AuthFilter, TwoFAFilter)
   async login(@Req() req: Request, @Res() res: Response, @RealIP() ip: string): Promise<void> {
     this.authService.deleteNullSessions();
-    var user: AppUser & { session: Session, friends: AppUser[], achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] } = await this.authService.getUserSessionAchieve(req.cookies['ft_transcendence_sessionId']);
+    var user: AppUser & { session: Session, friends: AppUser[], blocked: AppUser[], achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] } = await this.authService.getUserSessionAchieve(req.cookies['ft_transcendence_sessionId']);
     if (user === null) {
       throw new Error("Session not found")
     }
@@ -46,6 +46,7 @@ export class AuthController {
         losses: user.losses,
         ladder_level: user.ladder_level,
         friends: user.friends,
+        blocked: user.blocked,
         achievements: user.achievements,
         match_history: match_history,
         csrf_token: csrf_token.access_token,

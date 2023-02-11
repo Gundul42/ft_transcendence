@@ -17,7 +17,9 @@
 		"add-as-friend": "https://localhost/api/users/add-as-friend",
 		"respond": "https://localhost/api/users/respond",
 		"remove-friend": "https://localhost/api/users/remove-friend",
-		"search-all": "https://localhost/api/users/search-all"
+		"search-all": "https://localhost/api/users/search-all",
+		"block": "https://localhost/api/users/block",
+		"unblock": "https://localhost/api/users/unblock"
 	},
 	"achievement" : {
 		"aknowledge": "https://localhost/api/achievement/aknowledge"
