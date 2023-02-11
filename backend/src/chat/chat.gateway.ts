@@ -9,7 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
-import { IMessage, IRoom } from '../Interfaces';
+import { IMessage, IRoom, IRoomAccess } from '../Interfaces';
 import { AuthenticatedSocketChat } from './AuthenticatedSocketChat';
 
 @WebSocketGateway(3030, { namespace: 'chat' , transports: ['polling', 'websocket']})
