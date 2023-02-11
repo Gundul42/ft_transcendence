@@ -606,6 +606,10 @@
   color: white;
 }
 
+.Room-create>input {
+  width: 100%;
+}
+
 .unread {
   background-color: rgb(245, 146, 146);
 }

@@ -7,6 +7,7 @@ import { ClientEvents, ServerEvents } from '../events';
 import endpoint from '../endpoint.json';
 import { socket as game_socket } from '../Play/socket';
 import { SearchBar } from './SearchBar';
+import { RoomMaker } from './RoomMaker';
 
 export const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
 
@@ -178,6 +179,7 @@ const ChatBar = ({app_state, rooms, messages, setCurrentRoom, setRooms, setIsInf
 					</tbody>
 				</table>
 			</div>
+			<RoomMaker />
 		</div>
 	);
 }
