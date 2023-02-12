@@ -1,7 +1,13 @@
 import { io } from 'socket.io-client';
 import { ClientEvents } from '../events';
 
-export const socket = io("https://localhost/game", {'transports': ['polling', 'websocket']});
+export const socket = io("https://localhost/game", {
+	'transports': [
+		'polling', 'websocket'
+	],
+	extraHeaders: {
+		'Authorization': "Bearer " + localStorage.getItem("csrf_token") as string
+	}});
 
 export const startMatchMaking = () => {
 	socket.emit(ClientEvents.Play);

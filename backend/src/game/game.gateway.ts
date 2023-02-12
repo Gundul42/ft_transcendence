@@ -5,7 +5,7 @@ import {
 	SubscribeMessage,
 	WebSocketGateway,
   } from '@nestjs/websockets';
-  import { Server, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { AuthenticatedSocket } from './AuthenticatedSocket';
@@ -13,6 +13,7 @@ import { AchievementService } from '../achievement/achievement.service';
 import { ServerEvents, ClientEvents } from './events';
 import { LobbyManager } from './lobby/lobby.manager';
 import { Lobby } from './lobby/lobby';
+import { AuthService } from '../auth/auth.service';
 
 @WebSocketGateway(3030, {namespace: 'game', transports: ['polling', 'websocket']})
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -20,7 +21,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	constructor(
 		private readonly lobbyManager: LobbyManager,
 		private achievementService: AchievementService,
-		private prisma: PrismaService) {}
+		private prisma: PrismaService,
+		private authService: AuthService) {}
 
 	afterInit(server: Server) {
 		this.lobbyManager.server = server;
@@ -42,7 +44,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log(err);
 			return null;
 		});
-		if (session_user === null || session_user.user === null) {
+		try {
+			var result: {username: string, sub: number, iat: number, exp: number} = await this.authService.verifyJwt((client.handshake.headers.authorization as string).split(' ')[1]);
+		} catch (err: any) {
+			console.log(err);
+			client.disconnect(true);
+			return ;
+		}
+		if (session_user === null || session_user.user === null || result.sub !== session_user.user.id) {
+			console.log("Token and session do not match")
 			client.disconnect(true);
 			return ;
 		}

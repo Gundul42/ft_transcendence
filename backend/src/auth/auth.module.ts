@@ -19,5 +19,6 @@ import * as info from './info.json'
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, AchievementService],
+  exports: [AuthService]
 })
 export class AuthModule {}

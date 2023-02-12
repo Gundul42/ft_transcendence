@@ -10,7 +10,12 @@ import { SearchBar } from './SearchBar';
 import { RoomMaker } from './RoomMaker';
 import { AddUser } from './AddUser';
 
-export const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
+export const socket = io("https://localhost/chat", {
+	'transports': ['polling', 'websocket'],
+	extraHeaders: {
+		'Authorization': "Bearer " + localStorage.getItem("csrf_token") as string
+	}
+});
 
 function Participants({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
 	const [idChallenged, setIdChallenged] : [number, any] = useState(0);
