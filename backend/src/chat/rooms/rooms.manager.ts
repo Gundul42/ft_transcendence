@@ -406,9 +406,9 @@ export class RoomsManager {
 		});
 	}
 
-	async makePenalty(userId: number, room: IRoom, type: IPenaltyType)
+	async makePenalty(userId: number, room: IRoom, type: IPenaltyType, time: number)
 	{
-		return await this.prisma.penalty.create({
+		const penalty = await this.prisma.penalty.create({
 			data: {
 			  user: {
 				  connect: { id: userId }
@@ -423,6 +423,18 @@ export class RoomsManager {
 			console.log(err);
 			return null;
 		  });
+		if (penalty === null)
+		  return;
+		setTimeout(async (penalty) =>
+		{
+			await this.prisma.penalty.delete({
+				where: {
+					id: penalty.id
+				}
+			});
+			console.log("Penalty has been lifted!");
+		}, time * 3600000, penalty);
+		return (penalty);
 	}
 	
 	// Connects the penalty to the room, disconnects the user from it
@@ -465,27 +477,27 @@ export class RoomsManager {
 		});
 	}
 
-	async kickUser(userId: number, room: IRoom)
+	async kickUser(userId: number, room: IRoom, number: number)
 	{
-		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Kick);
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Kick, number);
 		if (penalty === null)
 			return null;
 		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
 			console.log(userId, " has been kicked!");
 	}
 
-	async banUser(userId: number, room: IRoom)
+	async banUser(userId: number, room: IRoom, number: number)
 	{
-		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Ban);
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Ban, number);
 		if (penalty === null)
 			return null;
 		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
 			console.log(userId, " has been banned!");
 	}
 
-	async muteUser(userId: number, room: IRoom)
+	async muteUser(userId: number, room: IRoom, number: number)
 	{
-		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Mute);
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Mute, number);
 		if (penalty === null)
 			return null;
 		if (await this.addPenaltyToUser(penalty, userId, room) !== null)

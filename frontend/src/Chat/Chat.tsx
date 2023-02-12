@@ -65,13 +65,13 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 	};
 
 	const kickUser = (user_id: number) => {
-		const reason = prompt("Reason for kicking this user?")
-		if (!reason)
-			return (alert("Please don't use it for no reason"))
+		const time = prompt("How long should this penalty last? (minutes)")
+		if (!time)
+			return (alert("Please input the penalty time!"))
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
-		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
+		form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
 		fetch(endpoint.chat['user-kick'], {
 			method: "POST",
 			body: form_data.join('&'),
@@ -81,13 +81,13 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		})
 	};
 	const banUser = (user_id: number) => {
-		const reason = prompt("Reason for banning this user?")
-		if (!reason)
-			return (alert("Please don't use it for no reason"))
+		const time = prompt("How long should this penalty last? (minutes)")
+		if (!time)
+			return (alert("Please input the penalty time!"))
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
-		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
+		form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
 		fetch(endpoint.chat['user-ban'], {
 			method: "POST",
 			body: form_data.join('&'),
@@ -97,13 +97,13 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		})
 	};
 	const muteUser = (user_id: number) => {
-		const reason = prompt("Reason for muting this user?")
-		if (!reason)
-			return (alert("Please don't use it for no reason"))
+		const time = prompt("How long should this penalty last? (minutes)")
+		if (!time)
+			return (alert("Please input the penalty time!"))
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
-		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
+		form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
 		fetch(endpoint.chat['user-mute'], {
 			method: "POST",
 			body: form_data.join('&'),

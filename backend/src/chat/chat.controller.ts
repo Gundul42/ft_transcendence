@@ -95,7 +95,7 @@ export class ChatController {
 
 	@Post('user-kick')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('time') time: string, @Req() req: Request): Promise<void>
 	{
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
@@ -106,15 +106,15 @@ export class ChatController {
 					return ("Not an admin in this room")
 				if (aRoom.administrators[0].id === Number(userId))
 					return ("You can't kick the owner!");
-				this.roomMg.kickUser(Number(userId), aRoom);
-				return ("User " + userId + " was kicked because of: " + reason);
+				this.roomMg.kickUser(Number(userId), aRoom, Number(time));
+				return ("User " + userId + " was kicked because of: " + time);
 			}
 		})
 	}
 
 	@Post('user-ban')
 	@UseGuards(AuthGuard)
-	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void>
 	{
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
@@ -125,15 +125,15 @@ export class ChatController {
 					return ("Not an admin in this room")
 				if (aRoom.administrators[0].id === Number(userId))
 					return ("You can't ban the owner!");
-				this.roomMg.banUser(Number(userId), aRoom);
-				return ("User " + userId + " was banned because of: " + reason);
+				this.roomMg.banUser(Number(userId), aRoom, Number(time));
+				return ("User " + userId + " was banned because of: " + time);
 			}
 		})
 	}
 	
 	@Post('user-mute')
 	@UseGuards(AuthGuard)
-	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('reason') reason: string, @Req() req: Request): Promise<void>
+	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void>
 	{
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
@@ -144,8 +144,8 @@ export class ChatController {
 					return ("Not an admin in this room")
 				if (aRoom.administrators[0].id === Number(userId))
 					return ("You can't mute the owner!");
-				this.roomMg.muteUser(Number(userId), aRoom);
-				return ("User " + userId + " was muted because of: " + reason);
+				this.roomMg.muteUser(Number(userId), aRoom, Number(time));
+				return ("User " + userId + " was muted because of: " + time);
 			}
 		})
 	}
