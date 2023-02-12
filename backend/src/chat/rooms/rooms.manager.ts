@@ -107,6 +107,51 @@ export class RoomsManager {
 		})
 	}
 
+	async findAccessibleRoom(userid: number, room_name: string) : Promise<IRoom> {
+		return await this.prisma.room.findFirst({
+			where: {
+				name: room_name,
+				OR: [
+					{
+						accessibility: { not: IRoomAccess.Private }
+					},
+					{
+						participants: {
+							some: { id: userid }
+						}
+					}
+				]
+			},
+			select: {
+				id: true,
+				participants: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				administrators: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				penalties: true,
+				accessibility: true,
+				name: true,
+				messages: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		})
+	}
+
 	async makeRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
 	{
 		const result: Room = await this.prisma.room.create({

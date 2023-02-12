@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Res, Req, Body, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Query, Req, Body, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatService } from './chat.service';
@@ -25,6 +25,16 @@ export class ChatController {
 			throw new InternalServerErrorException();
 		}
 		return (user_rooms.user.rooms);
+	}
+
+	@Get('get-accessible-rooms')
+	@UseGuards(AuthGuard)
+	async getAccessibleRooms(@Req() req: Request, @Query('start') start: string) : Promise<Omit<Room, "password">[]> {
+		const session_user: Session & { user: AppUser } = await this.chatService.getSessionUser(req.cookies["ft_transcendence_sessionId"]);
+		if (session_user === null) {
+			throw new InternalServerErrorException();
+		}
+		return await this.chatService.getRecordsAccessibleRooms(session_user.user.id, start);
 	}
 
 	@Post('password-change')
@@ -139,6 +149,7 @@ export class ChatController {
 			}
 		})
 	}
+
 	@Post('create-room')
 	@UseGuards(AuthGuard, JwtAuthGuard)
 	async createRoom(@Body('access_mode') access_mode: number, @Body('password') password: string, @Body('name') room_name: string, @Req() req: Request): Promise<void> {

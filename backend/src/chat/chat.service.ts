@@ -112,4 +112,49 @@ export class ChatService {
 			return false;
 		})
 	}
+
+	async getRecordsAccessibleRooms(userid: number, partial_name: string) : Promise<Omit<Room, "password">[]> {
+		return await this.prisma.room.findMany({
+			where: {
+				name: { contains: partial_name },
+				OR: [
+					{ accessibility: 0 },
+					{ 
+						accessibility: 1,
+						participants: {
+							some: { id: userid }
+						}
+					},
+					{ accessibility: 2 }
+				]
+			},
+			select: {
+				id: true,
+				participants: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				administrators: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				penalties: true,
+				accessibility: true,
+				name: true,
+				messages: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return ([]);
+		})
+	}
 }

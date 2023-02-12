@@ -7,14 +7,22 @@ import { socket as chat_socket } from './Chat';
 export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state} : {rooms: Map<string, IRoom>, app_state: ISafeAppState, set_page: any, setRooms: any, setCurrentRoom: any}) => {
 	const [textField, setTextField] : [string, any] = useState("");
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
+	const [foundRooms, setFoundRooms] : [IRoom[], any] = useState([]);
+	const [password, setPassword] : [string, any] = useState("");
 	const blockedMap: Map<number, IUserPublic> = new Map(app_state.data.blocked.map((user) => [user.id, user]));
 
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const response = await fetch(endpoint.users['search-all'] + "?start=" + encodeURIComponent(textField));
-				const data: IUserPublic[] = await response.json();
-				setFoundUsers(data);
+				const response_users = await fetch(endpoint.users['search-all'] + "?start=" + encodeURIComponent(textField));
+				const response_rooms = await fetch(endpoint.chat['get-accessible-rooms'] + "?start=" + encodeURIComponent(textField));
+				if (!response_rooms.ok || !response_users.ok) {
+					throw new Error("Server error");
+				}
+				const user_data: IUserPublic[] = await response_users.json();
+				const room_data: IRoom[] = await response_rooms.json();
+				setFoundUsers(user_data);
+				setFoundRooms(room_data);
 			} catch (err) {
 				console.log(err);
 			}
@@ -22,7 +30,8 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 		if (textField.length > 0) {
 			fetchData();
 		} else {
-			setFoundUsers([])
+			setFoundUsers([]);
+			setFoundRooms([]);
 		}
 	}, [textField])
 
@@ -66,6 +75,13 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 		)
 	}
 
+	const joinRoom = (room_name: string) => {
+		chat_socket.emit("joinRoom", { room_name: room_name, password: password}, (response: boolean) => {
+			if (response) {
+				setCurrentRoom(room_name);
+			}
+		})
+	}
 
 	return (
 		<div>
@@ -88,7 +104,24 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 									</td>}
 							</tr>
 						)
-					}) }
+					})
+				}
+				{ foundRooms.length > 0 &&
+					foundRooms.map((room) => {
+						return (
+							<tr key={room.id}>
+								<td>{room.name}</td>
+								{ room.accessibility === 2 && room.participants.filter((participant) => participant.id === app_state.data.id).length === 0 &&
+									<td>
+										<input type="password" placeholder="Password" value={password} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((e.target as HTMLInputElement).value)}} required/>
+									</td>}
+								<td>
+									<button onClick={()=>{joinRoom(room.name)}}>&#128172;</button>
+								</td>
+							</tr>
+						)
+					})
+				}
 				</tbody>
 			</table>
 		</div>

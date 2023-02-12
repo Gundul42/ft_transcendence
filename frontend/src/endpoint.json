@@ -32,6 +32,7 @@
 		"user-kick": "https://localhost/api/chat/user-kick",
 		"user-ban": "https://localhost/api/chat/user-ban",
 		"user-mute": "https://localhost/api/chat/user-mute",
-		"create-room": "https://localhost/api/chat/create-room"
+		"create-room": "https://localhost/api/chat/create-room",
+		"get-accessible-rooms": "https://localhost/api/chat/get-accessible-rooms"
 	}
 }

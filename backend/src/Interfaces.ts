@@ -48,7 +48,6 @@ export interface IMessage {
 	uname:			string,
 	id:				number,
 	appUserId:		number,
-	// socketID:		number,
 	room:			string
 }
 

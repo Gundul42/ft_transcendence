@@ -6,7 +6,7 @@ import { WebSocketGateway,
 	OnGatewayDisconnect} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
-import { Session, AppUser } from '@prisma/client';
+import { Session, AppUser, Room, Penalty } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
 import { IMessage, IRoom, IRoomAccess } from '../Interfaces';
@@ -235,7 +235,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("addToRoom")
 	async addToRoom(client: AuthenticatedSocketChat, data: {userid: number, room_name: string}) : Promise<boolean> {
-		//add check for DMs and admins
+		const dest_room: IRoom = await this.rooms.findAccessibleRoom(client.data.id, data.room_name);
+		if (dest_room.administrators.filter((admin) => admin.id === client.data.id).length === 0 || dest_room.accessibility === IRoomAccess.DirectMessage) {
+			return false;
+		}
 		const updated_room: IRoom = await this.rooms.addUserToRoom(data.userid, data.room_name);
 		if (updated_room === null || updated_room.administrators.filter((admin) => admin.id === client.data.id).length === 0) {
 			return false;
@@ -245,6 +248,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client2.join(updated_room.name);
 		}
 		this.rooms.server.to(updated_room.name).emit("roomUpdate", { room: updated_room });
+		return true;
+	}
+
+	@SubscribeMessage("joinRoom")
+	async joinRoom(client: AuthenticatedSocketChat, data: {room_name: string, password: string}) : Promise<boolean> {
+		if (await this.rooms.checkRoomStatus([data.room_name, data.password], client) === false) {
+			return false;
+		}
+		const room: IRoom = await this.rooms.findAccessibleRoom(client.data.id, data.room_name);
+		if (room === null) {
+			return false;
+		}
+		this.rooms.server.to(room.name).emit("roomUpdate", { room: room });
 		return true;
 	}
 
