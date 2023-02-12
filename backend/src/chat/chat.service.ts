@@ -67,6 +67,18 @@ export class ChatService {
 		})
 	}
 
+	isAdmin(aRoom: IRoom, user: AppUser & { rooms: IRoom[]; }): boolean
+	{
+		const res = aRoom.administrators.map((admin) => {
+			if (admin.id == user.id)
+				return (true);
+			return (false);
+		})
+		if (res.includes(true))
+			return (true);
+		return (false);
+	}
+
 	async getSessionUser(sessionid: string) : Promise<Session & { user: AppUser }> {
 		return await this.prisma.session.findUnique({
 			where: { id: sessionid },

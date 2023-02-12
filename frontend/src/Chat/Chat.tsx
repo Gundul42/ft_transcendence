@@ -12,19 +12,6 @@ import { AddUser } from './AddUser';
 
 export const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
 
-type ChatMessage = {
-	text:			String,
-	uname:			String,
-	id:				Number,
-	socketID:		Number,
-	room:			String
-};
-
-// type ChatUser = {
-// 	uname : String
-// 	socketID : Number
-// }
-
 function Participants({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
 	const [idChallenged, setIdChallenged] : [number, any] = useState(0);
 	const [admin, setAdmin] : [boolean, any] = useState(false);
@@ -60,6 +47,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		{
 			if (admin.id === app_state.data.id)
 				setAdmin(true);
+			return (null);
 		})
 	}, [room.administrators, app_state.data.id])
 
@@ -85,6 +73,38 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
 		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
 		fetch(endpoint.chat['user-kick'], {
+			method: "POST",
+			body: form_data.join('&'),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+		})
+	};
+	const banUser = (user_id: number) => {
+		const reason = prompt("Reason for banning this user?")
+		if (!reason)
+			return (alert("Please don't use it for no reason"))
+		let form_data: string[] = [];
+		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
+		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
+		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
+		fetch(endpoint.chat['user-ban'], {
+			method: "POST",
+			body: form_data.join('&'),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
+		})
+	};
+	const muteUser = (user_id: number) => {
+		const reason = prompt("Reason for muting this user?")
+		if (!reason)
+			return (alert("Please don't use it for no reason"))
+		let form_data: string[] = [];
+		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
+		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
+		form_data.push(encodeURIComponent("reason") + "=" + encodeURIComponent(reason));
+		fetch(endpoint.chat['user-mute'], {
 			method: "POST",
 			body: form_data.join('&'),
 			headers: {
@@ -121,8 +141,9 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 									<button onClick={()=>{challenge(participant.id, "special")}}>Challenge | Special</button>
 									{ admin === true &&
 										<>
-										<button onClick={()=>{kickUser(participant.id)}}>Kick from room</button>
-										<button>fancyAdminButton</button>
+										<button onClick={()=>{kickUser(participant.id)}}>Kick</button>
+										<button onClick={()=>{banUser(participant.id)}}>Ban</button>
+										<button onClick={()=>{muteUser(participant.id)}}>Mute</button>
 										</>
 									}
 									{ room.administrators[0].id === app_state.data.id && room.administrators.includes(participant) === false && 
@@ -189,7 +210,7 @@ const ChatBar = ({app_state, rooms, messages, setCurrentRoom, setRooms, setIsInf
 
 const handleCallback = (reply : string) =>
 {
-	console.log(reply);
+	console.log("callback", reply);
 	alert(reply);
 }
 
@@ -235,9 +256,6 @@ const ChatFooter = ({data_state, room} : {data_state : IUser, room: IRoom}) => {
 				socket.emit(elements[0], 
 					{
 						text: elements.slice(1), 
-						// name: (data_state.display_name as string).split(' ')[0], 
-						// id: `${socket.id}${Math.random()}`,
-						// socketID: socket.id,
 					}, handleCallback);
 				window.location.reload();
 			}
@@ -246,9 +264,6 @@ const ChatFooter = ({data_state, room} : {data_state : IUser, room: IRoom}) => {
 				socket.emit("message", 
 					{
 					text: message, 
-					// name: (data_state.display_name as string).split(' ')[0], 
-					// id: `${socket.id}${Math.random()}`,
-					// socketID: socket.id,
 					room: room.name
 					}, handleCallback);
 					window.localStorage.setItem(room.name, (Number(window.localStorage.getItem(room.name)) + 1).toString())
@@ -288,7 +303,6 @@ function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 	const [owner, setOwner] : [boolean, any] = useState(false);
 
 	useEffect(() => {
-		console.log(room.administrators);
 		if (room.administrators[0].id === app_state.data.id)
 			setOwner(true);
 	}, [room.administrators, app_state.data.id])

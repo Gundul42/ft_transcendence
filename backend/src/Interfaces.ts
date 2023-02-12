@@ -110,3 +110,9 @@ export enum IRoomAccess {
 	PassProtected,
 	DirectMessage
 }
+
+export enum IPenaltyType {
+	Kick,
+	Ban,
+	Mute
+}
