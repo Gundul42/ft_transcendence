@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser, Room } from '@prisma/client';
-import { IRoom, IRoomAccess } from '../Interfaces';
+import { IPenaltyType, IRoom, IRoomAccess } from '../Interfaces';
 
 @Injectable()
 export class ChatService {
@@ -9,7 +9,7 @@ export class ChatService {
 
 	async getRooms(sessionid: string) : Promise<Session & { user: AppUser & { rooms: IRoom[] } }> {
 		const blocked_list: number[] = [];
-		await this.prisma.session.findUnique({
+		const user: AppUser = await this.prisma.session.findUnique({
 			where: { id: sessionid },
 			include: {
 				user: {
@@ -21,14 +21,26 @@ export class ChatService {
 			(session.user.blocked as AppUser[]).map((blocked_user) => {
 				blocked_list.push(blocked_user.id);
 			})
+			return (session.user);
 		})
-		.catch((err: any) => {console.log(err)});
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
 		return await this.prisma.session.findUnique({
 			where: { id: sessionid },
 			include: {
 				user: {
 					include: {
 						rooms: {
+							where: {
+								penalties: {
+									none: {
+										type: { in: [IPenaltyType.Ban, IPenaltyType.Kick] },
+										userid: user.id
+									}
+								}
+							},
 							select: {
 								id: true,
 								participants: {
@@ -126,7 +138,13 @@ export class ChatService {
 						}
 					},
 					{ accessibility: 2 }
-				]
+				],
+				penalties: {
+					none: {
+						type: { in: [IPenaltyType.Ban, IPenaltyType.Kick] },
+						userid: userid
+					}
+				}
 			},
 			select: {
 				id: true,

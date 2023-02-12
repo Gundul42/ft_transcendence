@@ -264,6 +264,25 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		return true;
 	}
 
+	@SubscribeMessage("leaveRoom")
+	async leaveRoom(client: AuthenticatedSocketChat, data: { room_name: string }) : Promise<boolean> {
+		try {
+			var class_user: number = await this.rooms.classifyUser(client.data.id, data.room_name);
+		} catch (err: any) {
+			return false;
+		}
+		await this.rooms.removeParticipant(client, data.room_name);
+		if (class_user > 0) {
+			await this.rooms.removeAdmin(client.data.id, data.room_name);
+		}
+		if (class_user > 1) {
+			await this.rooms.removeOwner(client.data.id, data.room_name);
+		}
+		var room: IRoom = await this.rooms.findRecordRoom(data.room_name);
+		this.rooms.server.to(room.name).emit("roomUpdate", { room: room });
+		return true;
+	}
+
 	@SubscribeMessage("ping")
 	pong(@MessageBody() message : string) : void
 	{

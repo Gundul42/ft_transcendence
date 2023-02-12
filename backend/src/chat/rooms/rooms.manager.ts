@@ -152,6 +152,39 @@ export class RoomsManager {
 		})
 	}
 
+	async findRecordRoom(room_name: string) : Promise<IRoom> {
+		return await this.prisma.room.findFirst({
+			where: { name: room_name },
+			select: {
+				id: true,
+				participants: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				administrators: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				penalties: true,
+				accessibility: true,
+				name: true,
+				messages: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		})
+	}
+
 	async makeRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
 	{
 		const result: Room = await this.prisma.room.create({
@@ -490,6 +523,67 @@ export class RoomsManager {
 			return null;
 		if (await this.addPenaltyToUser(penalty, userId, room) !== null)
 			console.log(userId, " has been muted!");
+	}
+
+	async classifyUser(userid: number, room_name: string) : Promise<number> {
+		//TODO: add owner logic
+		const room: IRoom = await this.prisma.room.findUnique({
+			where: { name: room_name },
+			include: {
+				participants: true,
+				administrators: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		})
+		if (room === null || room.participants.filter((participant) => participant.id === userid).length === 0) {
+			throw new Error("Request is not valid")
+		} else if (false/*room.owner.id === userid*/) {
+			return 2;
+		} else if (room.administrators.filter((admin) => admin.id === userid).length > 0) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	async removeParticipant(client: AuthenticatedSocketChat, room_name: string) : Promise<void> {
+		await this.prisma.room.update({
+			where: { name: room_name },
+			data: {
+				participants: {
+					disconnect: { id: client.data.id }
+				}
+			}
+		})
+		.catch((err: any) => {console.log(err)});
+		client.leave(room_name);
+	}
+
+	async removeAdmin(userid: number, room_name: string) : Promise<void> {
+		await this.prisma.room.update({
+			where: { name: room_name },
+			data: {
+				administrators: {
+					disconnect: { id: userid }
+				}
+			}
+		})
+		.catch((err: any) => {console.log(err)});
+	}
+
+	async removeOwner(userid: number, room_name: string) : Promise<void> {
+		// await this.prisma.room.update({
+		// 	where: { name: room_name },
+		// 	data: {
+		// 		administrators: {
+		// 			disconnect: { id: userid }
+		// 		}
+		// 	}
+		// })
+		// .catch((err: any) => {console.log(err)});
 	}
 
 	isMuted(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean
