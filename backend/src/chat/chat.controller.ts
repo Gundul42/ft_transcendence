@@ -49,7 +49,7 @@ export class ChatController {
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
-				if (aRoom.administrators[0].id === user_rooms.user.id)
+				if (aRoom.owner.id === user_rooms.user.id)
 					return (this.roomMg.changePassword(aRoom, password));
 		})
 		console.log("No matching room found/They aren't an owner");
@@ -63,7 +63,7 @@ export class ChatController {
 		{
 			if (aRoom.name === room)
 			{ 
-				if (aRoom.administrators[0].id === user_rooms.user.id)
+				if (aRoom.owner.id === user_rooms.user.id)
 					return (this.roomMg.removePassword(aRoom));
 			}
 		})
@@ -85,7 +85,7 @@ export class ChatController {
 					if (user.id == userId)
 					{
 						console.log("user match: ", user.id)
-						if (aRoom.administrators[0].id === user_rooms.user.id)
+						if (aRoom.owner.id === user_rooms.user.id)
 							return (this.roomMg.promoteToAdmin(aRoom, user));
 					}
 				})
@@ -96,8 +96,11 @@ export class ChatController {
 
 	@Post('user-kick')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('time') time: string, @Req() req: Request): Promise<void>
+	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('time') time: string, @Req() req: Request): Promise<void | string>
 	{
+		const timeNum = Number(time);
+		if (timeNum === 0 || Number.isNaN(timeNum))
+			return ("Put proper time!");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
 		{
@@ -105,18 +108,21 @@ export class ChatController {
 			{
 				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
 					return ("Not an admin in this room")
-				if (aRoom.administrators[0].id === Number(userId))
+				if (aRoom.owner.id === Number(userId))
 					return ("You can't kick the owner!");
-				this.roomMg.kickUser(Number(userId), aRoom, Number(time));
-				return ("User " + userId + " was kicked because of: " + time);
+				this.roomMg.kickUser(Number(userId), aRoom, timeNum);
+				return ("User " + userId + " was kicked for " + timeNum + " minutes");
 			}
 		})
 	}
 
 	@Post('user-ban')
 	@UseGuards(AuthGuard)
-	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void>
+	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void | string>
 	{
+		const timeNum = Number(time);
+		if (timeNum === 0 || Number.isNaN(timeNum))
+			return ("Put proper time!");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
 		{
@@ -124,18 +130,21 @@ export class ChatController {
 			{
 				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
 					return ("Not an admin in this room")
-				if (aRoom.administrators[0].id === Number(userId))
+				if (aRoom.owner.id === Number(userId))
 					return ("You can't ban the owner!");
-				this.roomMg.banUser(Number(userId), aRoom, Number(time));
-				return ("User " + userId + " was banned because of: " + time);
+				this.roomMg.banUser(Number(userId), aRoom, timeNum);
+				return ("User " + userId + " was banned for " + timeNum + " minutes");
 			}
 		})
 	}
 	
 	@Post('user-mute')
 	@UseGuards(AuthGuard)
-	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void>
+	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void | string>
 	{
+		const timeNum = Number(time);
+		if (timeNum === 0 || Number.isNaN(timeNum))
+			return ("Put proper time!");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
 		{
@@ -143,10 +152,10 @@ export class ChatController {
 			{
 				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
 					return ("Not an admin in this room")
-				if (aRoom.administrators[0].id === Number(userId))
+				if (aRoom.owner.id === Number(userId))
 					return ("You can't mute the owner!");
-				this.roomMg.muteUser(Number(userId), aRoom, Number(time));
-				return ("User " + userId + " was muted because of: " + time);
+				this.roomMg.muteUser(Number(userId), aRoom, timeNum);
+				return ("User " + userId + " was muted for " + timeNum + " minutes");
 			}
 		})
 	}

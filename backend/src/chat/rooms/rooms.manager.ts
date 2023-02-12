@@ -613,6 +613,9 @@ export class RoomsManager {
 			data: {
 				owner: {
 					connect: { id: newOwner.id }
+				},
+				administrators: {
+					connect: { id: newOwner.id }
 				}
 			}
 		})
