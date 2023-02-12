@@ -162,6 +162,9 @@ export class RoomsManager {
 			administrators: {
 				connect: { id: client.data.id }
 			},
+			owner: {
+				connect: { id: client.data.id }
+			},
 			name: name,
 			accessibility: IRoomAccess.Public
 		  }
@@ -173,18 +176,8 @@ export class RoomsManager {
 		if (result === null)
 			return (null)
 		client.join(name);
-		/*await this.prisma.appUser.update(
-			{
-				where: {
-					id: user.id,
-				},
-				data:
-				{
-					rooms: {connect: { id: result.id }},
-				}
-			}
-		)*/
 		return result;
+		
 	}
 
 	async joinRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>

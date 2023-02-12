@@ -51,11 +51,11 @@ model AppUser {
 	achievements	Achieve[]
 	rooms			Room[]		@relation("participate")
 	adminOf			Room[]		@relation("administrate")
-	ownerOf			Room[]		@relation("owner")
 	penalties		Penalty[]
 	messages		Message[]	@relation("message")
 	requests_sent	UserRequest[]	@relation("requests sender")
 	requests_rec	UserRequest[]	@relation("requests receiver")
+	ownerOf			Room[]		@relation("owner")
 }
 
 model Achieve {
@@ -88,8 +88,8 @@ model Room {
 	id				Int			@id @default(autoincrement())
 	participants	AppUser[]	@relation("participate")
 	administrators	AppUser[]	@relation("administrate")
-	appUserId		Int
-	owner			AppUser		@relation("owner", fields: [appUserId], references: [id])
+	ownerId		Int
+	owner			AppUser?	@relation("owner", fields: [ownerId], references: [id])
 	penalties		Penalty[]
 	accessibility	Int			@default(0)
 	name			String		@unique

@@ -303,9 +303,9 @@ function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 	const [owner, setOwner] : [boolean, any] = useState(false);
 
 	useEffect(() => {
-		if (room.administrators[0].id === app_state.data.id)
+		if (room.owner.id === app_state.data.id)
 			setOwner(true);
-	}, [room.administrators, app_state.data.id])
+	}, [room.owner, app_state.data.id])
 
 	if (owner === false) {
 		return (

@@ -127,7 +127,8 @@ export interface IRoom {
 	penalties:		any[],
 	accessibility:	IRoomAccess,
 	name:			string,
-	messages:		IMessage[]
+	messages:		IMessage[],
+	owner:			IUserPublic
 }
 
 export enum IRoomAccess {

@@ -149,7 +149,8 @@ export class ChatService {
 				penalties: true,
 				accessibility: true,
 				name: true,
-				messages: true
+				messages: true,
+				owner: true
 			}
 		})
 		.catch((err: any) => {
@@ -157,4 +158,5 @@ export class ChatService {
 			return ([]);
 		})
 	}
+
 }
