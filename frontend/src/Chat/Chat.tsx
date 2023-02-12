@@ -78,7 +78,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 			headers: {
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
-		})
+		}).then(async response => alert(await response.text()))
 	};
 	const banUser = (user_id: number) => {
 		const time = prompt("How long should this penalty last? (minutes)")
@@ -94,7 +94,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 			headers: {
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
-		})
+		}).then(async response => alert(await response.text()))
 	};
 	const muteUser = (user_id: number) => {
 		const time = prompt("How long should this penalty last? (minutes)")
@@ -110,7 +110,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 			headers: {
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
-		})
+		}).then(async response => alert(await response.text()))
 	};
 
 	const leaveRoom = () => {
@@ -396,7 +396,7 @@ const ViewRoom = ({app_state, messages, setMessages, rooms, currentRoom, isInfoV
 
 //Updating last message https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView
 export const Chat = ({app_state, set_page, unreadRooms, setUnreadRooms} : {app_state: ISafeAppState, set_page: any, unreadRooms: number, setUnreadRooms: any}) => {
-	const [rooms, setRooms] : [Map<string, IRoom>, any] = useState(new Map<string, IRoom>);
+	const [rooms, setRooms] : [Map<string, IRoom>, any] = useState(new Map<string, IRoom>());
 	const [messages, setMessages] : [Map<string, IMessage[]>, any] = useState(new Map(Array.from(rooms, (room) => [room[1].name ,room[1].messages])));
 	const [currentRoom, setCurrentRoom] : [string, any] = useState("");
 	const [isInfoView, setIsInfoView] : [boolean, any] = useState(false);
