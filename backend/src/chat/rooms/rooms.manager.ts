@@ -79,6 +79,7 @@ export class RoomsManager {
 				}
 			}
 		})
+		.then((user) => user.rooms)
 		.catch((err: any) => {
 			console.log(err);
 			return null;
@@ -299,6 +300,44 @@ export class RoomsManager {
 			return null;
 		});
 		console.log("User promoted to admin!")
+	}
+
+	async addUserToRoom(userid: number, room_name: string) : Promise<IRoom> {
+		return await this.prisma.room.update({
+			where: { name: room_name },
+			data: {
+				participants: {
+					connect: { id: userid }
+				}
+			},
+			select: {
+				id: true,
+				participants: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				administrators: {
+					select: {
+						id: true,
+						display_name: true,
+						avatar: true,
+						status: true
+					}
+				},
+				penalties: true,
+				accessibility: true,
+				name: true,
+				messages: true
+			}
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		})
 	}
 
 }

@@ -22,7 +22,12 @@ export const RoomMaker = () => {
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
 			}
 		)
-		.then(() => {window.location.reload()})
+		.then((response) => {
+			if (response.ok) {
+				return window.location.reload();
+			}
+			throw new Error("Request not valid");
+		})
 		.catch((err: any) => {
 			console.log(err);
 			alert("A room with this name already exists")

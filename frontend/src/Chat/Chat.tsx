@@ -8,6 +8,7 @@ import endpoint from '../endpoint.json';
 import { socket as game_socket } from '../Play/socket';
 import { SearchBar } from './SearchBar';
 import { RoomMaker } from './RoomMaker';
+import { AddUser } from './AddUser';
 
 export const socket = io("https://localhost/chat", {'transports': ['polling', 'websocket']});
 
@@ -51,7 +52,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 			game_socket.off(ServerEvents.Ready);
 			game_socket.off(ServerEvents.ForwardDecline);
 		}
-	})
+	}, [])
 
 	useEffect(() => {
 		console.log("checking if admin")
@@ -105,6 +106,8 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 	}
 	return (
 		<div>
+			{ room.administrators.filter((admin) => admin.id === app_state.data.id).length > 0 &&
+				<AddUser app_state={app_state} room={room} />}
 			<table>
 				<tbody>
 				{room.participants.map((participant, id) => {
@@ -403,6 +406,15 @@ export const Chat = ({app_state, set_page, unreadRooms, setUnreadRooms} : {app_s
 	}, [rooms])
 
 	useEffect(() => {
+		const eventListener = (event: any, ...args: any) => {
+			console.log(event, args)
+		}
+
+		socket.onAny(eventListener);
+		socket.on("roomUpdate", ( data: {room: IRoom}) => {
+			console.log("setting up new rooms")
+			setRooms((prev_rooms: Map<string, IRoom>) => new Map(prev_rooms.set(data.room.name, data.room)));
+		})
 		socket.on("messageResponse", (data: IMessage) =>
 		{
 			if (blockedMap.get(data.appUserId) !== undefined) return;
@@ -420,39 +432,11 @@ export const Chat = ({app_state, set_page, unreadRooms, setUnreadRooms} : {app_s
 		});
 
 		return () => {
+			socket.offAny(eventListener);
+			socket.off("roomUpdate");
 			socket.off('messageResponse');
 		}
 	}, [])
-
-	useEffect(() => {
-		console.log("one message of this kind only")
-        //socket.emit("connection");
-		/*socket.on("connection", (data: ChatMessage[]) => {
-			console.log("connected socket, should be getting msg data")
-			console.log(data);
-			setMessages((prev_messages: ChatMessage[]) => ([
-				...prev_messages,
-				data
-			]));
-		});*/
-
-		const eventListener = (event: any, ...args: any) => {
-			console.log(event, args)
-		}
-
-		socket.on("roomUpdate", ( data: {roomid: number, room: IRoom}) => {
-			console.log("setting up new rooms")
-			setRooms(new Map(rooms.set(data.room.name, data.room)));
-		})
-		socket.onAny(eventListener);
-
-		return () => {
-			//socket.off('connection');
-			//socket.off('disconnect');
-			socket.offAny(eventListener);
-			socket.off("roomUpdate");
-		};
-    }, [rooms]);
 	
 	return (
 		<div className="Chat">

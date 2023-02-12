@@ -223,8 +223,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (client2 !== null) {
 			client2.join(room.name);
 		}
-		this.rooms.server.to(room.name).emit("roomUpdate", { roomid: room.id, room: room });
+		this.rooms.server.to(room.name).emit("roomUpdate", { room: room });
 		return (room.name);
+	}
+
+	@SubscribeMessage("addToRoom")
+	async addToRoom(client: AuthenticatedSocketChat, data: {userid: number, room_name: string}) : Promise<boolean> {
+		//add check for DMs and admins
+		const updated_room: IRoom = await this.rooms.addUserToRoom(data.userid, data.room_name);
+		if (updated_room === null || updated_room.administrators.filter((admin) => admin.id === client.data.id).length === 0) {
+			return false;
+		}
+		const client2: AuthenticatedSocketChat = this.rooms.getSocketFromNamespace(data.userid);
+		if (client2 !== null) {
+			client2.join(updated_room.name);
+		}
+		this.rooms.server.to(updated_room.name).emit("roomUpdate", { room: updated_room });
+		return true;
 	}
 
 	@SubscribeMessage("ping")
