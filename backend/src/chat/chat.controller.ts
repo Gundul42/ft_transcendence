@@ -7,6 +7,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { IRoom } from '../Interfaces';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RoomsManager } from './rooms/rooms.manager';
+
 @Controller("chat")
 export class ChatController {
 	constructor(

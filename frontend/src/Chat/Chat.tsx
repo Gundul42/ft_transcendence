@@ -113,6 +113,14 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 		})
 	};
 
+	const leaveRoom = () => {
+		socket.emit("leaveRoom", {room_name: room.name}, (response: boolean) => {
+			if (response) {
+				window.location.reload();
+			}
+		});
+	}
+
 	if (idChallenged !== 0) {
 		return (
 			<div>
@@ -157,6 +165,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 				</tbody>
 			</table>
 			<button onClick={()=> {setIsInfoView(false)}}>Close</button>
+			<button style={{backgroundColor: "red"}} onClick={()=> {leaveRoom()}}>Leave</button>
 		</div>
 	)
 }
