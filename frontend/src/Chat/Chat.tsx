@@ -154,7 +154,7 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 										<button onClick={()=>{muteUser(participant.id)}}>Mute</button>
 										</>
 									}
-									{ room.administrators[0].id === app_state.data.id && room.administrators.includes(participant) === false && 
+									{ room.owner.id === app_state.data.id && room.administrators.includes(participant) === false && 
 									<button onClick={()=>{promoteAdmin(participant.id)}}>Promote to admin</button>
 									}
 

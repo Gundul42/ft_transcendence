@@ -143,7 +143,8 @@ export class RoomsManager {
 				penalties: true,
 				accessibility: true,
 				name: true,
-				messages: true
+				messages: true,
+				owner: true
 			}
 		})
 		.catch((err: any) => {
@@ -173,6 +174,8 @@ export class RoomsManager {
 						status: true
 					}
 				},
+				owner: true,
+				ownerId: true,
 				penalties: true,
 				accessibility: true,
 				name: true,
@@ -310,6 +313,9 @@ export class RoomsManager {
 					administrators: {
 						connect: [{ id: client.data.id }, { id: other_id }]
 					},
+					owner: {
+						connect: {id: client.data.id}
+					},
 					accessibility: 3,
 					name: uuidv4(),
 					password: "",
@@ -335,7 +341,8 @@ export class RoomsManager {
 					penalties: true,
 					accessibility: true,
 					name: true,
-					messages: true
+					messages: true,
+					owner: true
 				}
 			})
 			.catch((err: any) => {
@@ -536,7 +543,8 @@ export class RoomsManager {
 			where: { name: room_name },
 			include: {
 				participants: true,
-				administrators: true
+				administrators: true,
+				owner: true
 			}
 		})
 		.catch((err: any) => {
@@ -545,7 +553,7 @@ export class RoomsManager {
 		})
 		if (room === null || room.participants.filter((participant) => participant.id === userid).length === 0) {
 			throw new Error("Request is not valid")
-		} else if (false/*room.owner.id === userid*/) {
+		} else if (room.owner.id === userid) { console.log("was owner")
 			return 2;
 		} else if (room.administrators.filter((admin) => admin.id === userid).length > 0) {
 			return 1;
@@ -580,15 +588,35 @@ export class RoomsManager {
 	}
 
 	async removeOwner(userid: number, room_name: string) : Promise<void> {
-		// await this.prisma.room.update({
-		// 	where: { name: room_name },
-		// 	data: {
-		// 		administrators: {
-		// 			disconnect: { id: userid }
-		// 		}
-		// 	}
-		// })
-		// .catch((err: any) => {console.log(err)});
+		const currentAdmins = await this.prisma.room.findFirst({
+			where: {name: room_name},
+			include: {
+				administrators: true,
+				participants: true
+			}
+		})
+		var newOwner: AppUser;
+		if (currentAdmins?.administrators.length === 0)
+		{
+			console.log("no admins found")
+			newOwner = currentAdmins.participants[0];
+		}
+		else
+		{
+			newOwner = currentAdmins.administrators[0];
+		}
+		console.log(newOwner);
+		if (newOwner === undefined)
+			return ;
+		await this.prisma.room.update({
+			where: { name: room_name },
+			data: {
+				owner: {
+					connect: { id: newOwner.id }
+				}
+			}
+		})
+		.catch((err: any) => {console.log(err)});
 	}
 
 	isMuted(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean

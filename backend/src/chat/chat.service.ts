@@ -62,6 +62,8 @@ export class ChatService {
 								penalties: true,
 								accessibility: true,
 								name: true,
+								ownerId: true,
+								owner: true,
 								messages: {
 									where: {
 										appUserId: { notIn: blocked_list }
@@ -111,6 +113,9 @@ export class ChatService {
 					connect: { id: userid }
 				},
 				administrators: {
+					connect: { id: userid }
+				},
+				owner: {
 					connect: { id: userid }
 				},
 				accessibility: access,
@@ -168,7 +173,8 @@ export class ChatService {
 				accessibility: true,
 				name: true,
 				messages: true,
-				owner: true
+				owner: true,
+				ownerId: true
 			}
 		})
 		.catch((err: any) => {
