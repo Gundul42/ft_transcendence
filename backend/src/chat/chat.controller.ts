@@ -72,7 +72,7 @@ export class ChatController {
 
 	@Post('admin-promotion')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async promoteToAdminValidation(@Body('room') room: string, @Body('user') userId: number, @Req() req: Request): Promise<void>
+	async promoteToAdminValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<void>
 	{
 		console.log(userId);
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
@@ -82,7 +82,7 @@ export class ChatController {
 			{
 				aRoom.participants.map(user =>
 				{
-					if (user.id == userId)
+					if (user.id == Number(userId))
 					{
 						console.log("user match: ", user.id)
 						if (aRoom.owner.id === user_rooms.user.id)
@@ -96,24 +96,15 @@ export class ChatController {
 
 	@Post('user-kick')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async userKickValidation(@Body('room') room: string, @Body('user') userId: number, @Body('time') time: string, @Req() req: Request): Promise<void | string>
+	async userKickValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<void | string>
 	{
-		const timeNum = Number(time);
-		if (timeNum === 0 || Number.isNaN(timeNum))
-			return ("Put proper time!");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
-		user_rooms.user.rooms.map((aRoom) =>
-		{
-			if (aRoom.name === room)
-			{
-				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
-					return ("Not an admin in this room")
-				if (aRoom.owner.id === Number(userId))
-					return ("You can't kick the owner!");
-				this.roomMg.kickUser(Number(userId), aRoom, timeNum);
-				return ("User " + userId + " was kicked for " + timeNum + " minutes");
-			}
-		})
+		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
+		if (valRoom === null)
+			return ("You can't perform this action");
+		const newvalRoom = await this.roomMg.kickUser(Number(userId), valRoom);
+		this.roomMg.server.to(valRoom.name).emit("roomUpdate", { room: newvalRoom });
+		return "You kicked that user out";
 	}
 
 	@Post('user-ban')
@@ -124,18 +115,11 @@ export class ChatController {
 		if (timeNum === 0 || Number.isNaN(timeNum))
 			return ("Put proper time!");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
-		user_rooms.user.rooms.map((aRoom) =>
-		{
-			if (aRoom.name === room)
-			{
-				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
-					return ("Not an admin in this room")
-				if (aRoom.owner.id === Number(userId))
-					return ("You can't ban the owner!");
-				this.roomMg.banUser(Number(userId), aRoom, timeNum);
-				return ("User " + userId + " was banned for " + timeNum + " minutes");
-			}
-		})
+		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
+		if (valRoom === null)
+			return ("You can't perform this action");
+		this.roomMg.banUser(Number(userId), valRoom, timeNum);
+		return ("You banned that user for " + timeNum + " minutes!");
 	}
 	
 	@Post('user-mute')
@@ -146,18 +130,11 @@ export class ChatController {
 		if (timeNum === 0 || Number.isNaN(timeNum))
 			return ("Put proper time!");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
-		user_rooms.user.rooms.map((aRoom) =>
-		{
-			if (aRoom.name === room)
-			{
-				if (this.chatService.isAdmin(aRoom, user_rooms.user) === false)
-					return ("Not an admin in this room")
-				if (aRoom.owner.id === Number(userId))
-					return ("You can't mute the owner!");
-				this.roomMg.muteUser(Number(userId), aRoom, timeNum);
-				return ("User " + userId + " was muted for " + timeNum + " minutes");
-			}
-		})
+		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
+		if (valRoom === null)
+			return ("You can't perform this action");
+		this.roomMg.muteUser(Number(userId), valRoom, timeNum);
+		return ("You muted that user for " + timeNum + " minutes!");
 	}
 
 	@Post('create-room')
@@ -171,5 +148,4 @@ export class ChatController {
 			throw new BadRequestException();
 		}
 	}
-
 }

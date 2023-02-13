@@ -70,13 +70,13 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 	};
 
 	const kickUser = (user_id: number) => {
-		const time = prompt("How long should this penalty last? (minutes)")
-		if (!time)
-			return (alert("Please input the penalty time!"))
+		// const time = prompt("How long should this penalty last? (minutes)")
+		// if (!time)
+		// 	return (alert("Please input the penalty time!"))
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
-		form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
+		// form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
 		fetch(endpoint.chat['user-kick'], {
 			method: "POST",
 			body: form_data.join('&'),
@@ -316,8 +316,6 @@ const joinAll = (socket: Socket) =>
 
 function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
 	const [owner, setOwner] : [boolean, any] = useState(false);
-	const [chosenOption, setOption]: [number, any] = useState(0);
-	const options: string[] = ["Public", "Private"];
 
 	useEffect(() => {
 		if (room.owner.id === app_state.data.id)
@@ -358,34 +356,17 @@ function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 		})
 	}
 
-	// TO-DO implement this
-	const changeMode = () => {
-		fetch(endpoint.chat['mode-change'], {
-			method: "POST",
-			body: encodeURIComponent("room") + "=" + encodeURIComponent(room.name),
-			headers: {
-				'content-type': 'application/x-www-form-urlencoded',
-				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
-			}
-		})
-	}
-
 	return (
 		<div>
 			<table>
 				<tbody>
 						<tr>
 							<td>You're the owner here!</td>
-							{/* { participant.id !== app_state.data.id && */}
 								<td>
-									{/* <button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button> */}
 									<button onClick={()=>{password()}}>Set/Change Password</button>
 									<button onClick={()=>{removePassword()}}>Remove Password</button>
-									<button onClick={()=>{changeMode()}}>Change Mode</button>
 								</td>
 						</tr>
-					{/* )
-				})} */}
 				</tbody>
 			</table>
 		</div>
