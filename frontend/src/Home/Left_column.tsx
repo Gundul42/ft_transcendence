@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { UserPublic } from '../UserPublic';
-import { IAppState, IcurrentMatch, IUser, IUserRequest, ISafeAppState } from '../Interfaces';
+import { IcurrentMatch, IUser, IUserRequest, ISafeAppState } from '../Interfaces';
 import { ServerEvents, ClientEvents } from '../events';
 import endpoint from '../endpoint.json'
 

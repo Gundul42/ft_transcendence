@@ -62,6 +62,7 @@ const Dispatch = (
 		<div className="Open-layout">
 			<Header set_page={set_page}/>
 			{to_render}
+			<div className="break"></div>
 		</div>
 	);
 }

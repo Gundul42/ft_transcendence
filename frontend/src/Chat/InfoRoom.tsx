@@ -58,13 +58,13 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 	};
 
 	const kickUser = (user_id: number) => {
-		const time = prompt("How long should this penalty last? (minutes)")
-		if (!time)
-			return (alert("Please input the penalty time!"))
+		// const time = prompt("How long should this penalty last? (minutes)")
+		// if (!time)
+		// 	return (alert("Please input the penalty time!"))
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
-		form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
+		// form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
 		fetch(endpoint.chat['user-kick'], {
 			method: "POST",
 			body: form_data.join('&'),
@@ -141,14 +141,14 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 									<button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button>
 									<button onClick={()=>{challenge(participant.id, "classic")}}>Challenge | Classic</button>
 									<button onClick={()=>{challenge(participant.id, "special")}}>Challenge | Special</button>
-									{ admin === true &&
+									{ admin === true && room.accessibility !== 3 &&
 										<>
 										<button onClick={()=>{kickUser(participant.id)}}>Kick</button>
 										<button onClick={()=>{banUser(participant.id)}}>Ban</button>
 										<button onClick={()=>{muteUser(participant.id)}}>Mute</button>
 										</>
 									}
-									{ room.owner.id === app_state.data.id && room.administrators.includes(participant) === false && 
+									{ room.accessibility !== 3 && room.owner.id === app_state.data.id && room.administrators.includes(participant) === false && 
 									<button onClick={()=>{promoteAdmin(participant.id)}}>Promote to admin</button>
 									}
 

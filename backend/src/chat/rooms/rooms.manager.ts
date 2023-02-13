@@ -145,6 +145,7 @@ export class RoomsManager {
 				accessibility: true,
 				name: true,
 				messages: true,
+				ownerId: true,
 				owner: true
 			}
 		})
@@ -431,7 +432,9 @@ export class RoomsManager {
 				penalties: true,
 				accessibility: true,
 				name: true,
-				messages: true
+				messages: true,
+				owner: true,
+				ownerId: true
 			}
 		})
 		.catch((err: any) => {
@@ -472,7 +475,7 @@ export class RoomsManager {
 	}
 	
 	// Connects the penalty to the room, disconnects the user from it
-	async addDcPenaltyToUser(penalty: Penalty, userId: number, room: IRoom)
+	async addDcPenaltyToUser(penalty: Penalty, userId: number, room: IRoom): Promise<IRoom>
 	{
 		return await this.prisma.room.update({
 			where: { name: room.name },
@@ -486,6 +489,14 @@ export class RoomsManager {
 				penalties: {
 					connect: {id: penalty.id}
 				}
+			},
+			select:
+			{
+				name: true,
+				participants: true,
+				administrators: true,
+				owner: true,
+				ownerId: true
 			}
 		})
 		.catch((err: any) => {
@@ -511,13 +522,12 @@ export class RoomsManager {
 		});
 	}
 
-	async kickUser(userId: number, room: IRoom, number: number)
+	async kickUser(userId: number, room: IRoom)
 	{
-		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Kick, number);
+		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Kick, 1);
 		if (penalty === null)
 			return null;
-		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
-			console.log(userId, " has been kicked!");
+		return (await this.addDcPenaltyToUser(penalty, userId, room))
 	}
 
 	async banUser(userId: number, room: IRoom, number: number)
@@ -525,8 +535,7 @@ export class RoomsManager {
 		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Ban, number);
 		if (penalty === null)
 			return null;
-		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
-			console.log(userId, " has been banned!");
+		return (await this.addDcPenaltyToUser(penalty, userId, room))
 	}
 
 	async muteUser(userId: number, room: IRoom, number: number)
@@ -539,7 +548,6 @@ export class RoomsManager {
 	}
 
 	async classifyUser(userid: number, room_name: string) : Promise<number> {
-		//TODO: add owner logic
 		const room: IRoom = await this.prisma.room.findUnique({
 			where: { name: room_name },
 			include: {

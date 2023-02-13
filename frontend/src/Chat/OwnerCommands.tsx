@@ -25,6 +25,12 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
 		})
+		.then((res) => {
+			if (!res.ok) {
+				throw new Error("It was not possible to set the password")
+			}
+		})
+		.catch((err: any) => {console.log(err)})
 	}
 
 	const removePassword = () => {
@@ -36,6 +42,12 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
 			}
 		})
+		.then((res) => {
+			if (!res.ok) {
+				throw new Error("It was not possible to remove the password")
+			}
+		})
+		.catch((err: any) => {console.log(err)})
 	}
 
 	if (owner === false || room.accessibility === IRoomAccess.DirectMessage) {

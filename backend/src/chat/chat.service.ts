@@ -184,4 +184,25 @@ export class ChatService {
 		})
 	}
 
+	validateForOperation(rooms: IRoom[], mbAdmin: AppUser & { rooms: IRoom[] }, targetUser: number, roomName: string)
+	{
+		const results: (IRoom | null)[] = rooms.map((aRoom) =>
+		{
+			if (aRoom.name === roomName)
+			{
+				if (aRoom.accessibility === IRoomAccess.DirectMessage)
+					return (null);
+				if (this.isAdmin(aRoom, mbAdmin) === false)
+					return (null)
+				if (aRoom.owner.id === Number(targetUser))
+					return (null);
+				return (aRoom);
+			}
+			return (null);
+		})
+		const wasFound = results.find(value => value !== null);
+		if (typeof wasFound === "object")
+			return (wasFound);
+		return (null);
+	}
 }

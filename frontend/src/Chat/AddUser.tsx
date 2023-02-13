@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
-import { IRoom, IUserPublic, ISafeAppState } from '../Interfaces';
+import { IRoom, IUserPublic, ISafeAppState, IRoomAccess } from '../Interfaces';
 import endpoint from '../endpoint.json';
 
 export const AddUser = ({app_state, room, chat_socket} : {app_state: ISafeAppState, room: IRoom, chat_socket: Socket}) => {
@@ -30,6 +30,9 @@ export const AddUser = ({app_state, room, chat_socket} : {app_state: ISafeAppSta
 		});
 	};
 
+	if (room.accessibility === IRoomAccess.DirectMessage) {
+		return <></>
+	}
 	return (
 		<div>
 			<input style={{backgroundColor: "white", borderRadius: "30px", border: "1px solid black", height: "30px", width: "50%"}} type="text" placeholder="Add a user..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
