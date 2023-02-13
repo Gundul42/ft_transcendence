@@ -310,6 +310,8 @@ const joinAll = (socket: Socket) =>
 
 function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) {
 	const [owner, setOwner] : [boolean, any] = useState(false);
+	const [chosenOption, setOption]: [number, any] = useState(0);
+	const options: string[] = ["Public", "Private"];
 
 	useEffect(() => {
 		if (room.owner.id === app_state.data.id)
@@ -350,6 +352,18 @@ function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 		})
 	}
 
+	// TO-DO implement this
+	const changeMode = () => {
+		fetch(endpoint.chat['mode-change'], {
+			method: "POST",
+			body: encodeURIComponent("room") + "=" + encodeURIComponent(room.name),
+			headers: {
+				'content-type': 'application/x-www-form-urlencoded',
+				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
+			}
+		})
+	}
+
 	return (
 		<div>
 			<table>
@@ -361,7 +375,7 @@ function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 									{/* <button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button> */}
 									<button onClick={()=>{password()}}>Set/Change Password</button>
 									<button onClick={()=>{removePassword()}}>Remove Password</button>
-									{/* <button onClick={()=>{mode(participant.id, "special")}}>Change Mode</button> */}
+									<button onClick={()=>{changeMode()}}>Change Mode</button>
 								</td>
 						</tr>
 					{/* )
