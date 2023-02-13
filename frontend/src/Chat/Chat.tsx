@@ -152,14 +152,14 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 									<button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button>
 									<button onClick={()=>{challenge(participant.id, "classic")}}>Challenge | Classic</button>
 									<button onClick={()=>{challenge(participant.id, "special")}}>Challenge | Special</button>
-									{ admin === true &&
+									{ admin === true && room.accessibility !== 3 &&
 										<>
 										<button onClick={()=>{kickUser(participant.id)}}>Kick</button>
 										<button onClick={()=>{banUser(participant.id)}}>Ban</button>
 										<button onClick={()=>{muteUser(participant.id)}}>Mute</button>
 										</>
 									}
-									{ room.owner.id === app_state.data.id && room.administrators.includes(participant) === false && 
+									{ room.accessibility !== 3 && room.owner.id === app_state.data.id && room.administrators.includes(participant) === false && 
 									<button onClick={()=>{promoteAdmin(participant.id)}}>Promote to admin</button>
 									}
 
@@ -322,7 +322,7 @@ function OwnerCommands({app_state, room, set_page, setIsInfoView} : {app_state: 
 			setOwner(true);
 	}, [room.owner, app_state.data.id])
 
-	if (owner === false) {
+	if (owner === false || room.accessibility === 3) {
 		return (
 			<div>
 			</div>

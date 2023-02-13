@@ -190,6 +190,8 @@ export class ChatService {
 		{
 			if (aRoom.name === roomName)
 			{
+				if (aRoom.accessibility === IRoomAccess.DirectMessage)
+					return (null);
 				if (this.isAdmin(aRoom, mbAdmin) === false)
 					return (null)
 				if (aRoom.owner.id === Number(targetUser))

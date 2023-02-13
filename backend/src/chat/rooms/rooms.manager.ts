@@ -432,7 +432,9 @@ export class RoomsManager {
 				penalties: true,
 				accessibility: true,
 				name: true,
-				messages: true
+				messages: true,
+				owner: true,
+				ownerId: true
 			}
 		})
 		.catch((err: any) => {
@@ -533,8 +535,7 @@ export class RoomsManager {
 		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Ban, number);
 		if (penalty === null)
 			return null;
-		if (await this.addDcPenaltyToUser(penalty, userId, room) !== null)
-			console.log(userId, " has been banned!");
+		return (await this.addDcPenaltyToUser(penalty, userId, room))
 	}
 
 	async muteUser(userId: number, room: IRoom, number: number)

@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { Session, AppUser, Room } from '@prisma/client';
 import { AuthGuard } from '../auth/auth.guard';
-import { IRoom } from '../Interfaces';
+import { IRoom, IRoomAccess } from '../Interfaces';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RoomsManager } from './rooms/rooms.manager';
 
@@ -49,10 +49,13 @@ export class ChatController {
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
+			{
+				if (aRoom.accessibility === IRoomAccess.DirectMessage)
+					return ;
 				if (aRoom.owner.id === user_rooms.user.id)
 					return (this.roomMg.changePassword(aRoom, password));
+			}
 		})
-		console.log("No matching room found/They aren't an owner");
 	  }
 
 	@Post('password-remove')
@@ -62,24 +65,26 @@ export class ChatController {
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
-			{ 
+			{
+				if (aRoom.accessibility === IRoomAccess.DirectMessage)
+					return ;
 				if (aRoom.owner.id === user_rooms.user.id)
 					return (this.roomMg.removePassword(aRoom));
 			}
 		})
-		console.log("No matching room found/They aren't an owner");
 	}
 
 	@Post('admin-promotion')
 	@UseGuards(AuthGuard, JwtAuthGuard)
 	async promoteToAdminValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<void>
 	{
-		console.log(userId);
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
 			{
+				if (aRoom.accessibility === IRoomAccess.DirectMessage)
+					return null;
 				aRoom.participants.map(user =>
 				{
 					if (user.id == Number(userId))
@@ -91,7 +96,6 @@ export class ChatController {
 				})
 			}
 		})
-		console.log("No matching room found/They aren't an owner");
 	}
 
 	@Post('user-kick')
@@ -102,8 +106,10 @@ export class ChatController {
 		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
 		if (valRoom === null)
 			return ("You can't perform this action");
-		const newvalRoom = await this.roomMg.kickUser(Number(userId), valRoom);
-		this.roomMg.server.to(valRoom.name).emit("roomUpdate", { room: newvalRoom });
+		const newValRoom = await this.roomMg.kickUser(Number(userId), valRoom);
+		if (newValRoom === null)
+			return ("Something went wrong");
+		this.roomMg.server.to(newValRoom.name).emit("roomUpdate", { room: newValRoom });
 		return "You kicked that user out";
 	}
 
@@ -118,7 +124,10 @@ export class ChatController {
 		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
 		if (valRoom === null)
 			return ("You can't perform this action");
-		this.roomMg.banUser(Number(userId), valRoom, timeNum);
+		const newValRoom = await this.roomMg.banUser(Number(userId), valRoom, timeNum);
+		if (newValRoom === null)
+			return ("Something went wrong");
+		this.roomMg.server.to(newValRoom.name).emit("roomUpdate", { room: newValRoom });
 		return ("You banned that user for " + timeNum + " minutes!");
 	}
 	
