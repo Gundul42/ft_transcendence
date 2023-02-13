@@ -98,6 +98,9 @@ export class AuthService {
     });
   }
 
+  async verifyJwt(token: string) : Promise<{username: string, sub: number, iat: number, exp: number}> {
+    return await this.jwtService.verify(token, { secret: "qwertzuiopasdfghjklyxcvbnm"});
+  }
   // Guards
 
   async validateSession(req: Request) : Promise<boolean> {

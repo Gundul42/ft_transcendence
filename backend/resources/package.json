@@ -33,6 +33,7 @@
     "@types/cookie-parser": "^1.4.3",
     "@types/multer": "^1.4.7",
     "@types/passport-jwt": "^3.0.8",
+    "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
     "nestjs-real-ip": "^2.2.0",
     "node-2fa": "^2.0.3",

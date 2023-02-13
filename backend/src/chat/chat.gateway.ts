@@ -6,6 +6,7 @@ import { WebSocketGateway,
 	OnGatewayDisconnect} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuthService } from '../auth/auth.service';
 import { Session, AppUser, Room, Penalty } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
@@ -17,7 +18,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	constructor (
 		private readonly prisma: PrismaService,
 		private readonly rooms: RoomsManager,
-		private readonly storage: StorageManager
+		private readonly storage: StorageManager,
+		private authService: AuthService
 		)
 	{
 		rooms.prisma = this.prisma;
@@ -71,7 +73,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log(err);
 			return null;
 		});
-		if (session_user === null || session_user.user === null) {
+		try {
+			var result: {username: string, sub: number, iat: number, exp: number} = await this.authService.verifyJwt((client.handshake.headers.authorization as string).split(' ')[1]);
+		} catch (err: any) {
+			console.log(err);
+			client.disconnect(true);
+			return ;
+		}
+		if (session_user === null || session_user.user === null || result.sub !== session_user.user.id) {
+			console.log("Token and session do not match")
 			client.disconnect(true);
 			return ;
 		}
@@ -83,14 +93,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			})
 		}
 		console.log(session_user.user.display_name, " just connected");
-		/*
-		console.log("chat gateway", client.id);
-		client.on('join', (room: string, callback) => this.handleJoinEvent(client, room, callback));
-		client.on('leave', (room: string, callback) => this.handleLeaveEvent(client, room, callback));
-		client.on('message', (message: IMessage, callback) => this.handleMsg(client, message, callback));
-		client.on('connection', (callback) => this.sendLog(client, callback));
-		
-		// this.prisma.appUser*/
 	}
 
 	handleDisconnect(client: AuthenticatedSocketChat)
