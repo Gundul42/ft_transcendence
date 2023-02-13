@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Room, Session, AppUser, Penalty } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
+import * as bcrypt from 'bcrypt';
 import { IRoom, IRoomAccess, IUserPublic, IPenaltyType } from '../../Interfaces';
 import { AuthenticatedSocketChat } from '../AuthenticatedSocketChat';
 
@@ -40,14 +41,14 @@ export class RoomsManager {
 		{
 			if (room.length === 1)
 				return false;
-			var passprot = await this.prisma.room.findFirst(
-				{
-					where:
-					{
-						name: room[0]
-					}
-				})
-			if (passprot?.password !== room[1])
+			var passprot = await this.prisma.room.findFirst({
+				where: { name: room[0] }
+			})
+			.catch((err: any) => {
+				console.log(err);
+				return null;
+			})
+			if (passprot === null || !bcrypt.compareSync(room[1], passprot.password))
 				return (false);
 			await this.joinRoom(client, room[0]);
 			return true;
@@ -357,7 +358,7 @@ export class RoomsManager {
 		await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
-				password: password,
+				password: bcrypt.hashSync(password, 10),
 				accessibility: IRoomAccess.PassProtected
 			}
 		})
@@ -551,7 +552,7 @@ export class RoomsManager {
 			console.log(err);
 			return null;
 		})
-		if (room === null || room.participants.filter((participant) => participant.id === userid).length === 0) {
+		if (room === null || room.participants.filter((participant) => participant.id === userid).length === 0 || room.accessibility === IRoomAccess.DirectMessage) {
 			throw new Error("Request is not valid")
 		} else if (room.owner.id === userid) { console.log("was owner")
 			return 2;

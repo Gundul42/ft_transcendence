@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { Header, ISafeAppState } from '../App';
 import { io } from 'socket.io-client';
-import { IRoom, IUser, IUserPublic, IMessage } from '../Interfaces';
+import { IRoom, IUser, IUserPublic, IMessage, IRoomAccess } from '../Interfaces';
 import { ClientEvents, ServerEvents } from '../events';
 import endpoint from '../endpoint.json';
 import { socket as game_socket } from '../Play/socket';
@@ -170,7 +170,8 @@ function Participants({app_state, room, set_page, setIsInfoView} : {app_state: I
 				</tbody>
 			</table>
 			<button onClick={()=> {setIsInfoView(false)}}>Close</button>
-			<button style={{backgroundColor: "red"}} onClick={()=> {leaveRoom()}}>Leave</button>
+			{ room.accessibility !== IRoomAccess.DirectMessage &&
+				<button style={{backgroundColor: "red"}} onClick={()=> {leaveRoom()}}>Leave</button>}
 		</div>
 	)
 }

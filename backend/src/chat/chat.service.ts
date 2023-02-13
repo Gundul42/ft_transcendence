@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser, Room } from '@prisma/client';
 import { IPenaltyType, IRoom, IRoomAccess } from '../Interfaces';
@@ -120,7 +121,7 @@ export class ChatService {
 				},
 				accessibility: access,
 				name: room_name,
-				password: password
+				password: bcrypt.hashSync(password, 10)
 			}
 		})
 		.then(() => true)

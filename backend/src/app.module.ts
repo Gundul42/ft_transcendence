@@ -3,12 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ContentModule } from './content/content.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ChatGateway } from './chat/chat.gateway';
 import { GameModule } from './game/game.module';
 import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
-import { RoomsManager } from './chat/rooms/rooms.manager';
-import { StorageManager } from './chat/storage/storage.manager';
 import { AchievementModule } from './achievement/achievement.module';
 
 @Module({
@@ -19,7 +16,7 @@ import { AchievementModule } from './achievement/achievement.module';
     GameModule,
     UsersModule,
     AchievementModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({isGlobal: true}),
     ChatModule
   ]
 })

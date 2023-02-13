@@ -8,7 +8,7 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 	const [textField, setTextField] : [string, any] = useState("");
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
 	const [foundRooms, setFoundRooms] : [IRoom[], any] = useState([]);
-	const [password, setPassword] : [string, any] = useState("");
+	const [password, setPassword] : [Map<number, string>, any] = useState(new Map<number, string>);
 	const blockedMap: Map<number, IUserPublic> = new Map(app_state.data.blocked.map((user) => [user.id, user]));
 
 	useEffect(() => {
@@ -75,10 +75,11 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 		)
 	}
 
-	const joinRoom = (room_name: string) => {
-		chat_socket.emit("joinRoom", { room_name: room_name, password: password}, (response: boolean) => {
+	const joinRoom = (room: IRoom) => {
+		if (password.get(room.id) === undefined) return;
+		chat_socket.emit("joinRoom", { room_name: room.name, password: password.get(room.id)}, (response: boolean) => {
 			if (response) {
-				setCurrentRoom(room_name);
+				setCurrentRoom(room.name);
 			}
 		})
 	}
@@ -113,10 +114,10 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 								<td>{room.name}</td>
 								{ room.accessibility === 2 && room.participants.filter((participant) => participant.id === app_state.data.id).length === 0 &&
 									<td>
-										<input type="password" placeholder="Password" value={password} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((e.target as HTMLInputElement).value)}} required/>
+										<input type="password" placeholder="Password" value={password.get(room.id) === undefined ? "" : password.get(room.id)} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((prev_map: Map<number, string>) => new Map(prev_map.set(room.id, (e.target as HTMLInputElement).value)))}} required/>
 									</td>}
 								<td>
-									<button onClick={()=>{joinRoom(room.name)}}>&#128172;</button>
+									<button onClick={()=>{joinRoom(room)}}>&#128172;</button>
 								</td>
 							</tr>
 						)
