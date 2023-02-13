@@ -7,7 +7,7 @@ export const SearchBar = ({set_page, setCurrentRoom, app_state, chat_socket} : {
 	const [textField, setTextField] : [string, any] = useState("");
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
 	const [foundRooms, setFoundRooms] : [IRoom[], any] = useState([]);
-	const [password, setPassword] : [Map<number, string>, any] = useState(new Map<number, string>);
+	const [password, setPassword] : [Map<number, string>, any] = useState(new Map<number, string>());
 	const blockedMap: Map<number, IUserPublic> = new Map(app_state.data.blocked.map((user) => [user.id, user]));
 
 	useEffect(() => {
@@ -88,45 +88,43 @@ export const SearchBar = ({set_page, setCurrentRoom, app_state, chat_socket} : {
 
 	return (
 		<div>
-			<input style={{backgroundColor: "white", borderRadius: "30px", border: "1px solid black", height: "30px", width: "95%"}} type="text" placeholder="Search..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
-			<table className="Search-bar">
-				<tbody>
-				{ foundUsers.length > 0 &&
-					foundUsers.map((user) => {
-						return (
-							<tr key={user.id}>
-								<td>{user.display_name}</td>
-								{user.id !== app_state.data.id &&
-									<td>
-										<button onClick={()=>{set_page("visit", user.id)}}>&#x1f464;</button>
-										<button onClick={()=>{sendDirectMessage(user.id)}}>&#128172;</button>
-										{ blockedMap.get(user.id) === undefined &&
-										<button onClick={()=>{blockUser(user.id)}}>&#128683;</button>}
-										{ blockedMap.get(user.id) !== undefined &&
-										<button onClick={()=>{unblockUser(user.id)}}>&#x2705;</button>}
-									</td>}
-							</tr>
-						)
-					})
-				}
-				{ foundRooms.length > 0 &&
-					foundRooms.map((room) => {
-						return (
-							<tr key={room.id}>
-								<td>{room.name}</td>
-								{ room.accessibility === 2 && room.participants.filter((participant) => participant.id === app_state.data.id).length === 0 &&
-									<td>
-										<input type="password" placeholder="Password" value={password.get(room.id) === undefined ? "" : password.get(room.id)} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((prev_map: Map<number, string>) => new Map(prev_map.set(room.id, (e.target as HTMLInputElement).value)))}} required/>
-									</td>}
+			<input className="Searchbar" type="text" placeholder="Search..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
+			<table className="Searchbar-content"><tbody>
+			{ foundUsers.length > 0 &&
+				foundUsers.map((user) => {
+					return (
+						<tr key={user.id}>
+							<td>{user.display_name}</td>
+							{user.id !== app_state.data.id &&
 								<td>
-									<button onClick={()=>{joinRoom(room)}}>&#128172;</button>
-								</td>
-							</tr>
-						)
-					})
-				}
-				</tbody>
-			</table>
+									<button onClick={()=>{set_page("visit", user.id)}}>&#x1f464;</button>
+									<button onClick={()=>{sendDirectMessage(user.id)}}>&#128172;</button>
+									{ blockedMap.get(user.id) === undefined &&
+									<button onClick={()=>{blockUser(user.id)}}>&#128683;</button>}
+									{ blockedMap.get(user.id) !== undefined &&
+									<button onClick={()=>{unblockUser(user.id)}}>&#x2705;</button>}
+								</td>}
+						</tr>
+					)
+				})
+			}
+			{ foundRooms.length > 0 &&
+				foundRooms.map((room) => {
+					return (
+						<tr key={room.id}>
+							<td>{room.name}</td>
+							{ room.accessibility === 2 && room.participants.filter((participant) => participant.id === app_state.data.id).length === 0 &&
+								<td>
+									<input type="password" placeholder="Password" value={password.get(room.id) === undefined ? "" : password.get(room.id)} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((prev_map: Map<number, string>) => new Map(prev_map.set(room.id, (e.target as HTMLInputElement).value)))}} required/>
+								</td>}
+							<td>
+								<button onClick={()=>{joinRoom(room)}}>&#128172;</button>
+							</td>
+						</tr>
+					)
+				})
+			}
+			</tbody></table>
 		</div>
 	)
 }

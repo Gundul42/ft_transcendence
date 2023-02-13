@@ -25,7 +25,7 @@ export const ChatBar = (
 			<SearchBar set_page={set_page} app_state={app_state} setCurrentRoom={setCurrentRoom} chat_socket={chat_socket} />
 			<div>
 				<div className='Text-field'>Users and Rooms</div>
-				<table>
+				<table className="clickable">
 					<tbody>
 						{ room_arr.map((room) => {
 							let className: string;
@@ -48,6 +48,7 @@ export const ChatBar = (
 					</tbody>
 				</table>
 			</div>
+			<div className='Text-field'>Create Room</div>
 			<RoomMaker />
 		</div>
 	);

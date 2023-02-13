@@ -4,8 +4,9 @@ import { Header } from '../Header';
 import { PersonalInformation } from './PersonalInformation';
 import { QR } from './QR';
 import { RightColumn } from '../Right_column';
-import { IUserPublicPage, IAppState, ISafeAppState, IAPICall, IUser } from '../Interfaces';
+import { IUserPublicPage, ISafeAppState, IAPICall, IUser } from '../Interfaces';
 import endpoint from '../endpoint.json';
+import './User.css';
 
 export const User = (
 	{ app_state, set_page, unreadMessages, set_data} : 
@@ -97,14 +98,6 @@ export const User = (
 		.catch((err: any) => console.log(err))
 	}
 
-	const converter: IAppState = {
-		data: {
-			type: "content",
-			link: null,
-			data: app_state.data
-		},
-		page: app_state.page
-	};
 	const user_info: IUserPublicPage = {
 		id: app_state.data.id,
 		display_name: app_state.data.display_name,
@@ -124,7 +117,7 @@ export const User = (
 			<PersonalInformation app_state={app_state} uploadAvatar={uploadAvatar} setTwoFA={setTwoFA} />
 			<Header set_page={set_page} />
 			<Dashboard user_info={user_info} />
-			<RightColumn app_state={converter} set_page={set_page} unreadMessages={unreadMessages} />
+			<RightColumn set_page={set_page} unreadMessages={unreadMessages} />
 		</div>
 	)
 }

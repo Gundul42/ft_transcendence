@@ -12,8 +12,9 @@
 
 .App-header {
   background-color: #282c34;
-  width: 50%;
-  flex: 1 2 15%;
+  min-width: 50%;
+  max-width: 100%;
+  min-height: 12%;
   font-size: calc(4px + 2vmin);
   color: white;
   display: flex;
@@ -25,7 +26,7 @@
   cursor: pointer;
 }
 
-.Open-layout, .Chat, .Play {
+.Open-layout, .Home, .User, .Visited-user {
   background-color: #282c34;
   width: 100%;
   height: 100%;
@@ -33,47 +34,33 @@
   color: white;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between;
 }
 
-.Login, .One-time-password {
+.Play {
   background-color: #282c34;
-  width: 50%;
-  flex: 2 1 15%;
+  width: 100%;
+  height: 100%;
   font-size: calc(4px + 2vmin);
   color: white;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
 .Home, .User, .Visited-user {
+  flex-wrap: wrap;
+}
+
+.Login, .One-time-password {
   background-color: #282c34;
-  height: 100%;
   width: 100%;
   font-size: calc(4px + 2vmin);
   color: white;
   display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-}
-
-.Play {
-  background-color: #282c34;
-  height: 100%;
-  width: 100%;
-  font-size: calc(4px + 2vmin);
-  color: white;
-}
-
-.Lobby-state {
-  display: flex;
-  flex-wrap: nowrap;
-  width: 100%;
-  justify-content: space-around;
 }
 
 .User-public {
@@ -88,112 +75,6 @@
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   border: 2px solid white;
-}
-
-.Chat {
-  background-color: #8891a3;
-  height: 100%;
-  width: 100%;
-  font-size: calc(4px + 2vmin);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-}
-
-.Chat-Body {
-  background-color: #282c34;
-  height: 100%;
-  width: 70%;
-  font-size: calc(4px + 2vmin);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  align-items: normal;
-}
-
-.Message-Text {
-  background-color: #ffffff;
-  border-radius: 10px;
-  color:#282c34;
-  padding-inline: 0.5em;
-  margin: 5px;
-}
-
-.Message-Chats {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: left;
-  align-items: flex-start;
-}
-
-.Sender-Name {
-  margin-left: 10px;
-}
-
-.Chat-Contacts {
-  height: 100%;
-  width: 30%;
-  background-color: #282c34;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: left;
-  align-items: normal;
-  gap: 5px;
-}
-
-.Chat-Box {
-  height: 100%;
-  width: 100%;
-  background-color: #282c34;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: nowrap;
-  flex-direction: column;
-  justify-content: left;
-  align-items: flex-start;
-  gap: 5px;
-}
-
-.Chat-Input {
-  height: 3em;
-  width: 100%;
-  background-color: #282c34;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column-reverse;
-  justify-content: left;
-  align-items: center;
-  gap: 5px;
-}
-
-.Welcome-section {
-  background-color: #a6a8ac;
-  width: 50%;
-  flex: 4 1 80%;
-  font-size: calc(4px + 2vmin);
-  color: #282c34;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  border-radius: 10px;
-}
-
-.Left-column {
-  height: 100%;
-  width: 24%;
-  background-color: #282c34;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
 }
 
 .Right-column {
@@ -238,6 +119,7 @@
 }
 
 .Menu-icon:hover, .Menu-icon-alert:hover {
+  cursor: pointer;
   background-color: white;
   height: 27vh;
 }
@@ -247,35 +129,6 @@
   max-height: 50%;
   width: auto;
   height: auto;
-}
-
-.Avatar-base {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-.Overlay-container {
-  position: absolute;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.Avatar-overlay {
-  width: 50%;
-  height: 50%;
-}
-
-.Overlay-container:hover {
-  opacity: 1;
-  cursor: pointer;
 }
 
 .Wall {
@@ -292,11 +145,6 @@
   align-items: center;
 }
 
-.QRcode {
-  height: 50%;
-  aspect-ratio: 1 / 1;
-}
-
 .Text-field {
   background-color: #a6a8ac;
   border-radius: 10px;
@@ -305,95 +153,6 @@
   flex-direction: column;
   align-self: flex-end;
   width: 100%;
-}
-
-.Inline-description {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  align-items: center;
-}
-
-.Description {
-  font-style: italic;
-  width: 30%;
-}
-
-.Value {
-  font-weight: bold;
-  width: 60%;
-  text-overflow: clip;
-  overflow: scroll;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.TwoFA-activate {
-  border-radius: 2px;
-  cursor: pointer;
-  height: 70%;
-}
-
-.TwoFA-deactivate {
-  border-radius: 2px;
-  cursor: pointer;
-  height: 70%;
-  background-color: rgb(173, 102, 102);
-}
-
-.TwoFA-deactivate:hover {
-  background-color: rgb(94, 55, 55);
-}
-
-.Dashboard {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-  height: 80%;
-  gap: 10px;
-}
-
-.Dashboard-row {
-  width: 100%;
-  height: 50%;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.Dashboard-row>* {
-  background-color: #a6a8ac;
-  height: 100%;
-  width: 50%;
-  border-radius: 10px;
-  color: #282c34;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  overflow: hide;
-}
-
-.Match-lost {
-  background-color: rgb(233, 136, 136);
-}
-
-.Match-won {
-  background-color: rgb(109, 182, 119);
-}
-
-.Match-lost, .Match-won {
-  overflow-y: hidden;
-  overflow-x: scroll;
-}
-
-.Section-title {
-  align-self: flex-start;
-  text-align: center;
 }
 
 .button {
@@ -413,15 +172,6 @@
 
 .button, .Menu-icon {
   cursor: pointer;
-}
-
-.Achievements {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 70%;
-  overflow: scroll;
 }
 
 .break {
@@ -511,21 +261,6 @@
   visibility: visible;
 }
 
-.Friends-list {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.list {
-  width: 60%
-}
-
-.list .User-public {
-  justify-content: space-around;
-}
-
 .circle0, .circle1, .circle2 {
   border-radius: 50%;
   height: 2vh;
@@ -544,74 +279,10 @@
   background-color: yellow;
 }
 
-.Requests {
-  width: 90%;
-  max-height: 50%;
-  overflow-x: hidden;
-  overflow-y: scroll;
-}
-
-.record {
-  display: flex;
-  flex-direction: row;
-  height: 10%;
-  width: 100%;
-  justify-content: space-between;
-  padding: 2%;
-  border-bottom: 1px solid black;
-}
-
-.record-name {
-  width: 50%;
-}
-
-.record-buttons {
-  width: 50%;
-}
-
-.Check-button {
-  background-color: rgb(79, 170, 79);
-}
-
-.Cancellation-button {
-  background-color: rgb(238, 116, 116);
-}
-
-.Check-button, .Cancellation-button {
-  border-radius: 5px;
-  height: 100%;
-  width: 25%;
-}
-
-.Check-button:hover, .Cancellation-button:hover {
-  cursor: pointer;
-}
-
 .Avatar-visit {
   max-width: 50%;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
-}
-
-.Search-bar {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
-  width: 100%;
-  border-collapse: "collapse"
-}
-
-.Search-bar tr:hover {
-  background-color: #282c34;
-  color: white;
-}
-
-.Room-create>input {
-  width: 100%;
-}
-
-.unread {
-  background-color: rgb(245, 146, 146);
 }
 
 html {
@@ -624,4 +295,29 @@ a {
 
 h1, h2 {
   width: 100%;
+}
+
+canvas {
+	height: 75%;
+	width: auto;
+	border: 5px solid white;
+}
+
+canvas:hover {
+  cursor: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.clickable tr:hover {
+  cursor: pointer;
+  background-color: white;
+  color:#282c34
+}
+
+button:hover {
+  cursor: pointer;
 }

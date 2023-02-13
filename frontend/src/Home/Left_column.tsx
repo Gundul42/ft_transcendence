@@ -31,7 +31,7 @@ const Requests = ({requests} : {requests: (IUserRequest & {from: {display_name: 
 	return(
 		<div className="Requests">
 			<h2>Requests</h2>
-			<table style={{width: "100%"}}>
+			<table className="clickable">
 			{ requests.map((req: IUserRequest & {from: {display_name: string}}) => (
 					<tr className="record" key={req.id}>
 						<td className="record-name">{req.from.display_name}</td>
@@ -90,34 +90,29 @@ const Matches = ({set_page, game_socket} : {set_page : any, game_socket: Socket}
 	return (
 		<div className="Matches">
 			<h2>Ongoing Matches</h2>
+			<table className="clickable"><tbody>
 			{ active_matches.length > 0 && 
 					active_matches.map((active_match, i, arr) => {
+						if (active_match === null) return <></>;
 						return (
-							<p onClick={() => {watch(active_match.id)}} key={active_match.id}>{active_match.player1.display_name} : {active_match.player2.display_name}</p>
+							<tr key={active_match.id}>
+								<td onClick={() => {watch(active_match.id)}} key={active_match.id}>{active_match.player1.display_name} V/S {active_match.player2.display_name}</td>
+							</tr>
 						)
 					})
 			}
+			</tbody></table>
 			{ active_matches.length === 0 &&
 				<p className="filler">Nobody is ponging today</p>}
 		</div>
 	)
 }
 
-export const LeftColumn = ({app_state, set_page, game_socket} : {app_state: IAppState, set_page: any, game_socket: Socket}) => {
-	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
-		const converter: ISafeAppState = {
-			data: app_state.data.data,
-			page: app_state.page
-		}
-		return (
-			<div className="Left-column">
-				<Friends user_info={app_state.data.data} app_state={converter} set_page={set_page} />
-				<Matches set_page={set_page} game_socket={game_socket} />
-			</div>
-		)
-	} else {
-		return(
-			<div className="Left-column"></div>
-		)
-	}
+export const LeftColumn = ({app_state, set_page, game_socket} : {app_state: ISafeAppState, set_page: any, game_socket: Socket}) => {
+	return (
+		<div className="Left-column">
+			<Friends user_info={app_state.data} app_state={app_state} set_page={set_page} />
+			<Matches set_page={set_page} game_socket={game_socket} />
+		</div>
+	)
 }

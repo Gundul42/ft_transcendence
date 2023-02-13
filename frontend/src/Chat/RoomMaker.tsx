@@ -35,7 +35,7 @@ export const RoomMaker = () => {
 	}
 
 	return (
-		<div style={{display: "flex", gap: "10px", width: "100%"}}>
+		<div className="Room-maker">
 			<div className="Room-create">
 				<input type="text" placeholder="Choose a name" value={roomName} onChange={(e: React.FormEvent<HTMLInputElement>) => {setRoomName((e.target as HTMLInputElement).value)}} />
 				{ chosenAccessMode === 2 &&

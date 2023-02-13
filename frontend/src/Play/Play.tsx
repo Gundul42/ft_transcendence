@@ -5,8 +5,9 @@ import { InfoFooter } from './InfoFooter';
 import { InfoHeader } from './InfoHeader';
 import { Winner } from './Winner';
 import { ServerEvents, ClientEvents } from '../events';
-import { playFieldXMaxSize, playFieldYMaxSize, paddleHeight } from '../constants';
+import constants from '../constants.json';
 import { IFinish, IGameState, ILobbyState, ISafeAppState, IUserPublic } from '../Interfaces';
+import './Play.css';
 
 const emptyUser: IUserPublic = {
 	id: 0,
@@ -29,11 +30,11 @@ export const Play = ({app_state, set_page, game_socket} : {app_state: ISafeAppSt
 	const [isKeyDown, setKeyDown] : [boolean, any] = useState(false);
 	const [gameState, setGameState] : [IGameState, any] = useState({
 		ball: {
-			x: playFieldXMaxSize / 2,
-			y: playFieldYMaxSize / 2
+			x: constants.game_canvas.width / 2,
+			y: constants.game_canvas.height / 2
 		},
-		paddle1: { y: ((playFieldYMaxSize / 2) - (paddleHeight / 2))},
-		paddle2: { y: ((playFieldYMaxSize / 2) - (paddleHeight / 2))}
+		paddle1: { y: ((constants.game_canvas.height / 2) - (constants.paddle.height / 2))},
+		paddle2: { y: ((constants.game_canvas.height / 2) - (constants.paddle.height / 2))}
 	})
 	const [lobbyState, setLobbyState] : [ILobbyState, any] = useState(emptyLobby);
 	const [winner, SetWinner] : [IFinish | null, any] = useState(null);

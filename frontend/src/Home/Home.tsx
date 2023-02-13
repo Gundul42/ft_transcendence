@@ -5,8 +5,9 @@ import { DisplayNamePrompt } from './DisplayNamePrompt';
 import { Header } from '../Header';
 import { LeftColumn } from './Left_column';
 import { RightColumn } from '../Right_column';
-import { IAppState, ISafeAppState } from '../Interfaces';
+import { ISafeAppState } from '../Interfaces';
 import { ClientEvents, ServerEvents } from '../events';
+import './Home.css';
 
 const PlayButton = ({setClicked, mode, game_socket} : {setClicked: any, mode: string, game_socket: Socket}) => {
 	return (
@@ -41,21 +42,13 @@ export function Home({app_state, set_page, unreadMessages, game_socket} : {app_s
 		};
 	}, []);
 
-	let converter: IAppState = {
-		data: {
-			type: "content",
-			link: null,
-			data: app_state.data
-		},
-		page: app_state.page
-	}
 	return(
 		<div className="Home">
 			{app_state.data.display_name === null &&
 				<DisplayNamePrompt />}
 			{ app_state.data.achievements.length > 0 && !app_state.data.achievements[0].aknowledged &&
 				<DisplayAchievement achievement={app_state.data.achievements[0]} /> }
-			<LeftColumn app_state={converter} set_page={set_page} game_socket={game_socket} />
+			<LeftColumn app_state={app_state} set_page={set_page} game_socket={game_socket} />
 			<Header set_page={set_page}/>
 			<div className="Welcome-section">
 				<h1>Welcome {app_state.data.display_name}</h1>
@@ -71,7 +64,7 @@ export function Home({app_state, set_page, unreadMessages, game_socket} : {app_s
 				<div className="break"></div>
 				<p>In the special mode the ball is going to get faster every round</p>
 			</div>
-			<RightColumn app_state={converter} set_page={set_page} unreadMessages={unreadMessages} />
+			<RightColumn set_page={set_page} unreadMessages={unreadMessages} />
 		</div>
 	)
 }

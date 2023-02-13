@@ -32,7 +32,7 @@ export const AddUser = ({app_state, room, chat_socket} : {app_state: ISafeAppSta
 
 	return (
 		<div>
-			<input style={{backgroundColor: "white", borderRadius: "30px", border: "1px solid black", height: "30px", width: "50%"}} type="text" placeholder="Search..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
+			<input style={{backgroundColor: "white", borderRadius: "30px", border: "1px solid black", height: "30px", width: "50%"}} type="text" placeholder="Add a user..." value={textField} onChange={(event: React.FormEvent<HTMLInputElement>) => {setTextField((event.target as HTMLInputElement).value)}}/>
 			<table className="Search-bar">
 				<tbody>
 				{ foundUsers.length > 0 &&

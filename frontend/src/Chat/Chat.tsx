@@ -7,6 +7,7 @@ import { Header } from '../Header';
 import { InfoRoom } from './InfoRoom';
 import { OwnerCommands } from './OwnerCommands';
 import { IRoom, IMessage, ISafeAppState } from '../Interfaces';
+import './Chat.css';
 
 const ViewRoom = (
 	{app_state, messages, rooms, currentRoom, isInfoView, setIsInfoView, set_page, chat_socket, game_socket} : 
@@ -16,18 +17,18 @@ const ViewRoom = (
 
 	if (isInfoView && rooms.get(currentRoom) !== undefined) {
 		return (
-			<>
-				<OwnerCommands app_state={app_state} room={room} />
+			<div className="Chat-area">
 				<InfoRoom setIsInfoView={setIsInfoView} app_state={app_state} room={room} set_page={set_page} chat_socket={chat_socket} game_socket={game_socket} />
-			</>
+				<OwnerCommands app_state={app_state} room={room} />
+			</div>
 		)
 	} else {
 		return (
-			<>
+			<div className="Chat-area">
+			<ChatFooter data_state={app_state.data} room={room} chat_socket={chat_socket} />
 				{rooms.get(currentRoom) !== undefined &&
 					<ChatBody room={room} messages={safe_messages} /> }
-				<ChatFooter data_state={app_state.data} room={room} chat_socket={chat_socket} />
-			</>
+			</div>
 		)
 	}
 }

@@ -18,10 +18,10 @@ export const ChatBody = ({room, messages} : {room: IRoom, messages: IMessage[]})
 				messages.map(message => (
 					<div className="Message-Chats" key={message.id.toString()}>
 						<p>{participants_map.get(message.appUserId)?.display_name}</p>
-					<div className='Message-Text'>
-						<p>{message.value}</p>
-					</div>
-				</div>))
+						<div className='Message-Text'>
+							<p>{message.value}</p>
+						</div>
+					</div>))
 			}
 			<div ref={lastMessageRef} />
 			</div>

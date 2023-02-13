@@ -46,10 +46,6 @@ export const Canvas = ({gameState} : {gameState: IGameState}) => {
 	}, [gameState])
 
 	return (
-		<canvas style={{
-			height: "75%",
-			width: "auto",
-			border: "5px solid white"
-		}} width={constants.game_canvas.width} height={constants.game_canvas.height} ref={canvasRef} />
+		<canvas width={constants.game_canvas.width} height={constants.game_canvas.height} ref={canvasRef} />
 	)
 }

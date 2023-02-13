@@ -126,10 +126,11 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 		)
 	}
 	return (
-		<div>
+		<div className="Info-room">
 			{ room.administrators.filter((admin) => admin.id === app_state.data.id).length > 0 &&
 				<AddUser app_state={app_state} room={room} chat_socket={chat_socket} />}
 			<table>
+			<div className="Text-field">Participants</div>
 				<tbody>
 				{room.participants.map((participant, id) => {
 					return (
@@ -157,9 +158,11 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 				})}
 				</tbody>
 			</table>
+			<div>
 			<button onClick={()=> {setIsInfoView(false)}}>Close</button>
 			{ room.accessibility !== IRoomAccess.DirectMessage &&
 				<button style={{backgroundColor: "red"}} onClick={()=> {leaveRoom()}}>Leave</button>}
+			</div>
 		</div>
 	)
 }

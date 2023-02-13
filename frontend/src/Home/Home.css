@@ -1,0 +1,81 @@
+.Welcome-section {
+	background-color: #a6a8ac;
+	width: 50%;
+	flex: 4 1 80%;
+	font-size: calc(4px + 2vmin);
+	color: #282c34;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	border-radius: 10px;
+}
+
+.Left-column {
+	height: 100%;
+	width: 24%;
+	background-color: #282c34;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+.Friends-list {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.list {
+	width: 60%;
+}
+
+.list .User-public {
+	justify-content: space-around;
+}
+
+.Requests {
+	width: 90%;
+	max-height: 50%;
+	overflow-x: hidden;
+	overflow-y: scroll;
+}
+
+.record {
+	display: flex;
+	flex-direction: row;
+	height: 10%;
+	width: 100%;
+	justify-content: space-between;
+	padding: 2%;
+	border-bottom: 1px solid black;
+}
+
+.record-name {
+	width: 50%;
+}
+
+.record-buttons {
+	width: 50%;
+}
+
+.Check-button {
+	background-color: rgb(79, 170, 79);
+}
+
+.Cancellation-button {
+	background-color: rgb(238, 116, 116);
+}
+
+.Check-button, .Cancellation-button {
+	border-radius: 5px;
+	height: 100%;
+	width: 25%;
+}
+
+.Check-button:hover, .Cancellation-button:hover {
+	cursor: pointer;
+}

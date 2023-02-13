@@ -3,7 +3,7 @@ import { Dashboard } from '../User/Dashboard';
 import { Header } from '../Header';
 import { PublicInfo } from './PublicInfo';
 import { RightColumn } from '../Right_column';
-import { IAppState, ISafeAppState, IUserPublicPage } from '../Interfaces';
+import { ISafeAppState, IUserPublicPage } from '../Interfaces';
 import endpoint from '../endpoint.json';
 
 export function Visit({ app_state, set_page, unreadMessages } : { app_state : ISafeAppState, set_page: any, unreadMessages: number }) {
@@ -22,15 +22,6 @@ export function Visit({ app_state, set_page, unreadMessages } : { app_state : IS
 		fetchData();
 	}, []);
 
-	let converter: IAppState = {
-		data: {
-			type: "content",
-			link: null,
-			data: app_state.data
-		},
-		page: app_state.page
-	};
-
 	if (userStats === null) {
 		return (<></>)
 	}
@@ -39,7 +30,7 @@ export function Visit({ app_state, set_page, unreadMessages } : { app_state : IS
 			<PublicInfo user_info={userStats} app_state={app_state} />
 			<Header set_page={set_page} />
 			<Dashboard user_info={userStats} />
-			<RightColumn set_page={set_page} app_state={converter} unreadMessages={unreadMessages} />
+			<RightColumn set_page={set_page} unreadMessages={unreadMessages} />
 		</div>
 	)
 }
