@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import endpoint from '../endpoint.json';
 
-export function DisplayName({display_name} : {display_name: string}) {
+export const DisplayName = ({display_name} : {display_name: string}) => {
 	const [name, setName] : [name: string, setName: any] = useState(display_name);
+
 	const handleSubmit = (event: React.SyntheticEvent) => {
 		if (name.length > 0) {
 			event.preventDefault();
@@ -15,12 +16,16 @@ export function DisplayName({display_name} : {display_name: string}) {
 				},
 				body: encodeURIComponent("uname") + "=" + encodeURIComponent(name)
 			})
-			.then(
-				() => { window.location.reload() },
-				(err) => { console.log(err) }
-			)
+			.then((res) => {
+				if (!res.ok) {
+					throw new Error("It was not possible to change name");
+				}
+				window.location.reload();
+			})
+			.catch((err: any) => {console.log(err)})
 		}
 	}
+
 	return (
 		<div className="Inline-description">
 			<p className="Description">Username</p>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ISafeAppState } from '../App';
 import endpoint from '../endpoint.json';
-import { IRoom, IUserPublic } from '../Interfaces';
+import { IRoom, ISafeAppState, IUserPublic } from '../Interfaces';
 import { socket as chat_socket } from './Chat';
 
 export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state} : {rooms: Map<string, IRoom>, app_state: ISafeAppState, set_page: any, setRooms: any, setCurrentRoom: any}) => {

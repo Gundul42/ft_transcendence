@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { IUserPublic, IUserRequest } from '../Interfaces';
+import { ISafeAppState, IUserPublic, IUserRequest } from '../Interfaces';
 import endpoint from '../endpoint.json';
-import { ISafeAppState } from '../App';
 
 export function PublicInfo({ user_info, app_state } : { user_info: IUserPublic, app_state: ISafeAppState }) {
 	const [requests, setRequests] : [{received: (IUserRequest & { from: { display_name: string}})[], sent: IUserRequest[]}, any] = useState({
 		received: app_state.data.requests_rec,
 		sent: app_state.data.requests_sent
 	});
+	const statuses: string[] = ["Offline", "Online", "Playing"];
+	const requests_userid: number[] = [...requests.received.map((rec) => rec.sender_id), ...requests.sent.map((sent) => sent.receiver_id)];
+	const friends_map: Map<number, IUserPublic> = new Map(app_state.data.friends.map((friend) => [friend.id, friend]));
 
 	const sendFriendRequest = () => {
 		fetch(endpoint.users['add-as-friend'] + "/" + user_info.id, {
@@ -33,9 +35,6 @@ export function PublicInfo({ user_info, app_state } : { user_info: IUserPublic, 
 		.catch((err: any) => {console.log(err)})
 	}
 
-	const statuses: string[] = ["Offline", "Online", "Playing"];
-	const requests_userid: number[] = [...requests.received.map((rec) => rec.sender_id), ...requests.sent.map((sent) => sent.receiver_id)];
-	const friends_map: Map<number, IUserPublic> = new Map(app_state.data.friends.map((friend) => [friend.id, friend]));
 	return (
 		<div className="Left-column">
 			<img src={endpoint.content.img + "/" + user_info.avatar} alt="Avatar" className="Avatar-visit"/>

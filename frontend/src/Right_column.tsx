@@ -1,19 +1,21 @@
 import React from 'react';
-import { IAppState } from './App';
+import { IAppState } from './Interfaces';
 import endpoint from './endpoint.json'
 
-function logOut(): void {
+const logOut = () => {
 	fetch(endpoint.auth.logout, {
 		method: "GET"
 	})
-	.then(
-		() => { window.location.reload(); }
-	);
+	.then((res) => {
+		if (!res.ok) {
+			throw new Error("It was not possible to log out");
+		}
+		window.location.reload();
+	})
+	.catch((err: any) => {console.log(err)})
 }
 
-export function RightColumn({app_state, set_page, unreadRooms} : {app_state: IAppState, set_page: any, unreadRooms: number}) {
-	console.log(unreadRooms);
-
+export const RightColumn = ({app_state, set_page, unreadRooms} : {app_state: IAppState, set_page: any, unreadRooms: number}) => {
 	let chatClass: string;
 	if (unreadRooms > 0) {
 		chatClass = "Menu-icon-alert";

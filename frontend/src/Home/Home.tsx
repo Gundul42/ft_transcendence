@@ -1,71 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../Play/socket';
+import { DisplayAchievement } from './DisplayAchievement';
+import { DisplayNamePrompt } from './DisplayNamePrompt';
+import { Header } from '../Header';
 import { LeftColumn } from './Left_column';
 import { RightColumn } from '../Right_column';
-import { Header, ISafeAppState, IAppState } from '../App';
-import endpoint from '../endpoint.json'
+import { IAppState, ISafeAppState } from '../Interfaces';
 import { ClientEvents, ServerEvents } from '../events';
-import { IAchieve } from '../Interfaces';
 
-function DisplayNamePrompt() {
-	const [name, setName] : [name: string, setName: any] = useState("");
-	const handleSubmit = (event: any) => {
-		if (name.length > 0) {
-			event.preventDefault();
-			fetch(endpoint.content.display_name, {
-				method: "POST",
-				headers: {
-					'content-type': 'application/x-www-form-urlencoded',
-					'accept-encoding': 'gzip, deflate, br',
-					'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
-				},
-				body: encodeURIComponent("uname") + "=" + encodeURIComponent(name)
-			})
-			.then(
-				() => { window.location.reload() },
-				(err) => { console.log(err) }
-			)
-		}
-	}
-	return(
-		<div className="Wall">
-			<h1>It looks like you don't have a username yet!</h1>
-			<form onSubmit={handleSubmit}>
-				<label htmlFor="uname">Set a username: </label>
-				<input type="text" name="uname" id="uname" placeholder="LivingLegend42" value={name} onChange={(e) => {setName(e.target.value)}} required />
-				<input type="submit" value="Submit"/>
-			</form>
-		</div>
-	)
-}
-
-function DisplayAchievement({achievement} : {achievement: IAchieve}) {
-	const handleClick = () => {
-		fetch(endpoint.achievement.aknowledge + "/" + achievement.id.toString(), {
-			method: "POST",
-			headers: {
-				'content-type': 'application/x-www-form-urlencoded',
-				'accept-encoding': 'gzip, deflate, br',
-				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string
-			},
-		})
-		.then(
-			() => { window.location.reload() },
-			(err) => { console.log(err) }
-		)
-	};
-
-	return(
-		<div className="Wall">
-			<h1>{achievement.name}</h1>
-			<img src={endpoint.content.img + achievement.logo} alt={achievement.logo} style={{height: "20%", aspectRatio: "1 / 1", borderRadius: "50%", border: "5px solid black"}} />
-			<p>{achievement.description}</p>
-			<button className="button" onClick={handleClick}>Nice</button>
-		</div>
-	)
-}
-
-function PlayButton({setClicked, mode} : {setClicked: any, mode: string}) {
+const PlayButton = ({setClicked, mode} : {setClicked: any, mode: string}) => {
 	return (
 		<button className="button" onClick={() => {setClicked(true); socket.emit(ClientEvents.Play, { mode: mode })}}>
 			{mode[0].toUpperCase() + mode.slice(1)}
@@ -73,7 +16,7 @@ function PlayButton({setClicked, mode} : {setClicked: any, mode: string}) {
 	)
 }
 
-function Loading({setClicked} : {setClicked: any}) {
+const Loading = ({setClicked} : {setClicked: any}) => {
 	return (
 		<div>
 			<div className="lds-ring"><div></div><div></div><div></div><div></div></div>

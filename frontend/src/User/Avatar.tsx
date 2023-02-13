@@ -1,11 +1,11 @@
 import React from 'react';
-import { IUserState } from './User';
 import endpoint from '../endpoint.json'
+import { ISafeAppState } from '../Interfaces';
 
-export function Avatar({user_state, uploadAvatar} : {user_state: IUserState, uploadAvatar: any}) {
+export const Avatar = ({app_state, uploadAvatar} : {app_state: ISafeAppState, uploadAvatar: any}) => {
 	return (
 	<div className="Avatar-container">
-		<img src={endpoint.content.img + "/" + user_state.avatar} alt="Avatar" className="Avatar-base"/>
+		<img src={endpoint.content.img + "/" + app_state.data.avatar} alt="Avatar" className="Avatar-base"/>
 		<div className="Overlay-container">
 			<img src={endpoint.content.img + "/icons/pen.png"} alt="Modify" className="Avatar-overlay" onClick={uploadAvatar}/>
 		</div>

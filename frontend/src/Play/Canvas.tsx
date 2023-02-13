@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { IGameState } from '../Interfaces';
 import constants from '../constants.json';
 
-export function Canvas({gameState} : {gameState: IGameState}) {
+export const Canvas = ({gameState} : {gameState: IGameState}) => {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	const draw = (ctx: CanvasRenderingContext2D) => {
@@ -45,12 +45,10 @@ export function Canvas({gameState} : {gameState: IGameState}) {
 		}
 	}, [draw])
 
-	const canvas_height = "75%";
-	const canvas_width = "auto";
 	return (
 		<canvas style={{
-			height: canvas_height,
-			width: canvas_width,
+			height: "75%",
+			width: "auto",
 			border: "5px solid white"
 		}} width={constants.game_canvas.width} height={constants.game_canvas.height} ref={canvasRef} />
 	)

@@ -2,9 +2,9 @@ import React from 'react';
 import { IAchieve, IMatch, IUserPublicPage } from '../Interfaces';
 import endpoint from '../endpoint.json';
 
-function LadderLevel({ladder_level} : {ladder_level : number}) {
+const LadderLevel = ({ladder_level} : {ladder_level : number}) => {
 	return (
-		<div id="Ladder-level">
+		<div className="Ladder-level">
 			<h2 className="Section-title">Ladder Level</h2>
 			<p>Your ladder level is:</p>
 			<div className="break"></div>
@@ -13,9 +13,9 @@ function LadderLevel({ladder_level} : {ladder_level : number}) {
 	)
 }
 
-function WinsLosses({wins, losses} : {wins: number, losses: number}) {
+const WinsLosses = ({wins, losses} : {wins: number, losses: number}) => {
 	return (
-		<div id="Wins-losses">
+		<div className="Wins-losses">
 			<h2 className="Section-title">Wins vs Losses</h2>
 			<p>Wins: <b>{wins}</b></p>
 			<div className="break"></div>
@@ -24,7 +24,7 @@ function WinsLosses({wins, losses} : {wins: number, losses: number}) {
 	)
 }
 
-function Achievements({achievements} : {achievements: IAchieve[]}) {
+const Achievements = ({achievements} : {achievements: IAchieve[]}) => {
 	return (
 		<div>
 			<h2 className="Section-title">Achievements</h2>
@@ -45,7 +45,7 @@ function Achievements({achievements} : {achievements: IAchieve[]}) {
 	)
 }
 
-function MatchHistory({match_history, userid} : {match_history: IMatch[], userid: number}) {
+const MatchHistory = ({match_history, userid} : {match_history: IMatch[], userid: number}) => {
 	const match_list = () => {
 		return (
 			match_history.map((match) => {
@@ -81,7 +81,7 @@ function MatchHistory({match_history, userid} : {match_history: IMatch[], userid
 	)
 }
 
-export function Dashboard({user_info} : {user_info: IUserPublicPage}) {
+export const Dashboard = ({user_info} : {user_info: IUserPublicPage}) => {
 	return (
 		<div className="Dashboard">
 			<div className="Dashboard-row">

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { IUserPublic, IUserRequest } from './Interfaces';
+import { ISafeAppState, IUserPublic, IUserRequest } from './Interfaces';
 import endpoint from './endpoint.json';
-import { ISafeAppState } from './App';
 
-function UserTooltip({user_info, app_state, set_page} : {user_info: IUserPublic, app_state: ISafeAppState, set_page: any}) {
+const UserTooltip = ({user_info, app_state, set_page} : {user_info: IUserPublic, app_state: ISafeAppState, set_page: any}) => {
 	const [requests, setRequests] : [{received: (IUserRequest & { from: { display_name: string}})[], sent: IUserRequest[]}, any] = useState({
 		received: app_state.data.requests_rec,
 		sent: app_state.data.requests_sent
@@ -14,7 +13,11 @@ function UserTooltip({user_info, app_state, set_page} : {user_info: IUserPublic,
 			method: "POST",
 			headers: { 'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
 		})
-		.then(()=> {console.log("success")})
+		.then((res) => {
+			if (!res.ok) {
+				throw new Error("It was not possible to send the request");
+			}
+		})
 		.catch((err: any) => {console.log(err)});
 		setRequests((prevReq: {received: (IUserRequest & { from: { display_name: string}})[], sent: IUserRequest[]}) => ({
 			received: prevReq.received,
@@ -42,7 +45,7 @@ function UserTooltip({user_info, app_state, set_page} : {user_info: IUserPublic,
 	)
 }
 
-export function UserPublic({user_info, app_state, display_status, display_img, set_page} : {user_info: IUserPublic, app_state: ISafeAppState, display_img: boolean, display_status: boolean, set_page: any}) {
+export const UserPublic = ({user_info, app_state, display_status, display_img, set_page} : {user_info: IUserPublic, app_state: ISafeAppState, display_img: boolean, display_status: boolean, set_page: any}) => {
 	return (
 		<div className="User-public">
 			<UserTooltip user_info={user_info} app_state={app_state} set_page={set_page} />

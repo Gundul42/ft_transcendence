@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ISafeAppState } from '../App';
-import { IRoom, IUserPublic } from '../Interfaces';
+import { IRoom, IUserPublic, ISafeAppState } from '../Interfaces';
 import { socket as chat_socket } from './Chat';
 import endpoint from '../endpoint.json';
 

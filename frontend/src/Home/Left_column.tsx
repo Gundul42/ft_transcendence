@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { IAppState, ISafeAppState } from '../App';
 import { UserPublic } from '../UserPublic';
-import { IcurrentMatch, IUser, IUserRequest } from '../Interfaces';
-import endpoint from '../endpoint.json'
+import { IAppState, IcurrentMatch, IUser, IUserRequest, ISafeAppState } from '../Interfaces';
 import { ServerEvents, ClientEvents } from '../events';
 import { socket } from '../Play/socket';
+import endpoint from '../endpoint.json'
 
-function Requests({requests} : {requests: (IUserRequest & {from: {display_name: string}})[] }) {
+const Requests = ({requests} : {requests: (IUserRequest & {from: {display_name: string}})[] }) => {
 	const respond = (accept: boolean, req_id: number) => {
 		let form_body: string[] = [];
 		form_body.push(encodeURIComponent("res") + "=" + encodeURIComponent(accept));
@@ -20,10 +19,13 @@ function Requests({requests} : {requests: (IUserRequest & {from: {display_name: 
 			},
 			body: form_body.join("&")
 		})
-		.then(
-			() => { window.location.reload() },
-			(err) => { console.log(err) }
-		)
+		.then((res) => {
+			if (!res.ok) {
+				throw new Error("It was not possible to respond the request");
+			}
+			window.location.reload();
+		})
+		.catch((err: any) => {console.log(err)})
 	};
 
 	return(
@@ -45,7 +47,7 @@ function Requests({requests} : {requests: (IUserRequest & {from: {display_name: 
 	)
 }
 
-function Friends({user_info, app_state, set_page} : {user_info: IUser, app_state: ISafeAppState, set_page: any}) {
+const Friends = ({user_info, app_state, set_page} : {user_info: IUser, app_state: ISafeAppState, set_page: any}) => {
 	return (
 		<div className="Friends">
 			{ user_info.requests_rec.length > 0 &&
@@ -67,8 +69,7 @@ function Friends({user_info, app_state, set_page} : {user_info: IUser, app_state
 }
 
 
-function Matches({set_page} : {set_page : any})
-{
+const Matches = ({set_page} : {set_page : any}) => {
 	const [active_matches, setActiveMatches] : [IcurrentMatch[], any] = useState([]);
 
 	useEffect(() => {
@@ -102,7 +103,7 @@ function Matches({set_page} : {set_page : any})
 	)
 }
 
-export function LeftColumn({app_state, set_page} : {app_state: IAppState, set_page: any}) {
+export const LeftColumn = ({app_state, set_page} : {app_state: IAppState, set_page: any}) => {
 	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
 		const converter: ISafeAppState = {
 			data: app_state.data.data,

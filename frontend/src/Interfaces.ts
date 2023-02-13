@@ -4,6 +4,16 @@ export enum UserStatus {
 	InGame
 }
 
+export interface IAppState {
+	data: IAPICall | null,
+	page: IPage
+  }
+  
+  export interface ISafeAppState {
+	data: IUser,
+	page: IPage
+  }
+
 export interface IUser {
 	id:				number,
 	full_name:		string,

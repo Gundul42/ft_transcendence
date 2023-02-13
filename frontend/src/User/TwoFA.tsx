@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function TwoFA({twoFA, setTwoFA} : {twoFA: boolean, setTwoFA: any}) {
+export const TwoFA = ({twoFA, setTwoFA} : {twoFA: boolean, setTwoFA: any}) => {
 	let input_value: string;
 	let input_class: string;
 	if (!twoFA) {

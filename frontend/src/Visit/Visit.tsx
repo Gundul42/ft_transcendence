@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Header, IAppState, ISafeAppState } from '../App';
-import { IUserPublicPage } from '../Interfaces';
-import endpoint from '../endpoint.json';
-import { PublicInfo } from './PublicInfo';
 import { Dashboard } from '../User/Dashboard';
+import { Header } from '../Header';
+import { PublicInfo } from './PublicInfo';
 import { RightColumn } from '../Right_column';
+import { IAppState, ISafeAppState, IUserPublicPage } from '../Interfaces';
+import endpoint from '../endpoint.json';
 
 export function Visit({ app_state, set_page, unreadRooms } : { app_state : ISafeAppState, set_page: any, unreadRooms: number }) {
 	const [userStats, setUserStats] : [IUserPublicPage | null, any] = useState(null);
