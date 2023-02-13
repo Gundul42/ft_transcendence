@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { socket as game_socket } from '../Play/socket';
-import { socket as chat_socket } from './Chat';
+import { Socket } from 'socket.io-client';
 import { AddUser } from './AddUser';
 import { IRoom, IRoomAccess, ISafeAppState } from '../Interfaces';
 import { ClientEvents, ServerEvents } from '../events';
 import endpoint from '../endpoint.json';
 
-export const InfoRoom = ({app_state, room, set_page, setIsInfoView} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any}) => {
+export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket, chat_socket} : {app_state: ISafeAppState, room: IRoom, set_page: any, setIsInfoView: any, game_socket: Socket, chat_socket: Socket}) => {
 	const [idChallenged, setIdChallenged] : [number, any] = useState(0);
 	const [admin, setAdmin] : [boolean, any] = useState(false);
 
@@ -129,7 +128,7 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView} : {app_state
 	return (
 		<div>
 			{ room.administrators.filter((admin) => admin.id === app_state.data.id).length > 0 &&
-				<AddUser app_state={app_state} room={room} />}
+				<AddUser app_state={app_state} room={room} chat_socket={chat_socket} />}
 			<table>
 				<tbody>
 				{room.participants.map((participant, id) => {

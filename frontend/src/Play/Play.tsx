@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { socket } from './socket';
+import { Socket } from 'socket.io-client';
 import { Canvas } from './Canvas';
 import { InfoFooter } from './InfoFooter';
 import { InfoHeader } from './InfoHeader';
@@ -25,7 +25,7 @@ const emptyLobby: ILobbyState = {
 	round: 0
 }
 
-export const Play = ({app_state, set_page} : {app_state: ISafeAppState, set_page: any}) => {
+export const Play = ({app_state, set_page, game_socket} : {app_state: ISafeAppState, set_page: any, game_socket: Socket}) => {
 	const [isKeyDown, setKeyDown] : [boolean, any] = useState(false);
 	const [gameState, setGameState] : [IGameState, any] = useState({
 		ball: {
@@ -42,9 +42,9 @@ export const Play = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 		if (!isKeyDown && [lobbyState.player1?.id, lobbyState.player2?.id].includes(app_state.data.id) === false) {
 			if (keyEvent.key === "w" || keyEvent.key === "ArrowUp") {
 				setKeyDown(true);
-				socket.emit(ClientEvents.Up);
+				game_socket.emit(ClientEvents.Up);
 			} else if (keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
-				socket.emit(ClientEvents.Down);
+				game_socket.emit(ClientEvents.Down);
 				setKeyDown(true);
 			}
 		}
@@ -53,14 +53,14 @@ export const Play = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	const keyup = (keyEvent: KeyboardEvent) => {
 		if ([lobbyState.player1?.id, lobbyState.player2?.id].includes(app_state.data.id) === false) {
 			if (keyEvent.key === "w" || keyEvent.key === "ArrowUp" || keyEvent.key === "s" || keyEvent.key === "ArrowDown") {
-				socket.emit(ClientEvents.Stop);
+				game_socket.emit(ClientEvents.Stop);
 				setKeyDown(false);
 			}
 		}
 	}
 
 	const leave = (e: BeforeUnloadEvent) => {
-		socket.emit(ClientEvents.Leave);
+		game_socket.emit(ClientEvents.Leave);
 	}
 
 	useEffect(() => {
@@ -76,20 +76,20 @@ export const Play = ({app_state, set_page} : {app_state: ISafeAppState, set_page
 	}, [])
 
 	useEffect(() => {
-		socket.on(ServerEvents.GameState, (data: IGameState) => {
+		game_socket.on(ServerEvents.GameState, (data: IGameState) => {
 			setGameState(data);
 		});
-		socket.on(ServerEvents.LobbyState, (data: ILobbyState) => {
+		game_socket.on(ServerEvents.LobbyState, (data: ILobbyState) => {
 			setLobbyState(data);
 		});
-		socket.on(ServerEvents.Finish, (data: IFinish) => {
+		game_socket.on(ServerEvents.Finish, (data: IFinish) => {
 			SetWinner(data);
 		})
 
 		return () => {
-			socket.off(ServerEvents.GameState);
-			socket.off(ServerEvents.LobbyState);
-			socket.off(ServerEvents.Finish);
+			game_socket.off(ServerEvents.GameState);
+			game_socket.off(ServerEvents.LobbyState);
+			game_socket.off(ServerEvents.Finish);
 		};
 	}, []);
 

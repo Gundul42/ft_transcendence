@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Socket } from 'socket.io-client';
 import { IRoom, IUserPublic, ISafeAppState } from '../Interfaces';
-import { socket as chat_socket } from './Chat';
 import endpoint from '../endpoint.json';
 
-export const AddUser = ({app_state, room} : {app_state: ISafeAppState, room: IRoom}) => {
+export const AddUser = ({app_state, room, chat_socket} : {app_state: ISafeAppState, room: IRoom, chat_socket: Socket}) => {
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
 	const [textField, setTextField] : [string, any] = useState("");
 

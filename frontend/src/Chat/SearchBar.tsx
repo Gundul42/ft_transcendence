@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Socket } from 'socket.io-client';
 import endpoint from '../endpoint.json';
-import { IRoom, ISafeAppState, IUserPublic } from '../Interfaces';
-import { socket as chat_socket } from './Chat';
+import { IRoom, IRoomAccess, ISafeAppState, IUserPublic } from '../Interfaces';
 
-export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state} : {rooms: Map<string, IRoom>, app_state: ISafeAppState, set_page: any, setRooms: any, setCurrentRoom: any}) => {
+export const SearchBar = ({set_page, setCurrentRoom, app_state, chat_socket} : {app_state: ISafeAppState, set_page: any, setCurrentRoom: any, chat_socket: Socket}) => {
 	const [textField, setTextField] : [string, any] = useState("");
 	const [foundUsers, setFoundUsers] : [IUserPublic[], any] = useState([]);
 	const [foundRooms, setFoundRooms] : [IRoom[], any] = useState([]);
@@ -75,8 +75,11 @@ export const SearchBar = ({rooms, set_page, setRooms, setCurrentRoom, app_state}
 	}
 
 	const joinRoom = (room: IRoom) => {
-		if (password.get(room.id) === undefined) return;
-		chat_socket.emit("joinRoom", { room_name: room.name, password: password.get(room.id)}, (response: boolean) => {
+		console.log("triggered")
+		if (password.get(room.id) === undefined && room.accessibility === IRoomAccess.PassProtected) return;
+		console.log("triggered")
+		chat_socket.emit("joinRoom", { room_name: room.name, password: password.get(room.id) === undefined ? "" : password.get(room.id)}, (response: boolean) => {
+			console.log("callback called")
 			if (response) {
 				setCurrentRoom(room.name);
 			}

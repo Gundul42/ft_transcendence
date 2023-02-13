@@ -43,7 +43,7 @@ export const Canvas = ({gameState} : {gameState: IGameState}) => {
 		return () => {
 			window.cancelAnimationFrame(animationFrameId)
 		}
-	}, [draw])
+	}, [gameState])
 
 	return (
 		<canvas style={{

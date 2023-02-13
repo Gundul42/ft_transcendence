@@ -255,6 +255,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("joinRoom")
 	async joinRoom(client: AuthenticatedSocketChat, data: {room_name: string, password: string}) : Promise<boolean> {
+		console.log("join triggered")
 		if (await this.rooms.checkRoomStatus([data.room_name, data.password], client) === false) {
 			return false;
 		}

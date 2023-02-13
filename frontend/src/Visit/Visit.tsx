@@ -6,7 +6,7 @@ import { RightColumn } from '../Right_column';
 import { IAppState, ISafeAppState, IUserPublicPage } from '../Interfaces';
 import endpoint from '../endpoint.json';
 
-export function Visit({ app_state, set_page, unreadRooms } : { app_state : ISafeAppState, set_page: any, unreadRooms: number }) {
+export function Visit({ app_state, set_page, unreadMessages } : { app_state : ISafeAppState, set_page: any, unreadMessages: number }) {
 	const [userStats, setUserStats] : [IUserPublicPage | null, any] = useState(null);
 
 	useEffect(() => {
@@ -39,7 +39,7 @@ export function Visit({ app_state, set_page, unreadRooms } : { app_state : ISafe
 			<PublicInfo user_info={userStats} app_state={app_state} />
 			<Header set_page={set_page} />
 			<Dashboard user_info={userStats} />
-			<RightColumn set_page={set_page} app_state={converter} unreadRooms={unreadRooms} />
+			<RightColumn set_page={set_page} app_state={converter} unreadMessages={unreadMessages} />
 		</div>
 	)
 }

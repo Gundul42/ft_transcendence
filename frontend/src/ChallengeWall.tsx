@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
-import { ClientEvents, ServerEvents } from './events';
+import React from 'react';
+import { Socket } from 'socket.io-client';
+import { ClientEvents } from './events';
 import { IChallengeInvite } from './Interfaces';
-import { socket } from './Play/socket';
 
-export function ChallengeWall({invites, setInvites, set_page} : {invites: IChallengeInvite[], setInvites: any, set_page: any}) {
+export function ChallengeWall({invites, setInvites, set_page, game_socket} : {invites: IChallengeInvite[], setInvites: any, set_page: any, game_socket: Socket}) {
 	const respondInvitation = (lobbyId: string, accept: boolean) => {
-		socket.emit(ClientEvents.RespondInvitation, { lobbyId: lobbyId, accept: accept });
+		game_socket.emit(ClientEvents.RespondInvitation, { lobbyId: lobbyId, accept: accept });
 		setInvites([]);
 		if (accept) {
 			set_page("play");

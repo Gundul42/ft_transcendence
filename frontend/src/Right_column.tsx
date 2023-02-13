@@ -15,9 +15,9 @@ const logOut = () => {
 	.catch((err: any) => {console.log(err)})
 }
 
-export const RightColumn = ({app_state, set_page, unreadRooms} : {app_state: IAppState, set_page: any, unreadRooms: number}) => {
+export const RightColumn = ({app_state, set_page, unreadMessages} : {app_state: IAppState, set_page: any, unreadMessages: number}) => {
 	let chatClass: string;
-	if (unreadRooms > 0) {
+	if (unreadMessages > 0) {
 		chatClass = "Menu-icon-alert";
 	} else {
 		chatClass = "Menu-icon";

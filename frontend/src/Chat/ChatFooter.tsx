@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { Socket } from 'socket.io-client';
 import { IRoom, IUser } from '../Interfaces';
-import { socket as chat_socket } from './Chat';
 
-export const ChatFooter = ({data_state, room} : {data_state : IUser, room: IRoom}) => {
+export const ChatFooter = ({data_state, room, chat_socket} : {data_state : IUser, room: IRoom, chat_socket: Socket}) => {
 	const [message, setMessage] : [string, any] = useState("");
 
 	const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {

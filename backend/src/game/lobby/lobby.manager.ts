@@ -263,7 +263,7 @@ export class LobbyManager {
 	public async dispatchGlobalState() : Promise<void> {
 		if (this.getLobbies().size === 0) return ;
 		let data: any[] = Array.from(this.getLobbies(), (entry) => {
-			if (entry[1].game_instance.started) {
+			if (entry[1].game_instance.started && entry[1].player1 !== undefined && entry[1].player2 !== undefined) {
 				return ({
 					id: entry[0],
 					player1: entry[1]?.player1.data.info,

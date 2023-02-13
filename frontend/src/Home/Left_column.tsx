@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { Socket } from 'socket.io-client';
 import { UserPublic } from '../UserPublic';
 import { IAppState, IcurrentMatch, IUser, IUserRequest, ISafeAppState } from '../Interfaces';
 import { ServerEvents, ClientEvents } from '../events';
-import { socket } from '../Play/socket';
 import endpoint from '../endpoint.json'
 
 const Requests = ({requests} : {requests: (IUserRequest & {from: {display_name: string}})[] }) => {
@@ -69,21 +69,21 @@ const Friends = ({user_info, app_state, set_page} : {user_info: IUser, app_state
 }
 
 
-const Matches = ({set_page} : {set_page : any}) => {
+const Matches = ({set_page, game_socket} : {set_page : any, game_socket: Socket}) => {
 	const [active_matches, setActiveMatches] : [IcurrentMatch[], any] = useState([]);
 
 	useEffect(() => {
-		socket.on(ServerEvents.GlobalState, (data: IcurrentMatch[]) => {
+		game_socket.on(ServerEvents.GlobalState, (data: IcurrentMatch[]) => {
 			setActiveMatches(data);
 		});
 
 		return () => {
-			socket.off(ServerEvents.GlobalState);
+			game_socket.off(ServerEvents.GlobalState);
 		};
 	}, []);
 	
 	const watch = (id : string) => {
-		socket.emit(ClientEvents.Watch, {lobbyId: id});
+		game_socket.emit(ClientEvents.Watch, {lobbyId: id});
 		set_page("play");
 	};
 
@@ -103,7 +103,7 @@ const Matches = ({set_page} : {set_page : any}) => {
 	)
 }
 
-export const LeftColumn = ({app_state, set_page} : {app_state: IAppState, set_page: any}) => {
+export const LeftColumn = ({app_state, set_page, game_socket} : {app_state: IAppState, set_page: any, game_socket: Socket}) => {
 	if (app_state.data !== null && app_state.data.data !== null && app_state.data.type === "content") {
 		const converter: ISafeAppState = {
 			data: app_state.data.data,
@@ -112,7 +112,7 @@ export const LeftColumn = ({app_state, set_page} : {app_state: IAppState, set_pa
 		return (
 			<div className="Left-column">
 				<Friends user_info={app_state.data.data} app_state={converter} set_page={set_page} />
-				<Matches set_page={set_page}/>
+				<Matches set_page={set_page} game_socket={game_socket} />
 			</div>
 		)
 	} else {

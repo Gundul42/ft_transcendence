@@ -8,8 +8,8 @@ import { IUserPublicPage, IAppState, ISafeAppState, IAPICall, IUser } from '../I
 import endpoint from '../endpoint.json';
 
 export const User = (
-	{ app_state, set_page, unreadRooms, set_data} : 
-	{ app_state: ISafeAppState, set_page: any, unreadRooms: number, set_data: any}
+	{ app_state, set_page, unreadMessages, set_data} : 
+	{ app_state: ISafeAppState, set_page: any, unreadMessages: number, set_data: any}
 	) => {
 	const [qr, setQr] : [string, any] = useState("")
 
@@ -124,7 +124,7 @@ export const User = (
 			<PersonalInformation app_state={app_state} uploadAvatar={uploadAvatar} setTwoFA={setTwoFA} />
 			<Header set_page={set_page} />
 			<Dashboard user_info={user_info} />
-			<RightColumn app_state={converter} set_page={set_page} unreadRooms={unreadRooms} />
+			<RightColumn app_state={converter} set_page={set_page} unreadMessages={unreadMessages} />
 		</div>
 	)
 }
