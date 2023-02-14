@@ -19,7 +19,8 @@ export const ChatFooter = ({data_state, room, chat_socket} : {data_state : IUser
 				window.location.reload();
 			}
 			else if (room !== undefined) {
-				chat_socket.emit("message", { text: message, room: room.name }, (reply : string) => {
+				chat_socket.emit("message", { text: message, room: room.name }, (reply : string | null) => {
+					if (reply === null) return;
 					console.log("callback ", reply);
 					alert(reply);
 				});

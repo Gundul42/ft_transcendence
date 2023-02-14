@@ -25,28 +25,26 @@ export const ChatBar = (
 			<SearchBar set_page={set_page} app_state={app_state} setCurrentRoom={setCurrentRoom} chat_socket={chat_socket} />
 			<div>
 				<div className='Text-field'>Users and Rooms</div>
-				<table className="clickable">
-					<tbody>
-						{ room_arr.map((room) => {
-							let className: string;
-							if (messages.get(room.name) !== undefined && (messages.get(room.name) as IMessage[]).length > (Number(window.localStorage.getItem(room.name)))) {
-								className = "unread";
-							} else {
-								className = "read";
-							}
-							return (
-								<tr key={room.id} className={className} onClick={()=>{changeCurrentRoom(room, className)}}>
-									{ room.accessibility !== 3 &&
-										<td>{room.name}</td> }
-									{ room.accessibility === 3 &&
-										<td>{room.participants.find((user) => user.id !== app_state.data.id)?.display_name}</td> }
-									<td>{room_access[room.accessibility]}</td>
-									<td><button onClick={()=> {setIsInfoView(true)}}>&#x2139;</button></td>
-								</tr>
-							)
-						})}
-					</tbody>
-				</table>
+				<table className="clickable"><tbody>
+					{ room_arr.map((room) => {
+						let className: string;
+						if (messages.get(room.name) !== undefined && (messages.get(room.name) as IMessage[]).length > (Number(window.localStorage.getItem(room.name)))) {
+							className = "unread";
+						} else {
+							className = "read";
+						}
+						return (
+							<tr key={room.id} className={className} onClick={()=>{changeCurrentRoom(room, className)}}>
+								{ room.accessibility !== 3 &&
+									<td>{room.name}</td> }
+								{ room.accessibility === 3 &&
+									<td>{room.participants.find((user) => user.id !== app_state.data.id)?.display_name}</td> }
+								<td>{room_access[room.accessibility]}</td>
+								<td><button onClick={()=> {setIsInfoView(true)}}>&#x2139;</button></td>
+							</tr>
+						)
+					})}
+				</tbody></table>
 			</div>
 			<div className='Text-field'>Create Room</div>
 			<RoomMaker />

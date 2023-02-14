@@ -36,6 +36,8 @@
 	flex-direction: column;
 	border: 1px solid white;
 	border-radius: 10px;
+	max-height: 80%;
+	overflow: scroll;
 }
 
 .Info-room>* {
@@ -67,10 +69,8 @@
 	width: 30%;
 	border-radius: 10px;
 	display: flex;
-	flex-wrap: wrap;
 	flex-direction: column;
 	justify-content: left;
-	align-items: normal;
 	gap: 5px;
 	overflow-x: hidden;
 	overflow-y: scroll;
@@ -135,6 +135,9 @@
 	border: 1px solid #282c34;
 	width: 100%;
 	border-collapse: "collapse";
+	align-self: center;
+	max-height: 20vh;
+	overflow-y: scroll;
 }
 
 .Searchbar-content tr:hover {
@@ -146,6 +149,7 @@
 	display: flex;
 	gap: 10px;
 	width: 100%;
+	align-self: flex-end;
 }
 
 .Room-create>input {

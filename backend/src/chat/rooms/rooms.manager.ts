@@ -444,8 +444,7 @@ export class RoomsManager {
 		});
 		if (penalty === null)
 		  return;
-		setTimeout(async (penalty: Penalty) =>
-		{
+		setTimeout(async (penalty: Penalty) => {
 			await this.prisma.penalty.delete({
 				where: {
 					id: penalty.id
@@ -453,7 +452,7 @@ export class RoomsManager {
 			})
 			.catch((err: any) => {console.log(err)})
 			console.log("Penalty has been lifted!");
-		}, time * 3600000, penalty);
+		}, time * 60000, penalty);
 		return (penalty);
 	}
 	

@@ -98,7 +98,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("message")
-	async handleMsg(client: AuthenticatedSocketChat, data: {text: string, room: string}) : Promise<string> {
+	async handleMsg(client: AuthenticatedSocketChat, data: {text: string, room: string}) : Promise<string | null> {
 		console.log("in handling");
 		console.log(client.data, data)
 		if (data.room === undefined) {
@@ -113,7 +113,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		console.log(data.text, " to ", toRoom?.name);
 		const msg = await this.storage.saveMessage(data.text, client.data, toRoom);
 		this.rooms.server.emit("messageResponse", this.storage.toIMessage(msg));
-		return ("Message sent");
+		return null;
 	}
 
 	@SubscribeMessage("dm")
