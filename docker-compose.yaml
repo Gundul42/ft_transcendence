@@ -7,14 +7,11 @@ services:
       - backend
     image: "nginx:latest"
     ports:
-      - "443:443"
       - "80:80"
     networks:
       - app
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./frontend/content:/var/www/html/content:ro
 
   frontend:
     restart: always
@@ -24,8 +21,6 @@ services:
     image: "frontend:latest"
     networks:
       - app
-    volumes:
-      - ./frontend/src:/var/www/html/frontend/src
 
   backend:
     restart: always
@@ -55,7 +50,6 @@ services:
   pgsql:
     restart: always
     image: postgres:latest
-#    build: ./postgres
     ports:
       - "5432:5432"
     networks:

@@ -40,6 +40,7 @@ export class LobbyManager {
 		this.lobbies.set(new_lobby.id, new_lobby);
 		client1.data.role = "player1";
 		new_lobby.addClient(client1);
+		console.log("emitting game request");
 		this.server.to(client2.id).emit(ServerEvents.ForwardInvitation, { player1: client1.data.info, lobbyId: new_lobby.id });
 		return (new_lobby);
 	}

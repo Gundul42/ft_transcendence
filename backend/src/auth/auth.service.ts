@@ -179,7 +179,7 @@ export class AuthService {
 	}
 
 	async confirmSignup(req: Request) : Promise<boolean> {
-		const url_request: URL = new URL("https://localhost" + req.url);
+		const url_request: URL = new URL("http://localhost" + req.url);
 		if (!req.cookies['ft_transcendence_sessionId']) {
 			throw new UnauthorizedException();
 		}

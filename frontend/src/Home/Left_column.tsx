@@ -31,7 +31,7 @@ const Requests = ({requests} : {requests: (IUserRequest & {from: {display_name: 
 	return(
 		<div className="Requests">
 			<h2>Requests</h2>
-			<table className="clickable">
+			<table className="clickable"><tbody>
 			{ requests.map((req: IUserRequest & {from: {display_name: string}}) => (
 					<tr className="record" key={req.id}>
 						<td className="record-name">{req.from.display_name}</td>
@@ -42,7 +42,7 @@ const Requests = ({requests} : {requests: (IUserRequest & {from: {display_name: 
 					</tr>
 				))
 			}
-			</table>
+			</tbody></table>
 		</div>
 	)
 }

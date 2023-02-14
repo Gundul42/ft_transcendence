@@ -103,7 +103,7 @@ const App = () => {
 					setChatSocket((prev_socket: Socket | null) => {
 						if (prev_socket === null) {
 							return (
-								io("https://localhost/chat", {
+								io("http://localhost/chat", {
 									'transports': ['polling', 'websocket'],
 									extraHeaders: {
 										'Authorization': "Bearer " + localStorage.getItem("csrf_token") as string
@@ -117,7 +117,7 @@ const App = () => {
 					setGameSocket((prev_socket: Socket | null) => {
 						if (prev_socket === null) {
 							return (
-								io("https://localhost/game", {
+								io("http://localhost/game", {
 									'transports': ['polling', 'websocket'],
 									extraHeaders: {
 										'Authorization': "Bearer " + localStorage.getItem("csrf_token") as string
@@ -144,6 +144,7 @@ const App = () => {
 		if (gameSocket === null) return ;
 		const game_socket: Socket = gameSocket as Socket;
 		game_socket.on(ServerEvents.ForwardInvitation, (data: IChallengeInvite) => {
+			console.log("getting invite");
 			if (invites.length === 0) {
 				setInvites([data]);
 			} else {
@@ -158,7 +159,7 @@ const App = () => {
 			game_socket.off(ServerEvents.ForwardInvitation);
 			game_socket.off(ServerEvents.AbortInvite);
 		}
-	}, [invites, gameSocket]);
+	}, [gameSocket]);
 
 	useEffect(() => {
 		window.addEventListener('popstate', goBack);

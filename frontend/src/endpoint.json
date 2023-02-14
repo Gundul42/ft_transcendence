@@ -1,38 +1,38 @@
 {
 	"auth": {
-		"login": "https://localhost/api/auth/login",
-		"signup": "https://localhost/api/auth/signup",
-		"confirm": "https://localhost/api/auth/confirm",
-		"logout": "https://localhost/api/auth/logout",
-		"twoFA": "https://localhost/api/auth/twoFA",
-		"pass2FA": "https://localhost/api/auth/login"
+		"login": "http://localhost/api/auth/login",
+		"signup": "http://localhost/api/auth/signup",
+		"confirm": "http://localhost/api/auth/confirm",
+		"logout": "http://localhost/api/auth/logout",
+		"twoFA": "http://localhost/api/auth/twoFA",
+		"pass2FA": "http://localhost/api/auth/login"
 	},
 	"content": {
-		"img": "https://localhost/api/content/img",
-		"display_name": "https://localhost/api/content/display_name",
-		"upload": "https://localhost/api/content/upload"
+		"img": "http://localhost/api/content/img",
+		"display_name": "http://localhost/api/content/display_name",
+		"upload": "http://localhost/api/content/upload"
 	},
 	"users": {
-		"userinfo": "https://localhost/api/users/userinfo",
-		"add-as-friend": "https://localhost/api/users/add-as-friend",
-		"respond": "https://localhost/api/users/respond",
-		"remove-friend": "https://localhost/api/users/remove-friend",
-		"search-all": "https://localhost/api/users/search-all",
-		"block": "https://localhost/api/users/block",
-		"unblock": "https://localhost/api/users/unblock"
+		"userinfo": "http://localhost/api/users/userinfo",
+		"add-as-friend": "http://localhost/api/users/add-as-friend",
+		"respond": "http://localhost/api/users/respond",
+		"remove-friend": "http://localhost/api/users/remove-friend",
+		"search-all": "http://localhost/api/users/search-all",
+		"block": "http://localhost/api/users/block",
+		"unblock": "http://localhost/api/users/unblock"
 	},
 	"achievement" : {
-		"aknowledge": "https://localhost/api/achievement/aknowledge"
+		"aknowledge": "http://localhost/api/achievement/aknowledge"
 	},
 	"chat": {
-		"retrieve": "https://localhost/api/chat/retrieve",
-		"password-change": "https://localhost/api/chat/password-change",
-		"password-removal": "https://localhost/api/chat/password-remove",
-		"admin-promotion": "https://localhost/api/chat/admin-promotion",
-		"user-kick": "https://localhost/api/chat/user-kick",
-		"user-ban": "https://localhost/api/chat/user-ban",
-		"user-mute": "https://localhost/api/chat/user-mute",
-		"create-room": "https://localhost/api/chat/create-room",
-		"get-accessible-rooms": "https://localhost/api/chat/get-accessible-rooms"
+		"retrieve": "http://localhost/api/chat/retrieve",
+		"password-change": "http://localhost/api/chat/password-change",
+		"password-removal": "http://localhost/api/chat/password-remove",
+		"admin-promotion": "http://localhost/api/chat/admin-promotion",
+		"user-kick": "http://localhost/api/chat/user-kick",
+		"user-ban": "http://localhost/api/chat/user-ban",
+		"user-mute": "http://localhost/api/chat/user-mute",
+		"create-room": "http://localhost/api/chat/create-room",
+		"get-accessible-rooms": "http://localhost/api/chat/get-accessible-rooms"
 	}
 }

@@ -15,7 +15,7 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 			if (response) {
 				setIdChallenged(player2_id);
 			} else {
-				alert("The other user is already ponging :(")
+				alert("The other user cannot pong with you at the moment :(")
 			}
 		})
 	};
@@ -153,9 +153,9 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 		<div className="Info-room">
 			{ room.administrators.filter((admin) => admin.id === app_state.data.id).length > 0 &&
 				<AddUser app_state={app_state} room={room} chat_socket={chat_socket} />}
-			<table>
+			<div>
 			<div className="Text-field">Participants</div>
-				<tbody>
+			<table><tbody>
 				{room.participants.map((participant, id) => {
 					return (
 						<tr key={id}>
@@ -180,8 +180,8 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 						</tr>
 					)
 				})}
-				</tbody>
-			</table>
+				</tbody></table>
+				</div>
 			<div>
 			<button onClick={()=> {setIsInfoView(false)}}>Close</button>
 			{ room.accessibility !== IRoomAccess.DirectMessage &&

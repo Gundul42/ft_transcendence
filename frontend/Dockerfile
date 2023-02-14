@@ -14,7 +14,11 @@ RUN mkdir -p /var/www/html\
 WORKDIR /var/www/html/frontend
 
 COPY ./resources/package.json .
+COPY ./src /var/www/html/frontend/src
 
-RUN npm install
+RUN npm install -g npm@latest\
+	&& npm install\
+	&& npm install --global serve\
+	&& npm --prefix /var/www/html/frontend run build
 
-CMD [ "npm", "--prefix", "/var/www/html/frontend", "start" ]
+CMD [ "serve", "-s", "build" ]
