@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Server, Socket } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { GameInstance } from '../GameInstance';
-import { ClientEvents, ServerEvents } from '../events';
+import { ServerEvents } from '../events';
 import { LobbyManager } from './lobby.manager';
 
 export class Lobby {
@@ -12,7 +12,7 @@ export class Lobby {
 	public player1: AuthenticatedSocket;
 	public player2: AuthenticatedSocket;
 	public readonly spectators: Map<Socket['id'], AuthenticatedSocket> = new Map<Socket['id'], AuthenticatedSocket>();
-	public readonly game_instance: GameInstance = new GameInstance(this, 2/*we can add difficulty logic based on ladder level*/);
+	public readonly game_instance: GameInstance = new GameInstance(this, 2);
 
 	constructor(
 		private readonly server: Server,

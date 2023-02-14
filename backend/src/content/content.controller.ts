@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards, Res, Req, Param, StreamableFile, UseInterceptors, UploadedFile, ParseFilePipeBuilder, Body } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Res, Req, Param, StreamableFile, UseInterceptors, UploadedFile, ParseFilePipeBuilder, Body, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Request, Response } from 'express';
 import { createReadStream } from 'fs';
@@ -8,13 +8,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { ContentService } from './content.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('content')
 export class ContentController {
 	constructor(
-		private contentService: ContentService,
-		private prisma: PrismaService) {}
+		private contentService: ContentService) {}
 
 	@Get('img/:dir/:picture')
 	@UseGuards(AuthGuard)
@@ -31,8 +29,7 @@ export class ContentController {
 	@UseGuards(AuthGuard, JwtAuthGuard)
 	async setDisplayName(@Req() req: Request, @Body('uname') uname: string): Promise<void> {
 	  if (!uname || uname.length === 0) {
-		console.log("You need to select a non empty username");
-		return ;
+		throw new BadRequestException("Username must be non-empty");
 	  }
 	  await this.contentService.updateDisplayName(req.cookies['ft_transcendence_sessionId'], uname);
 	}

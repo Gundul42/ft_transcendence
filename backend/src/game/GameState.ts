@@ -45,7 +45,6 @@ export class GameState {
 	public calcRandomDirection(round: number) : Coordinate {
 		let x: number = (round % 2 === 1) ? 1 : -1;
 		let y: number = (Math.random() * 2) - 1;
-		//let magnitude: number = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
 		return new Coordinate(x, y);
 	}
 

@@ -71,7 +71,15 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 			headers: {
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
-		}).then(async response => alert(await response.text()))
+		})
+		.then(async (response) => {
+			if (!response.ok) {
+				throw new Error((await response.json()).message)
+			} else {
+				alert(await response.text())
+			}
+		})
+		.catch((err: any) => {alert(err)})
 	};
 	const banUser = (user_id: number) => {
 		const time = prompt("How long should this penalty last? (minutes)")
@@ -87,7 +95,15 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 			headers: {
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
-		}).then(async response => alert(await response.text()))
+		})
+		.then(async (response) => {
+			if (!response.ok) {
+				throw new Error((await response.json()).message)
+			} else {
+				alert(await response.text())
+			}
+		})
+		.catch((err: any) => {alert(err)})
 	};
 	const muteUser = (user_id: number) => {
 		const time = prompt("How long should this penalty last? (minutes)")
@@ -103,7 +119,15 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 			headers: {
 				'content-type': 'application/x-www-form-urlencoded',
 				'Authorization': 'Bearer ' + localStorage.getItem("csrf_token") as string }
-		}).then(async response => alert(await response.text()))
+		})
+		.then(async (response) => {
+			if (!response.ok) {
+				throw new Error((await response.json()).message)
+			} else {
+				alert(await response.text())
+			}
+		})
+		.catch((err: any) => {alert(err)})
 	};
 
 	const leaveRoom = () => {

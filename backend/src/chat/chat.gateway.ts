@@ -26,39 +26,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		storage.prisma = this.prisma;
 	}
 
-	afterInit(server: Server)
-	{
+	afterInit(server: Server) {
 		this.rooms.server = server;
-		/*
-		server.use(async (socket: Socket, next) => {
-			const req = socket.request.headers.cookie;
-			console.log('Req: ', req);
-			// const query = socket.handshake.query;
-			// console.log("Query: ", query);
-			if (await this.isValid(req)) {
-				console.log("Auth successful");
-				
-				next();
-				return;
-			}
-			console.log("Auth failed");
-			return next(new Error("401"));
-		});
-		*/
 	}
 
-	async sendLog(client: Socket, callback: (val: string) => void)
-	{
-		const session = await this.findUser(client);
-		const backlog = await this.storage.loadMessages(session?.user);
-		console.log("about to emit");
-		this.rooms.server.emit("connection",
-			backlog
-		);
-	}
-
-	async handleConnection(client: Socket, ...args: any[]) : Promise<void>
-	{
+	async handleConnection(client: Socket, ...args: any[]) : Promise<void> {
 		console.log("connection is being handled")
 		if (!client.handshake.headers || !client.handshake.headers.cookie) {
 			client.disconnect(true);
@@ -92,132 +64,56 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				client.join(value.name)
 			})
 		}
-		console.log(session_user.user.display_name, " just connected");
+		console.log(session_user.user.display_name, " connected in namespace 'chat'");
 	}
 
-	handleDisconnect(client: AuthenticatedSocketChat)
-	{
-		console.log(client.data.display_name, " is leaving")
-		this.leaveAllRooms(client);
+	handleDisconnect(client: AuthenticatedSocketChat) {
+		console.log(client.data.display_name, " left namespace 'chat'");
 	}
 
-	async leaveAllRooms(client: Socket)
-	{
-
-	}
-
-	async findUser(client: Socket) : Promise<(Session & { user: AppUser | null}) | null>
-	{
+	async findUser(client: Socket) : Promise<(Session & { user: AppUser | null}) | null> {
 		return await this.prisma.session.findUnique({
-			where: {
-			  id: client.request.headers.cookie.slice('ft_transcendence_sessionId'.length + 1),
-			},
+			where: { id: client.request.headers.cookie.slice('ft_transcendence_sessionId'.length + 1) },
 			include: { user: true }
-			})
-			.catch((err: any) => {
-			  console.log(err);
-			  return null;
-			});
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		});
 	}
 
 	@SubscribeMessage("join")
-	async handleJoinEvent(client: AuthenticatedSocketChat, data: {text: string[]}, callback: (val: string) => void)
-	{
+	async handleJoinEvent(client: AuthenticatedSocketChat, data: {text: string[]}, callback: (val: string) => void) : Promise<void> {
 		console.log(data.text);
-		if (await this.rooms.checkRoomStatus(data.text, client) == false)
-		{
+		if (await this.rooms.checkRoomStatus(data.text, client) == false) {
 			console.log("not allowed");
 			if (callback)
 				callback("You can't join this room; provide pass if required")
 			return ;
 		}
-		
 		console.log("joining room", data.text[0]);
-		// const res = await this.rooms.makeRoom(client, client.data, data.text[0]);
-		// if (res != null)
-		// 	console.log("room creation succesful");
-		// client.join(room);
 		if (callback)
 			callback(`joined: ${data.text[0]}`);
 		this.rooms.server.emit("newRecipientResponse", data.text[0]);
 	}
 
-	async handleLeaveEvent(client: Socket, room: string, callback)
-	{
-		console.log("left the room");
-		client.leave(room);
-		callback(`left: ${room}`);
-	}
-
-	async isValid(query : string | undefined): Promise<boolean>
-	{
-		if (query == undefined)
-			return false;
-		console.log("Cookie: ", query.slice('ft_transcendence_sessionId'.length + 1));
-		if (!query.startsWith('ft_transcendence_sessionId')) {
-			return false;
-		  }
-		  return await this.prisma.session.findUnique({
-			where: {
-			  id: query.slice('ft_transcendence_sessionId'.length + 1),
-			},
-			include: { user: true }
-		  })
-		  .then(
-			(value: Session & { user: AppUser }) => {
-			  if (value == null || value.user == null || value.user.id == null) {
-				console.log("Session does not exist");
-				return false;
-			  }
-			  else {
-				return true;
-			  }
-			},
-			(err: any) => {
-			  console.log(err);
-			  return false;
-			}
-		  )
-	}
-
 	@SubscribeMessage("message")
-	async handleMsg(client: AuthenticatedSocketChat, data: {text: string, room: string}, callback: (val: string) => void)
-	{
+	async handleMsg(client: AuthenticatedSocketChat, data: {text: string, room: string}) : Promise<string> {
 		console.log("in handling");
 		console.log(client.data, data)
-		if (data.room === undefined)
-		{
-			console.log("no roomless msg allowed");
-			if (callback)
-				callback("Join a room first!");
-			return ;
+		if (data.room === undefined) {
+			return ("Join a room first!");
 		}
-		//const session: Session & { user: AppUser } = await this.findUser(client);
 		const toRoom = await this.rooms.findRoom(client.data, data.room)
-		if (toRoom === null)
-		{
-			if (callback)
-				callback("You don't belong in the specified room");
-			return ;
-		}
-		if (this.rooms.isMuted(toRoom, client))
+		if (toRoom === null) {
+			return ("You don't belong in the specified room");
+		} else if (this.rooms.isMuted(toRoom, client)) {
 			return ("You're muted!");
-		if (callback)
-			callback("Message sent");
-		else
-			console.log("no callback detected");
-		// if (this.storage.)
-		// console.log(client);
+		}
 		console.log(data.text, " to ", toRoom?.name);
 		const msg = await this.storage.saveMessage(data.text, client.data, toRoom);
 		this.rooms.server.emit("messageResponse", this.storage.toIMessage(msg));
-		// this.server.emit("messageResponse", 
-		// 	{
-		// 		text: message, 
-		// 		name: "Server", 
-		// 		id: 124234,
-		// 		socketID: 425669384756client
-		// 	});
+		return ("Message sent");
 	}
 
 	@SubscribeMessage("dm")
@@ -285,13 +181,4 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.rooms.server.to(room.name).emit("roomUpdate", { room: room });
 		return true;
 	}
-
-	@SubscribeMessage("ping")
-	pong(@MessageBody() message : string) : void
-	{
-		console.log("pong ", message);
-		this.rooms.server.emit("pong");
-	}
-	// Add methods for handling events here
 }
-

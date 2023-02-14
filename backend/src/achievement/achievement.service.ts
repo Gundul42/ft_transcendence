@@ -51,7 +51,7 @@ export class AchievementService {
 			include: { user: true }
 		})
 		.catch((err: any) => {
-			console.log("ACHIEVEMENT AKNOWLEDGEMENT ERROR: ", err);
+			console.log(err);
 			return null;
 		})
 		if (achievement === null || achievement.user.id !== user_id) return false;
@@ -63,7 +63,7 @@ export class AchievementService {
 		})
 		.then(() => true)
 		.catch((err: any) => {
-			console.log("ACHIEVEMENT AKNOWLEDGEMENT ERROR: ", err);
+			console.log(err);
 			return false;
 		})
 	}

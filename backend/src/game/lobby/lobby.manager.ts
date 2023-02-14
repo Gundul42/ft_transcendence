@@ -1,5 +1,5 @@
 import { Lobby } from './lobby';
-import { Server, Namespace } from 'socket.io';
+import { Server } from 'socket.io';
 import { AuthenticatedSocket } from '../AuthenticatedSocket';
 import { ServerEvents } from '../events';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -59,13 +59,12 @@ export class LobbyManager {
 					id: lobbyId
 				}
 			})
-			.catch((err: any) => {console.log(err)})
-			this.updateUserStatus(target_lobby, 2);
+			.then(() => {this.updateUserStatus(target_lobby, 2)})
+			.catch((err: any) => {console.log(err)});
 		}
 	}
 
-	public abortInvite(clientId: number) {
-		console.log("recalling invite")
+	public abortInvite(clientId: number) : void {
 		const clients: AuthenticatedSocket[] = Array.from((this.server.sockets as any), socket => socket[1]) as AuthenticatedSocket[];
 		if (clients.filter(client => client.data.userid === clientId && client.data.lobby === null).length === 0) {
 			throw new Error("Other client is unavailable");
@@ -99,8 +98,8 @@ export class LobbyManager {
 					id: lobby_id
 				}
 			})
+			.then(() => {this.updateUserStatus(upsertedLobby, 2)})
 			.catch((err: any) => {console.log(err)})
-			this.updateUserStatus(upsertedLobby, 2);
 		}
 		return upsertedLobby;
 	}
@@ -154,7 +153,7 @@ export class LobbyManager {
 				this.lobbies.get(lobby_id)?.spectators.forEach((value: AuthenticatedSocket, key: string, map: Map<string, AuthenticatedSocket>) => {
 					this.achievementService.grantAchievement(value.data.userid, achievements.popcorn);
 				})
-				this.updateUserStatus(this.lobbies.get(lobby_id), 1);
+				await this.updateUserStatus(this.lobbies.get(lobby_id), 1);
 				await this.updateStats(this.lobbies.get(lobby_id));
 				this.updateLadder();
 				this.lobbies.get(lobby_id).expelAll();
@@ -168,12 +167,12 @@ export class LobbyManager {
 		return this.lobbies;
 	}
 
-	private updateUserStatus(lobby: Lobby, status: number) : void {
-		this.prisma.appUser.update({
+	private async updateUserStatus(lobby: Lobby, status: number) : Promise<void> {
+		await this.prisma.appUser.update({
 			where: { id: lobby.player1.data.userid },
 			data: { status: status }
 		})
-		this.prisma.appUser.update({
+		await this.prisma.appUser.update({
 			where: { id: lobby.player2.data.userid },
 			data: { status: status }
 		})

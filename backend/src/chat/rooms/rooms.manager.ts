@@ -1,7 +1,7 @@
 // import { Rooms } from './rooms';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Room, Session, AppUser, Penalty } from '@prisma/client';
+import { Room, AppUser, Penalty } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { IRoom, IRoomAccess, IUserPublic, IPenaltyType } from '../../Interfaces';
@@ -11,20 +11,16 @@ export class RoomsManager {
 	public server: Server;
 	public counter = 0;
 
-	constructor(public prisma: PrismaService)
-	{
-	}
+	constructor(public prisma: PrismaService) {}
 
 	async checkRoomStatus(room: string[], client: AuthenticatedSocketChat) : Promise<boolean>
 	{
-		if (room === undefined)
+		if (room === undefined || room.length === 0)
 			return false;
 		const exists = await this.prisma.room.findFirst({
 			where: { name: room[0] },
-			include: {
-				penalties: true
-			}
-			});
+			include: { penalties: true }
+		});
 		if (exists === null) {
 			await this.makeRoom(client, room[0])
 			return true;
@@ -59,8 +55,7 @@ export class RoomsManager {
 		return (false);
 	}
 
-	bannedFromRoom(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean
-	{
+	bannedFromRoom(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean {
 		if (room.penalties.map((penalty) => {
 			if (penalty.userid === user.data.id && penalty.type === IPenaltyType.Ban)
 				return (true);
@@ -70,24 +65,21 @@ export class RoomsManager {
 		return (false);
 	}
 
-	async findRoom(user: IUserPublic, name: string) : Promise<Room & { penalties: Penalty[];} | null>
-	{
-		return await this.prisma.room.findFirst(
-			{
-				where:
-				{
-					participants:{
-						some: { id: user.id }
-					},
-					name: name
-					// need to check if the user belongs or not
+	async findRoom(user: IUserPublic, name: string) : Promise<Room & { penalties: Penalty[];} | null> {
+		return await this.prisma.room.findFirst({
+			where: {
+				participants:{
+					some: { id: user.id }
 				},
-				include:
-				{
-					penalties: true
-				}
-			}
-		)
+				name: name
+				// need to check if the user belongs or not
+			},
+			include: { penalties: true }
+		})
+		.catch((err: any) => {
+			console.log(err);
+			return null;
+		})
 	}
 
 	async findUserRooms(userid: number) : Promise<IRoom[]> {
@@ -101,7 +93,7 @@ export class RoomsManager {
 				}
 			}
 		})
-		.then((user) => user.rooms)
+		.then((user: AppUser & { rooms: Room[] }) => user.rooms)
 		.catch((err: any) => {
 			console.log(err);
 			return null;
@@ -190,32 +182,30 @@ export class RoomsManager {
 		})
 	}
 
-	async makeRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
-	{
+	async makeRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null> {
 		const result: Room = await this.prisma.room.create({
-		  data: {
-			participants: {
-				connect: { id: client.data.id }
-			},
-			administrators: {
-				connect: { id: client.data.id }
-			},
-			owner: {
-				connect: { id: client.data.id }
-			},
-			name: name,
-			accessibility: IRoomAccess.Public
-		  }
+			data: {
+				participants: {
+					connect: { id: client.data.id }
+				},
+				administrators: {
+					connect: { id: client.data.id }
+				},
+				owner: {
+					connect: { id: client.data.id }
+				},
+				name: name,
+				accessibility: IRoomAccess.Public
+			}
 		})
 		.catch((err: any) => {
 		  console.log(err);
 		  return null;
 		});
-		if (result === null)
-			return (null)
-		client.join(name);
+		if (result !== null) {
+			client.join(name);
+		}
 		return result;
-		
 	}
 
 	async joinRoom(client: AuthenticatedSocketChat, name: string) : Promise<Room | null>
@@ -248,11 +238,16 @@ export class RoomsManager {
 	}
 
 	public getSocketFromNamespace(userid: number) : AuthenticatedSocketChat {
-		const clients: AuthenticatedSocketChat[] = Array.from((this.server.sockets as any), socket => socket[1]) as AuthenticatedSocketChat[];
-		if (clients.filter(client => client.data.id === userid).length === 0) {
+		try {
+			const clients: AuthenticatedSocketChat[] = Array.from((this.server.sockets as any), socket => socket[1]) as AuthenticatedSocketChat[];
+			if (clients.filter(client => client.data.id === userid).length === 0) {
+				return null;
+			} else {
+				return clients.filter(client => client.data.id === userid)[0];
+			}
+		} catch (err: any) {
+			console.log(err);
 			return null;
-		} else {
-			return clients.filter(client => client.data.id === userid)[0];
 		}
 	}
 
@@ -354,8 +349,7 @@ export class RoomsManager {
 		}
 	}
 
-	async changePassword(room: IRoom, password: string)
-	{
+	async changePassword(room: IRoom, password: string) : Promise<void> {
 		await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
@@ -363,15 +357,11 @@ export class RoomsManager {
 				accessibility: IRoomAccess.PassProtected
 			}
 		})
-		.catch((err: any) => {
-			console.log(err);
-			return null;
-		});
-		console.log("Password changed!")
+		.then(() => {console.log("Password changed!")})
+		.catch((err: any) => {console.log(err)})
 	}
 
-	async removePassword(room: IRoom)
-	{
+	async removePassword(room: IRoom) : Promise<void> {
 		await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
@@ -379,15 +369,11 @@ export class RoomsManager {
 				accessibility: IRoomAccess.Public
 			}
 		})
-		.catch((err: any) => {
-			console.log(err);
-			return null;
-		});
-		console.log("Password removed!")
+		.then(() => {console.log("Password removed!")})
+		.catch((err: any) => {console.log(err)});
 	}
 
-	async promoteToAdmin(room: IRoom, user: IUserPublic)
-	{
+	async promoteToAdmin(room: IRoom, user: IUserPublic) : Promise<void> {
 		await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
@@ -396,11 +382,8 @@ export class RoomsManager {
 				},
 			}
 		})
-		.catch((err: any) => {
-			console.log(err);
-			return null;
-		});
-		console.log("User promoted to admin!")
+		.then(() => {console.log("User promoted to admin!")})
+		.catch((err: any) => {console.log(err)});
 	}
 
 	async addUserToRoom(userid: number, room_name: string) : Promise<IRoom> {
@@ -443,40 +426,39 @@ export class RoomsManager {
 		});
 	}
 
-	async makePenalty(userId: number, room: IRoom, type: IPenaltyType, time: number)
-	{
-		const penalty = await this.prisma.penalty.create({
+	async makePenalty(userId: number, room: IRoom, type: IPenaltyType, time: number) : Promise<Penalty> {
+		const penalty: Penalty = await this.prisma.penalty.create({
 			data: {
-			  user: {
-				  connect: { id: userId }
-			  },
-			  room: {
-				  connect: { id: room.id }
-			  },
-			  type: type,
+				user: {
+					connect: { id: userId }
+				},
+				room: {
+					connect: { id: room.id }
+				},
+				type: type,
 			}
-		  })
-		  .catch((err: any) => {
+			})
+			.catch((err: any) => {
 			console.log(err);
 			return null;
-		  });
+		});
 		if (penalty === null)
 		  return;
-		setTimeout(async (penalty) =>
+		setTimeout(async (penalty: Penalty) =>
 		{
 			await this.prisma.penalty.delete({
 				where: {
 					id: penalty.id
 				}
-			});
+			})
+			.catch((err: any) => {console.log(err)})
 			console.log("Penalty has been lifted!");
 		}, time * 3600000, penalty);
 		return (penalty);
 	}
 	
 	// Connects the penalty to the room, disconnects the user from it
-	async addDcPenaltyToUser(penalty: Penalty, userId: number, room: IRoom): Promise<IRoom>
-	{
+	async addDcPenaltyToUser(penalty: Penalty, userId: number, room: IRoom): Promise<IRoom> {
 		return await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
@@ -505,9 +487,8 @@ export class RoomsManager {
 		})
 	}
 
-
-	async addPenaltyToUser(penalty: Penalty, userId: number, room: IRoom)
-	{
+// Change name to addPenaltyToRoom?
+	async addPenaltyToUser(penalty: Penalty, userId: number, room: IRoom) : Promise<Room> {
 		return await this.prisma.room.update({
 			where: { name: room.name },
 			data: {
@@ -522,27 +503,24 @@ export class RoomsManager {
 		});
 	}
 
-	async kickUser(userId: number, room: IRoom)
-	{
+	async kickUser(userId: number, room: IRoom) : Promise<IRoom | null> {
 		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Kick, 1);
 		if (penalty === null)
 			return null;
-		return (await this.addDcPenaltyToUser(penalty, userId, room))
+		return (await this.addDcPenaltyToUser(penalty, userId, room));
 	}
 
-	async banUser(userId: number, room: IRoom, number: number)
-	{
+	async banUser(userId: number, room: IRoom, number: number) : Promise<IRoom | null> {
 		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Ban, number);
 		if (penalty === null)
 			return null;
-		return (await this.addDcPenaltyToUser(penalty, userId, room))
+		return (await this.addDcPenaltyToUser(penalty, userId, room));
 	}
 
-	async muteUser(userId: number, room: IRoom, number: number)
-	{
+	async muteUser(userId: number, room: IRoom, number: number) : Promise<void> {
 		const penalty: Penalty = await this.makePenalty(userId, room, IPenaltyType.Mute, number);
 		if (penalty === null)
-			return null;
+			return ;
 		if (await this.addPenaltyToUser(penalty, userId, room) !== null)
 			console.log(userId, " has been muted!");
 	}
@@ -580,8 +558,8 @@ export class RoomsManager {
 				}
 			}
 		})
+		.then(() => {client.leave(room_name)})
 		.catch((err: any) => {console.log(err)});
-		client.leave(room_name);
 	}
 
 	async removeAdmin(userid: number, room_name: string) : Promise<void> {
@@ -605,13 +583,10 @@ export class RoomsManager {
 			}
 		})
 		var newOwner: AppUser;
-		if (currentAdmins?.administrators.length === 0)
-		{
+		if (currentAdmins?.administrators.length === 0) {
 			console.log("no admins found")
 			newOwner = currentAdmins.participants[0];
-		}
-		else
-		{
+		} else {
 			newOwner = currentAdmins.administrators[0];
 		}
 		console.log(newOwner);
@@ -631,8 +606,7 @@ export class RoomsManager {
 		.catch((err: any) => {console.log(err)});
 	}
 
-	isMuted(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean
-	{
+	isMuted(room: Room & { penalties: Penalty[];}, user: AuthenticatedSocketChat): boolean {
 		if (room.penalties.map((penalty) =>
 		{
 			if (penalty.userid === user.data.id && penalty.type === IPenaltyType.Mute)

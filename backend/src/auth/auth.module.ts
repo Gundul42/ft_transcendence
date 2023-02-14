@@ -6,14 +6,13 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { AchievementService } from '../achievement/achievement.service';
-import * as info from './info.json'
 
 @Module({
   imports: [
     HttpModule,
     PassportModule,
     JwtModule.register({ 
-      secret: info.jwt_secret,
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: 600 }
     })
   ],

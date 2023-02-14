@@ -10,7 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Session, AppUser } from '@prisma/client';
 import { AuthenticatedSocket } from './AuthenticatedSocket';
 import { AchievementService } from '../achievement/achievement.service';
-import { ServerEvents, ClientEvents } from './events';
+import { ClientEvents } from './events';
 import { LobbyManager } from './lobby/lobby.manager';
 import { Lobby } from './lobby/lobby';
 import { AuthService } from '../auth/auth.service';
@@ -56,6 +56,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			client.disconnect(true);
 			return ;
 		}
+		console.log(session_user.user.display_name, " connected in namespace 'game'");
 		this.lobbyManager.initializeSocket(client as AuthenticatedSocket, session_user.user);
 		await this.prisma.appUser.update({
 			where: { id: session_user.user.id },
@@ -78,6 +79,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				status: 0
 			}
 		})
+		.catch((err: any) => {console.log(err)})
+		console.log(client.data.info.display_name, " left namespace 'game'")
 	}
 
 	@SubscribeMessage(ClientEvents.Play)
@@ -96,7 +99,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage(ClientEvents.Cancel)
 	cancelLobbyCreation(client: AuthenticatedSocket, data: { player2_id: number }) : void {
-		console.log("purging lobby");
+		console.log("Purging lobby");
 		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
 			if (client.data.lobby.isInvite && data !== undefined) {
 				this.lobbyManager.abortInvite(data.player2_id);

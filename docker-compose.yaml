@@ -40,6 +40,17 @@ services:
       - ./backend/resources/tsconfig.json:/home/app_backend/backend/tsconfig.json:ro
       - ./backend/prisma/schema.prisma:/home/app_backend/backend/prisma/schema.prisma:ro
       - ./backend/resources/content:/home/app_backend/content
+    environment:
+      - FTAPI_URL
+      - FTAPI_AUTH
+      - FTAPI_TOKEN
+      - FTAPI_USERDATA
+      - FTAPI_CLIENTID
+      - FTAPI_SECRET
+      - FTAPI_REDIRECTURI
+      - FTAPI_SCOPE
+      - DATABASE_URL
+      - JWT_SECRET
 
   pgsql:
     restart: always

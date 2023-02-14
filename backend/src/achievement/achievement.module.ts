@@ -7,7 +7,11 @@ import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [HttpModule],
-  providers: [AchievementService,AuthService, JwtService],
+  providers: [
+    AchievementService,
+    AuthService,
+    JwtService
+  ],
   controllers: [AchievementController]
 })
 export class AchievementModule {}

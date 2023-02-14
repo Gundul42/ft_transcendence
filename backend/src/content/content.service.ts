@@ -31,7 +31,7 @@ export class ContentService {
 	}
 
 	async updateAvatar(sessionid: string, new_path: string) : Promise<{new_path: string}> {
-		await this.prisma.session.update({
+		return await this.prisma.session.update({
 			where: { id: sessionid },
 			data: {
 				user: {
@@ -39,7 +39,11 @@ export class ContentService {
 				}
 			}
 		})
-		return ({new_path: new_path});
+		.then(() => ({new_path: new_path}))
+		.catch((err: any) => {
+			console.log(err);
+			return ({new_path: "icons/42wolfsburg.jpeg"});
+		})
 	}
 
 	async updateDisplayName(sessionid: string, new_name: string) : Promise<Session & { user: AppUser }> {

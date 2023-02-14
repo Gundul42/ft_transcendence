@@ -117,9 +117,8 @@ export class UsersService {
 		})
 		if (request === null) {
 			return false;
-		} else {
-			return true;
 		}
+		return true;
 	}
 
 	async registerRequest(l_id: number, r_id: number, type: "game" | "friend") : Promise<UserRequest> {

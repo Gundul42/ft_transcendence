@@ -1,7 +1,6 @@
 import { GameState } from "./GameState";
 import { Lobby } from "./lobby/lobby";
 import { ServerEvents } from "./events";
-import { PrismaService } from '../prisma/prisma.service';
 import * as constants from './constants.json';
 
 export interface ICoordinate {

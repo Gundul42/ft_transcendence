@@ -82,8 +82,7 @@ export class ChatService {
 		})
 	}
 
-	isAdmin(aRoom: IRoom, user: AppUser & { rooms: IRoom[]; }): boolean
-	{
+	isAdmin(aRoom: IRoom, user: AppUser & { rooms: IRoom[]; }) : boolean {
 		const res = aRoom.administrators.map((admin) => {
 			if (admin.id == user.id)
 				return (true);
@@ -184,8 +183,7 @@ export class ChatService {
 		})
 	}
 
-	validateForOperation(rooms: IRoom[], mbAdmin: AppUser & { rooms: IRoom[] }, targetUser: number, roomName: string)
-	{
+	validateForOperation(rooms: IRoom[], mbAdmin: AppUser & { rooms: IRoom[] }, targetUser: number, roomName: string) : IRoom | null {
 		const results: (IRoom | null)[] = rooms.map((aRoom) =>
 		{
 			if (aRoom.name === roomName)

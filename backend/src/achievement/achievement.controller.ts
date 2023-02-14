@@ -1,8 +1,8 @@
-import { Controller, Post, UseGuards, Req, Param, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, UseGuards, Req, Param, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { Request} from 'express';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { AppUser, Match, Session, UserRequest, Achieve } from '@prisma/client';
+import { AppUser, Session } from '@prisma/client';
 import { AchievementService } from './achievement.service';
 
 @Controller('achievement')

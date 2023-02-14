@@ -7,8 +7,15 @@ import { AuthModule } from '../auth/auth.module';
 import { AuthService } from '../auth/auth.service';
 
 @Module({
-  imports: [AuthModule, HttpModule],
+  imports: [
+    AuthModule,
+    HttpModule
+  ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService, JwtService],
+  providers: [
+    UsersService,
+    AuthService,
+    JwtService
+  ],
 })
 export class UsersModule {}

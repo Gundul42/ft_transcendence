@@ -1,5 +1,5 @@
 import { Controller, Get, Post, UseGuards, Query, Req, Body, BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 import { ChatService } from './chat.service';
 import { Session, AppUser, Room } from '@prisma/client';
@@ -13,8 +13,7 @@ export class ChatController {
 	constructor(
 		private chatService: ChatService,
 		private prisma: PrismaService,
-		private readonly roomMg: RoomsManager)
-		{
+		private readonly roomMg: RoomsManager) {
 			roomMg.prisma = prisma;
 		}
 	
@@ -42,10 +41,12 @@ export class ChatController {
 	@UseGuards(AuthGuard)
 	async changePasswordValidation(@Body('room') room: string, @Body('password') password: string, @Req() req: Request): Promise<void> {
 		if (!password || password.length === 0) {
-		  console.log("You need to select a non empty password");
-		  return ;
+			throw new BadRequestException();
 		}
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		if (user_rooms === null) {
+			throw new InternalServerErrorException();
+		}
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
@@ -56,12 +57,15 @@ export class ChatController {
 					return (this.roomMg.changePassword(aRoom, password));
 			}
 		})
-	  }
+	}
 
 	@Post('password-remove')
 	@UseGuards(AuthGuard, JwtAuthGuard)
 	async removePasswordValidation(@Body('room') room: string, @Req() req: Request): Promise<void> {
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		if (user_rooms === null) {
+			throw new InternalServerErrorException();
+		}
 		user_rooms.user.rooms.map((aRoom) =>
 		{
 			if (aRoom.name === room)
@@ -76,22 +80,22 @@ export class ChatController {
 
 	@Post('admin-promotion')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async promoteToAdminValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<void>
-	{
+	async promoteToAdminValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<void> {
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
-		user_rooms.user.rooms.map((aRoom) =>
-		{
-			if (aRoom.name === room)
-			{
-				if (aRoom.accessibility === IRoomAccess.DirectMessage)
+		if (user_rooms === null) {
+			throw new InternalServerErrorException();
+		}
+		user_rooms.user.rooms.map((aRoom) => {
+			if (aRoom.name === room) {
+				if (aRoom.accessibility === IRoomAccess.DirectMessage) {
 					return null;
-				aRoom.participants.map(user =>
-				{
-					if (user.id == Number(userId))
-					{
+				}
+				aRoom.participants.map(user => {
+					if (user.id == Number(userId)) {
 						console.log("user match: ", user.id)
-						if (aRoom.owner.id === user_rooms.user.id)
+						if (aRoom.owner.id === user_rooms.user.id) {
 							return (this.roomMg.promoteToAdmin(aRoom, user));
+						}
 					}
 				})
 			}
@@ -100,48 +104,62 @@ export class ChatController {
 
 	@Post('user-kick')
 	@UseGuards(AuthGuard, JwtAuthGuard)
-	async userKickValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<void | string>
-	{
+	async userKickValidation(@Body('room') room: string, @Body('user') userId: string, @Req() req: Request): Promise<string> {
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		if (user_rooms === null) {
+			throw new InternalServerErrorException("Something went wrong")
+		}
 		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
-		if (valRoom === null)
-			return ("You can't perform this action");
+		if (valRoom === null) {
+			throw new BadRequestException("You cannot perform this action");
+		}
 		const newValRoom = await this.roomMg.kickUser(Number(userId), valRoom);
-		if (newValRoom === null)
-			return ("Something went wrong");
+		if (newValRoom === null) {
+			throw new InternalServerErrorException("Something went wrong")
+		}
 		this.roomMg.server.to(newValRoom.name).emit("roomUpdate", { room: newValRoom });
 		return "You kicked that user out";
 	}
 
 	@Post('user-ban')
 	@UseGuards(AuthGuard)
-	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void | string>
-	{
+	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void | string> {
 		const timeNum = Number(time);
-		if (timeNum === 0 || Number.isNaN(timeNum))
-			return ("Put proper time!");
+		if (timeNum === 0 || Number.isNaN(timeNum)) {
+			throw new BadRequestException("Put proper time!");
+		}
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		if (user_rooms === null) {
+			throw new InternalServerErrorException("Something went wrong")
+		}
 		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
-		if (valRoom === null)
-			return ("You can't perform this action");
+		if (valRoom === null) {
+			throw new BadRequestException("You cannot perform this action");
+		}
 		const newValRoom = await this.roomMg.banUser(Number(userId), valRoom, timeNum);
-		if (newValRoom === null)
-			return ("Something went wrong");
+		if (newValRoom === null) {
+			throw new InternalServerErrorException("Something went wrong")
+		}
 		this.roomMg.server.to(newValRoom.name).emit("roomUpdate", { room: newValRoom });
 		return ("You banned that user for " + timeNum + " minutes!");
 	}
 	
 	@Post('user-mute')
 	@UseGuards(AuthGuard)
-	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void | string>
+	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<string>
 	{
 		const timeNum = Number(time);
-		if (timeNum === 0 || Number.isNaN(timeNum))
-			return ("Put proper time!");
+		if (timeNum === 0 || Number.isNaN(timeNum)) {
+			throw new BadRequestException("Put proper time!");
+		}
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
+		if (user_rooms === null) {
+			throw new InternalServerErrorException("Something went wrong")
+		}
 		const valRoom : IRoom | null = this.chatService.validateForOperation(user_rooms.user.rooms, user_rooms.user, Number(userId), room);
-		if (valRoom === null)
-			return ("You can't perform this action");
+		if (valRoom === null) {
+			throw new BadRequestException("You cannot perform this action");
+		}
 		this.roomMg.muteUser(Number(userId), valRoom, timeNum);
 		return ("You muted that user for " + timeNum + " minutes!");
 	}

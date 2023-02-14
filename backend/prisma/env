@@ -1,3 +1,0 @@
-#Scheme
-#postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=SCHEMA
-DATABASE_URL=postgresql://postgres:postgres@pgsql:5432/ft_transcendence?connect_timeout=1000

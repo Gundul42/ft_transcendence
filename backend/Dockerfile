@@ -26,7 +26,6 @@ RUN npm install\
 	&& npx prisma\
 	&& npx prisma init
 
-COPY --chown=app_backend:app_backend "./prisma/env" "/home/app_backend/backend/.env"
 COPY --chown=app_backend:app_backend "./prisma/schema.prisma" "/home/app_backend/backend/prisma/"
 COPY --chown=app_backend:app_backend "./resources/init.sh" "/"
 

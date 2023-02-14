@@ -10,7 +10,10 @@ import { HttpModule } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [HttpModule, AuthModule],
+  imports: [
+    HttpModule,
+    AuthModule
+  ],
   controllers: [ChatController],
   providers: [
     ChatGateway,

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, UseGuards, Query, Req, Param, Body, BadRequestException, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import { Express, Request, Response } from 'express';
+import { Request } from 'express';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
@@ -45,11 +45,10 @@ export class UsersController {
 			throw new BadRequestException("Connection with user already existed");
 		}
 		const new_request: UserRequest = await this.userService.registerRequest(session.user.id, Number(id), "friend");
-		if (new_request !== null) {
-			return ({req_id: new_request.id});
-		} else {
+		if (new_request === null) {
 			throw new InternalServerErrorException();
 		}
+		return ({req_id: new_request.id});
 	}
 
 	@Post('respond')
