@@ -31,7 +31,6 @@ services:
     networks:
       - app
     volumes:
-      - ./backend/src:/home/app_backend/backend/src:ro
       - ./backend/resources/tsconfig.json:/home/app_backend/backend/tsconfig.json:ro
       - ./backend/prisma/schema.prisma:/home/app_backend/backend/prisma/schema.prisma:ro
       - ./backend/resources/content:/home/app_backend/content

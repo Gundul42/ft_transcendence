@@ -28,6 +28,7 @@ RUN npm install\
 
 COPY --chown=app_backend:app_backend "./prisma/schema.prisma" "/home/app_backend/backend/prisma/"
 COPY --chown=app_backend:app_backend "./resources/init.sh" "/"
+COPY --chown=app_backend:app_backend "./src" "/home/app_backend/backend/src"
 
 RUN npm install @prisma/client\
 	&& npx prisma generate

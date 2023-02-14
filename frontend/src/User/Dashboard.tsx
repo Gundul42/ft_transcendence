@@ -34,9 +34,9 @@ const Achievements = ({achievements} : {achievements: IAchieve[]}) => {
 			{achievements.length > 0 &&
 				achievements.map((achievement) => {
 					return (
-						<div key={achievement.id} style={{width: "90%", maxHeight:"80%", display: "flex", flexDirection: "column", alignItems: "center"}}>
+						<div key={achievement.id} className="Achievement-record">
 							<h3>{achievement.name}</h3>
-							<img src={endpoint.content.img + achievement.logo} alt={achievement.name} style={{maxWidth: "30%", aspectRatio: "1 / 1", borderRadius: "50%", border: "2px solid black"}} />
+							<img src={endpoint.content.img + achievement.logo} alt={achievement.name}/>
 						</div>
 					)
 				})}
@@ -66,17 +66,16 @@ const MatchHistory = ({match_history, userid} : {match_history: IMatch[], userid
 		)
 	};
 	return (
-		<div id="Match-history">
+		<div>
 			<h2 className="Section-title">Match History</h2>
-			{match_history.length === 0 &&
-			<p>&#129335;</p>}
-			{match_history.length > 0 &&
-				<table style={{borderCollapse: "collapse", width: "90%", overflowY: "scroll", overflowX: "hidden"}}>
-					<tbody>
+			<div className="Match-list">
+				{match_history.length === 0 &&
+					<p>&#129335;</p>}
+				{match_history.length > 0 &&
+					<table><tbody>
 						{match_list()}
-					</tbody>
-				</table>
-			}
+					</tbody></table>}
+			</div>
 		</div>
 	)
 }
