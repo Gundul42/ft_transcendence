@@ -7,10 +7,10 @@ import { WebSocketGateway,
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
-import { Session, AppUser, Room, Penalty } from '@prisma/client';
+import { Session, AppUser } from '@prisma/client';
 import { RoomsManager } from './rooms/rooms.manager';
 import { StorageManager } from './storage/storage.manager';
-import { IMessage, IRoom, IRoomAccess } from '../Interfaces';
+import { IRoom, IRoomAccess } from '../Interfaces';
 import { AuthenticatedSocketChat } from './AuthenticatedSocketChat';
 
 @WebSocketGateway(3030, { namespace: 'chat' , transports: ['polling', 'websocket']})
@@ -99,8 +99,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("message")
 	async handleMsg(client: AuthenticatedSocketChat, data: {text: string, room: string}) : Promise<string | null> {
-		console.log("in handling");
-		console.log(client.data, data)
 		if (data.room === undefined) {
 			return ("Join a room first!");
 		}
@@ -110,7 +108,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		} else if (this.rooms.isMuted(toRoom, client)) {
 			return ("You're muted!");
 		}
-		console.log(data.text, " to ", toRoom?.name);
 		const msg = await this.storage.saveMessage(data.text, client.data, toRoom);
 		this.rooms.server.emit("messageResponse", this.storage.toIMessage(msg));
 		return null;
@@ -151,7 +148,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("joinRoom")
 	async joinRoom(client: AuthenticatedSocketChat, data: {room_name: string, password: string}) : Promise<boolean> {
-		console.log("join triggered")
 		if (await this.rooms.checkRoomStatus([data.room_name, data.password], client) === false) {
 			return false;
 		}

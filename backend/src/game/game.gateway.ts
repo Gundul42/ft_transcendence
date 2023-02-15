@@ -109,8 +109,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage(ClientEvents.Watch)
-	joinSpectator(client: AuthenticatedSocket, data: {lobbyId: string}) : void {
-		this.lobbyManager.joinAsSpectator(client, data.lobbyId);
+	joinSpectator(client: AuthenticatedSocket, data: {lobbyId: string}) : boolean {
+		return this.lobbyManager.joinAsSpectator(client, data.lobbyId);
 	}
 
 	/*
@@ -158,7 +158,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage(ClientEvents.Leave)
 	handleLeave(client: AuthenticatedSocket) : void {
-		console.log("client is leaving match");
+		console.log(client.data.info.display_name, " is leaving match");
 		if (client.data.role === "player1" && client.data.lobby !== null && !client.data.lobby.game_instance.started) {
 			this.lobbyManager.destroyLobby(client.data.lobby.id);
 		}

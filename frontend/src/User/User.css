@@ -165,3 +165,11 @@
 	justify-content: start;
 	align-items: flex-start;
 }
+
+.Match-list tr {
+	width: 100%;
+}
+
+.Match-list td {
+	overflow-x: hidden;
+}

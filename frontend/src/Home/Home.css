@@ -40,8 +40,16 @@
 .Requests {
 	width: 90%;
 	max-height: 50%;
-	overflow-x: hidden;
+	overflow-x: auto;
 	overflow-y: scroll;
+}
+
+.Requests table {
+	width: 100%;
+}
+
+.Requests tbody {
+	width: 100%;
 }
 
 .record {
@@ -56,6 +64,7 @@
 
 .record-name {
 	width: 50%;
+	overflow-x: auto;
 }
 
 .record-buttons {

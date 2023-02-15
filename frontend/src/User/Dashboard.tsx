@@ -57,9 +57,9 @@ const MatchHistory = ({match_history, userid} : {match_history: IMatch[], userid
 				}
 				return (
 					<tr key={match.id} className={has_won}>
-						<td>{match.winner.display_name}</td>
-						<td style={{width: "45%"}}>V/S</td>
-						<td>{match.loser.display_name}</td>
+						<td style={{width: "40%"}}>{match.winner.display_name}</td>
+						<td style={{width: "20%"}}>V/S</td>
+						<td style={{width: "40%"}}>{match.loser.display_name}</td>
 					</tr>
 				)
 			})
