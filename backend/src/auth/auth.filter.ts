@@ -4,7 +4,7 @@ import { Response } from 'express';
 @Catch(UnauthorizedException)
 export class AuthFilter implements ExceptionFilter {
 	catch(exception: HttpException, host: ArgumentsHost) {
-		console.log("redirected on auth filter");
+		console.log("Redirected on signup");
 		const context = host.switchToHttp();
 		const response = context.getResponse<Response>();
 		const status = exception.getStatus();
@@ -16,7 +16,7 @@ export class AuthFilter implements ExceptionFilter {
 @Catch(ForbiddenException)
 export class TwoFAFilter implements ExceptionFilter {
 	catch(exception: HttpException, host: ArgumentsHost) {
-		console.log("redirected on 2fa filter");
+		console.log("Redirected on 2 Factor Authentication");
 		const context = host.switchToHttp();
 		const response = context.getResponse<Response>();
 		const status = exception.getStatus();

@@ -27,7 +27,7 @@ export class AuthController {
 		this.authService.deleteNullSessions();
 		var user: AppUser & { session: Session, friends: AppUser[], blocked: AppUser[], achievements: Achieve[], requests_sent: UserRequest[], requests_rec: any[] } = await this.authService.getUserSessionAchieve(req.cookies['ft_transcendence_sessionId']);
 		if (user === null) {
-			throw new InternalServerErrorException();
+			res.send({status: 500, message: "Internal Server Error Exception"});
 		}
 		const csrf_token: { access_token: string } = await this.authService.generateJwt(user.full_name, user.id);
 		const match_history: any = await this.authService.composeMatchHistory(user.id);
@@ -60,7 +60,7 @@ export class AuthController {
 	async signup(@Res({ passthrough: true }) res: Response, @RealIP() ip: string): Promise<{ type: string, data: null, link: string | null}> {
 		const new_session: Session = await this.authService.setNewSession(uuidv4(), ip, uuidv4());
 		if (new_session === null) {
-			throw new InternalServerErrorException();
+			res.send({status: 500, message: "Internal Server Error Exception"});
 		}
 		res.cookie('ft_transcendence_sessionId', new_session.id, { sameSite: 'none', secure: true, httpOnly: true});
 		return ({
@@ -75,19 +75,19 @@ export class AuthController {
 	async confirm(@Req() req: Request, @Res() res: Response, @Query('code') code: string): Promise<void> {
 		const session: Session = await this.authService.getSession(req.cookies['ft_transcendence_sessionId']);
 		if (session === null) {
-			throw new InternalServerErrorException();
+			res.send({status: 500, message: "Internal Server Error Exception"});
 		}
 		const token: Token = await this.authService.requestToken(code, session.state);
 		if (token === null) {
-			throw new ServiceUnavailableException();
+			res.send({status: 503, message: "Service Unavailable Exception"});
 		}
 		const user_data: any = await this.authService.requestData(token.access_token);
 		if (user_data === null) {
-			throw new ServiceUnavailableException();
+			res.send({status: 503, message: "Service Unavailable Exception"});
 		}
 		const user: AppUser & { session: Session, token: Token} = await this.authService.upsertUserToken(user_data, token, session);
 		if (user === null) {
-			throw new InternalServerErrorException();
+			res.send({status: 500, message: "Internal Server Error Exception"});
 		}
 		await this.authService.connectSession(session.id, user.id, user.twoFA);
 		res.redirect('/');
@@ -160,7 +160,7 @@ export class AuthController {
 		.then(() => {res.redirect("/")})
 		.catch((err: any) => {
 			console.log(err);
-			throw new BadRequestException();
+			res.send({status: 400, message: "Bad request"})
 		})
 	}
 }

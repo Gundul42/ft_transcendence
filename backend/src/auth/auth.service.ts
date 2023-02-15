@@ -152,7 +152,7 @@ export class AuthService {
 			}
 			else if (value.twoFA_locked) {
 				if ((req.query.otp !== null) && (twofactor.verifyToken(value.user.twoFA_token.id, (req.query.otp as string)) !== null)) {
-					console.log("2FA successful");
+					console.log("2 Factor Authentication successful");
 					await this.prisma.session.update({
 						where: {
 							id: req.cookies['ft_transcendence_sessionId'],
@@ -166,7 +166,7 @@ export class AuthService {
 						throw new ForbiddenException();
 					});
 				} else {
-					console.log("2 FActor Authentication is active for this account");
+					console.log("2 Factor Authentication is active for this account");
 					throw new ForbiddenException();
 				}
 			}
