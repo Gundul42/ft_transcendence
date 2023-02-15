@@ -11,7 +11,8 @@ RUN apt update\
 RUN apt install -y postgresql-client\
 	&& npm install -g npm@latest\
 	&& npm i -g @nestjs/cli\
-	&& useradd -m app_backend\
+	&& groupadd -g 4200 app_backend\
+	&& useradd app_backend -u 4200 -g 4200 -m -s /bin/bash\
 	&& nest new -p npm /home/app_backend/backend\
 	&& chown -R app_backend:app_backend /home/app_backend
 

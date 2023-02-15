@@ -172,10 +172,6 @@ export class AuthService {
 			}
 			return (true);
 		})
-		.catch((err: any) => {
-			console.log(err);
-			throw new UnauthorizedException();
-		})
 	}
 
 	async confirmSignup(req: Request) : Promise<boolean> {

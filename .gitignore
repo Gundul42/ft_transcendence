@@ -1,3 +1,4 @@
 .env
-info.json
 ./frontend/node_modules
+backend/resources/content/upload/
+backend/prisma/migrations/
