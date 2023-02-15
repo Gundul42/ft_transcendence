@@ -39,7 +39,7 @@ export const User = (
 					})
 					.then( async (res) => {
 						if (!res.ok) {
-							throw new Error("Avatar could not be changed")
+							alert("Avatar could not be changed, make sure it's less than 5MB and in correct format");
 						}
 						const res_json: any = await res.json();
 						set_data((prev_data: IAPICall) => {
