@@ -34,7 +34,7 @@ model AppUser {
 	token			Token		@relation(fields: [access_token], references: [access_token])
 	email			String
 	full_name		String
-	display_name	String?
+	display_name	String?		@unique
 	avatar			String		@default("icons/42wolfsburg.jpeg")
 	twoFA			Boolean		@default(false)
 	twoFA_token		TwoFA?

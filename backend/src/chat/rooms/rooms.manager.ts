@@ -50,8 +50,6 @@ export class RoomsManager {
 			return true;
 		}
 		console.log("Joining not permitted");
-		//  check if doesn't exist
-		//	check if pass protected, if yes, check pass
 		return (false);
 	}
 
@@ -72,7 +70,6 @@ export class RoomsManager {
 					some: { id: user.id }
 				},
 				name: name
-				// need to check if the user belongs or not
 			},
 			include: { penalties: true }
 		})
@@ -486,7 +483,6 @@ export class RoomsManager {
 		})
 	}
 
-// Change name to addPenaltyToRoom?
 	async addPenaltyToUser(penalty: Penalty, userId: number, room: IRoom) : Promise<Room> {
 		return await this.prisma.room.update({
 			where: { name: room.name },

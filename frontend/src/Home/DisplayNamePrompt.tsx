@@ -5,8 +5,7 @@ export const DisplayNamePrompt = () => {
 	const [name, setName] : [name: string, setName: any] = useState("");
 
 	const handleSubmit = (event: any) => {
-		if (name.length > 21)
-		{
+		if (name.length > 21) {
 			alert("It's a name, not a bio, choose a name shorter than 21 characters");
 		}
 		else if (name.length > 0) {
