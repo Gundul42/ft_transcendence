@@ -32,8 +32,8 @@ services:
       - app
     volumes:
       - ./backend/resources/tsconfig.json:/home/app_backend/backend/tsconfig.json:ro
-      - ./backend/resources/content:/home/app_backend/content:rw
-      - ./backend/prisma:/home/app_backend/backend/prisma:rw
+      - v_migrations:/home/app_backend/backend/prisma/migrations:rw
+      - v_upload:/home/app_backend/content/upload:rw
     environment:
       - FTAPI_URL
       - FTAPI_AUTH
@@ -64,4 +64,6 @@ networks:
   app:
 
 volumes:
+  v_migrations:
   v_pgsql:
+  v_upload:
