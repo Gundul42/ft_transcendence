@@ -9,7 +9,6 @@ export const ChatBody = ({room, messages} : {room: IRoom, messages: IMessage[]})
 		lastMessageRef.current?.scrollIntoView({behavior: 'smooth'});
 	}, [messages]);
 
-	console.log("Current msg state: ", messages)
 	return (
 		<>
 			<div className='Chat-Box' style={{backgroundColor: "black", borderRadius: "10px"}}>

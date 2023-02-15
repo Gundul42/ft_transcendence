@@ -208,7 +208,6 @@ const App = () => {
 			const blocked: IUserPublic[] = (((data as IAPICall).data as IUser).blocked as IUserPublic[]);
 			const blockedMap: Map<number, IUserPublic> = new Map(blocked.map((user) => [user.id, user]));
 			if (blockedMap.get(message.appUserId) !== undefined) return;
-			console.log("just received ", message)
 			setMessages((prev_messages: Map<string, IMessage[]>) => {
 				let safe_messages: IMessage[];
 				if (prev_messages.get(message.room) === undefined) {
@@ -216,7 +215,6 @@ const App = () => {
 				} else {
 					safe_messages = prev_messages.get(message.room) as IMessage[];
 				}
-				console.log(safe_messages)
 				return new Map(messages.set(message.room, [...safe_messages, message]));
 			});
 			setUnreadMessages((prev_messages: number) => prev_messages + 1);
