@@ -14,6 +14,11 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 		const newPassword = prompt('Please enter the new password');
 		if (newPassword === null)
 			return ;
+		else if (newPassword.length < 5)
+		{
+			alert("The password should be longer than 5 characters");
+			return ;
+		}
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("password") + "=" + encodeURIComponent(newPassword));

@@ -5,7 +5,11 @@ export const DisplayNamePrompt = () => {
 	const [name, setName] : [name: string, setName: any] = useState("");
 
 	const handleSubmit = (event: any) => {
-		if (name.length > 0) {
+		if (name.length > 21)
+		{
+			alert("It's a name, not a bio, choose a name shorter than 21 characters");
+		}
+		else if (name.length > 0) {
 			event.preventDefault();
 			fetch(endpoint.content.display_name, {
 				method: "POST",
@@ -18,6 +22,7 @@ export const DisplayNamePrompt = () => {
 			})
 			.then((res) => {
 				if (!res.ok) {
+					alert("It was not possible to set this username");
 					throw new Error("It was not possible to set the username");
 				}
 				window.location.reload();

@@ -43,6 +43,8 @@ export class ChatController {
 		if (!password || password.length === 0) {
 			throw new BadRequestException();
 		}
+		if (password.length < 5)
+			throw new BadRequestException("Password has to be at least 5 characters long");
 		const user_rooms: Session & { user: AppUser & { rooms: IRoom[] }} = await this.chatService.getRooms(req.cookies["ft_transcendence_sessionId"]);
 		if (user_rooms === null) {
 			throw new InternalServerErrorException();

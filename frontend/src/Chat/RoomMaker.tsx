@@ -9,7 +9,12 @@ export const RoomMaker = () => {
 	const room_access: string[] = ["Public", "Private", "Protected"];
 
 	const createRoom = () => {
-		if (roomName.length === 0 || (password.length < 5 && chosenAccessMode === IRoomAccess.PassProtected)) return ;
+		if (roomName.length === 0 ) return ;
+		if (password.length < 5 && chosenAccessMode === IRoomAccess.PassProtected)
+		{
+			alert("Password needs to be at least 5 characters long");
+			return ;
+		}
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("access_mode") + "=" + encodeURIComponent(chosenAccessMode));
 		form_data.push(encodeURIComponent("password") + "=" + encodeURIComponent(password));

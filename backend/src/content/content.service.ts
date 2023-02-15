@@ -92,4 +92,12 @@ export class ContentService {
 			console.log(err);
 		})
 	}
+
+	async isTaken(uname: string): Promise<boolean> {
+		if (await this.prisma.appUser.findFirst({
+			where: { display_name: uname }
+		}) === null)
+			return (false);
+		return true;
+	}
 }

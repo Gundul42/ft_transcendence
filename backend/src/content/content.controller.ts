@@ -31,6 +31,11 @@ export class ContentController {
 	  if (!uname || uname.length === 0) {
 		throw new BadRequestException("Username must be non-empty");
 	  }
+	  if (uname.length > 21)
+	  	throw new BadRequestException("Username must shorter than 21 characters");
+	  if (await this.contentService.isTaken(uname) === true) {
+		throw new BadRequestException("This usernamehas has already been taken");
+	  }
 	  await this.contentService.updateDisplayName(req.cookies['ft_transcendence_sessionId'], uname);
 	}
 
