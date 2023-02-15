@@ -330,19 +330,23 @@ export class AuthService {
 			return ([]);
 		}
 		while (i < (user.matches_won as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length && j < (user.matches_lost as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
-			if ((user.matches_won[i].started_at as Date) < (user.matches_lost[j].started_at as Date)) {
+			if ((user.matches_won[i].started_at as Date) > (user.matches_lost[j].started_at as Date)) {
+				console.log(user.matches_won[i], " happened after than ", user.matches_lost[j]);
 				res.push(user.matches_won[i]);
 				i++;
 			} else {
+				console.log(user.matches_lost[j], " happened after than ", user.matches_won[i]);
 				res.push(user.matches_lost[j]);
 				j++;
 			}
 		}
 		while (i < (user.matches_won as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			console.log("then happened ", user.matches_won[i])
 			res.push(user.matches_won[i]);
 			i++;
 		}
 		while (j < (user.matches_lost as (Match & { winner: IUserPublic, loser: IUserPublic})[]).length) {
+			console.log("then happened ", user.matches_lost[j])
 			res.push(user.matches_lost[j]);
 			j++;
 		}

@@ -40,7 +40,6 @@ export class LobbyManager {
 		this.lobbies.set(new_lobby.id, new_lobby);
 		client1.data.role = "player1";
 		new_lobby.addClient(client1);
-		console.log("emitting game request");
 		this.server.to(client2.id).emit(ServerEvents.ForwardInvitation, { player1: client1.data.info, lobbyId: new_lobby.id });
 		return (new_lobby);
 	}
@@ -105,20 +104,17 @@ export class LobbyManager {
 		return upsertedLobby;
 	}
 
-	public joinAsSpectator(client: AuthenticatedSocket, lobby_id: string) : void {
+	public joinAsSpectator(client: AuthenticatedSocket, lobby_id: string) : boolean {
 		const lobby = this.lobbies.get(lobby_id);
 
 		if (!lobby) {
-			client.emit(ServerEvents.Refuse, {
-				message: "Selected lobby is not available"
-			});
+			return false;
 		} else if (lobby.spectators.size === lobby.max_clients) {
-			client.emit(ServerEvents.Refuse, {
-				message: "Lobby is full"
-			});
+			return false;
 		} else {
 			client.data.role = "spectator";
 			lobby.addClient(client);
+			return true;
 		}
 	}
 
@@ -241,7 +237,6 @@ export class LobbyManager {
 			console.log(err);
 			return ([]);
 		});
-		console.log(all_users)
 		let ladder_level: number = 1;
 		this.achievementService.grantAchievement(all_users[0].id, achievements.top);
 		for (let i = 0; i < all_users.length; i++) {

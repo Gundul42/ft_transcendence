@@ -83,8 +83,13 @@ const Matches = ({set_page, game_socket} : {set_page : any, game_socket: Socket}
 	}, []);
 	
 	const watch = (id : string) => {
-		game_socket.emit(ClientEvents.Watch, {lobbyId: id});
-		set_page("play");
+		game_socket.emit(ClientEvents.Watch, {lobbyId: id}, (response: boolean) => {
+			if (response) {
+				set_page("play");
+			} else {
+				alert("The selected lobby is not available")
+			}
+		});
 	};
 
 	return (
@@ -93,7 +98,7 @@ const Matches = ({set_page, game_socket} : {set_page : any, game_socket: Socket}
 			<table className="clickable"><tbody>
 			{ active_matches.length > 0 && 
 					active_matches.map((active_match, i, arr) => {
-						if (active_match === null) return <></>;
+						if (active_match === null) return ;
 						return (
 							<tr key={active_match.id}>
 								<td onClick={() => {watch(active_match.id)}} key={active_match.id}>{active_match.player1.display_name} V/S {active_match.player2.display_name}</td>

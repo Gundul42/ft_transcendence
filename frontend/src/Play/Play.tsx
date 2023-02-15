@@ -12,7 +12,7 @@ import './Play.css';
 const emptyUser: IUserPublic = {
 	id: 0,
 	display_name: "",
-	avatar: "",
+	avatar: "icons/42wolfsburg.jpeg",
 	status: 0
 }
 
