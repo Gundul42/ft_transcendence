@@ -5,8 +5,7 @@ export const DisplayName = ({display_name} : {display_name: string}) => {
 	const [name, setName] : [name: string, setName: any] = useState(display_name);
 
 	const handleSubmit = (event: React.SyntheticEvent) => {
-		if (name.length > 21)
-		{
+		if (name.length > 21) {
 			alert("It's a name, not a bio, choose a name shorter than 21 characters");
 		}
 		else if (name.length > 0) {
