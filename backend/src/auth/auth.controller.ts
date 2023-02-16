@@ -62,7 +62,7 @@ export class AuthController {
 		if (new_session === null) {
 			res.send({status: 500, message: "Internal Server Error Exception"});
 		}
-		res.cookie('ft_transcendence_sessionId', new_session.id, { sameSite: 'none', httpOnly: true});
+		res.cookie('ft_transcendence_sessionId', new_session.id, { sameSite: 'Lax', httpOnly: true});
 		return ({
 			'type' : 'link',
 			'data' : null,
@@ -132,7 +132,7 @@ export class AuthController {
 
 	@Get('/dummy/:id')
 	createDummy(@Res() res: Response, @Param('id') id: string) : void {
-		res.cookie('ft_transcendence_sessionId', `dummysession${id}`, { sameSite: 'none', httpOnly: true});
+		res.cookie('ft_transcendence_sessionId', `dummysession${id}`, { sameSite: 'Lax', httpOnly: true});
 		this.prisma.appUser.create({
 			data: {
 				id: Math.floor(Math.random() * 800),
