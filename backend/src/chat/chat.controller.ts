@@ -38,7 +38,7 @@ export class ChatController {
 	}
 
 	@Post('password-change')
-	@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard, JwtAuthGuard)
 	async changePasswordValidation(@Body('room') room: string, @Body('password') password: string, @Req() req: Request): Promise<void> {
 		if (!password || password.length === 0) {
 			throw new BadRequestException();
@@ -126,7 +126,7 @@ export class ChatController {
 	}
 
 	@Post('user-ban')
-	@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard, JwtAuthGuard)
 	async userBanValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<void | string> {
 		const timeNum = Number(time);
 		if (timeNum === 0 || Number.isNaN(timeNum)) {
@@ -149,7 +149,7 @@ export class ChatController {
 	}
 	
 	@Post('user-mute')
-	@UseGuards(AuthGuard)
+	@UseGuards(AuthGuard, JwtAuthGuard)
 	async userMuteValidation(@Body('room') room: string, @Body('user') userId: string, @Body('time') time: string, @Req() req: Request): Promise<string>
 	{
 		const timeNum = Number(time);
