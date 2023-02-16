@@ -10,8 +10,7 @@ export const RoomMaker = () => {
 
 	const createRoom = () => {
 		if (roomName.length === 0 ) return ;
-		if (password.length < 5 && chosenAccessMode === IRoomAccess.PassProtected)
-		{
+		if (password.length < 5 && chosenAccessMode === IRoomAccess.PassProtected) {
 			alert("Password needs to be at least 5 characters long");
 			return ;
 		}
@@ -46,7 +45,7 @@ export const RoomMaker = () => {
 				{ chosenAccessMode === 2 &&
 					<>
 					<div className="break"></div>
-					<input type="password" placeholder="Password" value={password} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((e.target as HTMLInputElement).value)}} required/>
+					<input type="password" placeholder="Password" minLength={5} value={password} onChange={(e: React.FormEvent<HTMLInputElement>) => {setPassword((e.target as HTMLInputElement).value)}} required/>
 					</>}
 				<div className="break"></div>
 				<div>

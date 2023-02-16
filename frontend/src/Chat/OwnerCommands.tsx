@@ -4,6 +4,7 @@ import endpoint from '../endpoint.json';
 
 export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, room: IRoom}) => {
 	const [owner, setOwner] : [boolean, any] = useState(false);
+	const [roomPassword, setRoomPassword] : [string, any] = useState("");
 
 	useEffect(() => {
 		if (room.owner.id === app_state.data.id)
@@ -11,17 +12,13 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 	}, [room.owner, app_state.data.id])
 
 	const password = () => {
-		const newPassword = prompt('Please enter the new password');
-		if (newPassword === null)
-			return ;
-		else if (newPassword.length < 5)
-		{
+		if (roomPassword.length < 5) {
 			alert("The password should be longer than 5 characters");
 			return ;
 		}
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
-		form_data.push(encodeURIComponent("password") + "=" + encodeURIComponent(newPassword));
+		form_data.push(encodeURIComponent("password") + "=" + encodeURIComponent(roomPassword));
 		console.log(form_data);
 		fetch(endpoint.chat['password-change'], {
 			method: "POST",
@@ -68,6 +65,7 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 					<tr>
 						<td>You're the owner here!</td>
 						<td>
+							<input type="password" placeholder="New Password" minLength={5} value={roomPassword} onChange={(e: React.FormEvent<HTMLInputElement>) => {setRoomPassword((e.target as HTMLInputElement).value)}} />
 							<button onClick={()=>{password()}}>Set/Change Password</button>
 							<button onClick={()=>{removePassword()}}>Remove Password</button>
 						</td>
