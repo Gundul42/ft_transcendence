@@ -12,6 +12,6 @@
 	"fps": 25,
 	"ball": {
 		"radius": 30,
-		"velocity": 10
+		"velocity": 17
 	}
 }
