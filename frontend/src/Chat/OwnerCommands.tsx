@@ -13,13 +13,16 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 
 	const password = () => {
 		if (roomPassword.length < 5) {
-			alert("The password should be longer than 5 characters");
+			alert("The password should be 5 characters minimum");
+			return ;
+		}
+		else if (roomPassword.length > 128) {
+			alert("The password can be 128 characters long maximum");
 			return ;
 		}
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("password") + "=" + encodeURIComponent(roomPassword));
-		console.log(form_data);
 		fetch(endpoint.chat['password-change'], {
 			method: "POST",
 			body: form_data.join("&"),
