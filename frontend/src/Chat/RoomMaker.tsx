@@ -13,6 +13,9 @@ export const RoomMaker = () => {
 		if (password.length < 5 && chosenAccessMode === IRoomAccess.PassProtected) {
 			alert("Password needs to be at least 5 characters long");
 			return ;
+		} else if (password.length > 128  && chosenAccessMode === IRoomAccess.PassProtected) {
+			alert("The password can be 128 characters long maximum");
+			return ;
 		}
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("access_mode") + "=" + encodeURIComponent(chosenAccessMode));

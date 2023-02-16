@@ -15,8 +15,7 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 		if (roomPassword.length < 5) {
 			alert("The password should be 5 characters minimum");
 			return ;
-		}
-		else if (roomPassword.length > 128) {
+		} else if (roomPassword.length > 128) {
 			alert("The password can be 128 characters long maximum");
 			return ;
 		}
