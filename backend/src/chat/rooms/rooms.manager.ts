@@ -1,4 +1,3 @@
-// import { Rooms } from './rooms';
 import { Server } from 'socket.io';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Room, AppUser, Penalty } from '@prisma/client';

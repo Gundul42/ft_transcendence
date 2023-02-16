@@ -10,7 +10,6 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 	const [admin, setAdmin] : [boolean, any] = useState(false);
 
 	const challenge = (player2_id: number, mode: "classic" | "special") => {
-		console.log("invitation is being sent")
 		game_socket.emit(ClientEvents.Invite, { player2_id: player2_id, mode: mode}, (response: boolean) => {
 			if (response) {
 				setIdChallenged(player2_id);
@@ -35,7 +34,6 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 	}, [])
 
 	useEffect(() => {
-		console.log("checking if admin")
 		room.administrators.map((admin) =>
 		{
 			if (admin.id === app_state.data.id)
@@ -58,13 +56,9 @@ export const InfoRoom = ({app_state, room, set_page, setIsInfoView, game_socket,
 	};
 
 	const kickUser = (user_id: number) => {
-		// const time = prompt("How long should this penalty last? (minutes)")
-		// if (!time)
-		// 	return (alert("Please input the penalty time!"))
 		let form_data: string[] = [];
 		form_data.push(encodeURIComponent("room") + "=" + encodeURIComponent(room.name));
 		form_data.push(encodeURIComponent("user") + "=" + encodeURIComponent(user_id));
-		// form_data.push(encodeURIComponent("time") + "=" + encodeURIComponent(time));
 		fetch(endpoint.chat['user-kick'], {
 			method: "POST",
 			body: form_data.join('&'),

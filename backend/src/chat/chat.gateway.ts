@@ -31,7 +31,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	async handleConnection(client: Socket, ...args: any[]) : Promise<void> {
-		console.log("connection is being handled")
+		console.log("Connection is being handled")
 		if (!client.handshake.headers || !client.handshake.headers.cookie) {
 			client.disconnect(true);
 			return ;

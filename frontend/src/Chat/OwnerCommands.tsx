@@ -67,12 +67,10 @@ export const OwnerCommands = ({app_state, room} : {app_state: ISafeAppState, roo
 				<tbody>
 					<tr>
 						<td>You're the owner here!</td>
-							<td>
-								{/* <button onClick={()=>{set_page("visit", participant.id)}}>&#x1f464;</button> */}
-								<button onClick={()=>{password()}}>Set/Change Password</button>
-								<button onClick={()=>{removePassword()}}>Remove Password</button>
-								{/* <button onClick={()=>{mode(participant.id, "special")}}>Change Mode</button> */}
-							</td>
+						<td>
+							<button onClick={()=>{password()}}>Set/Change Password</button>
+							<button onClick={()=>{removePassword()}}>Remove Password</button>
+						</td>
 					</tr>
 				</tbody>
 			</table>
